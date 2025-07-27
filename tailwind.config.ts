@@ -57,6 +57,25 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Mind Mirror gaming theme
+        neon: {
+          cyan: "hsl(var(--neon-cyan))",
+          purple: "hsl(var(--neon-purple))",
+          pink: "hsl(var(--neon-pink))",
+          green: "hsl(var(--neon-green))",
+        },
+        neural: {
+          gray: "hsl(var(--neural-gray))",
+        },
+        quantum: {
+          violet: "hsl(var(--quantum-violet))",
+        },
+        electric: {
+          blue: "hsl(var(--electric-blue))",
+        },
+        dark: {
+          purple: "hsl(var(--dark-purple))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
