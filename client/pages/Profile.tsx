@@ -599,6 +599,12 @@ export default function Profile() {
               Analytics Detallados
             </Button>
           </Link>
+          <Link to="/achievements">
+            <Button variant="outline" size="lg" className="border-yellow-400 text-yellow-400">
+              <Award className="w-5 h-5 mr-2" />
+              Ver Logros
+            </Button>
+          </Link>
           <Link to="/settings">
             <Button variant="outline" size="lg" className="border-neon-green text-neon-green">
               <Settings className="w-5 h-5 mr-2" />
