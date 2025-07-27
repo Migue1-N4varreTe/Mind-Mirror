@@ -96,21 +96,31 @@ export default function Index() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link to="/game">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-neon-cyan text-background hover:bg-neon-cyan/90 glow pulse-glow"
               >
                 <Gamepad2 className="w-5 h-5 mr-2" />
                 Comenzar Partida
               </Button>
             </Link>
-            <Button 
-              variant="outline" 
+            <Link to="/analytics">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-neon-purple text-neon-purple hover:bg-neon-purple/10"
+              >
+                <TrendingUp className="w-5 h-5 mr-2" />
+                Ver Analytics
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
               size="lg"
-              className="border-neon-purple text-neon-purple hover:bg-neon-purple/10"
+              className="border-neural-gray text-muted-foreground hover:bg-neural-gray/10"
             >
               <Brain className="w-5 h-5 mr-2" />
-              Ver Cómo Funciona
+              Cómo Funciona
             </Button>
           </div>
         </div>
@@ -289,7 +299,7 @@ export default function Index() {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Enfréntate a una IA que no solo juega contra ti, sino que te enseña quién eres realmente como jugador.
+            Enfr��ntate a una IA que no solo juega contra ti, sino que te enseña quién eres realmente como jugador.
           </p>
           <Link to="/game">
             <Button 
