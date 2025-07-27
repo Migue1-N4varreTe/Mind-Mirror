@@ -865,6 +865,17 @@ export default function Game() {
           </div>
         </div>
       </div>
+
+      {/* Game End Modal */}
+      {gameEndData && (
+        <GameEndModal
+          isOpen={showGameEndModal}
+          gameEndData={gameEndData}
+          newAchievements={newAchievements}
+          onPlayAgain={playAgain}
+          onClose={() => setShowGameEndModal(false)}
+        />
+      )}
     </div>
   );
 }
