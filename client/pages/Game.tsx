@@ -205,6 +205,9 @@ export default function Game() {
       const specialCell = SPECIAL_CELLS[cell.special];
       const effect = specialCell.effect.onActivate?.(newBoard, [row, col], 'player');
 
+      // Track special cell usage
+      setGameState(prev => ({ ...prev, specialCellsUsed: prev.specialCellsUsed + 1 }));
+
       if (effect) {
         if (effect.boardChanges) {
           effect.boardChanges.forEach(change => {
