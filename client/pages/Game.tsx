@@ -398,15 +398,17 @@ export default function Game() {
           color: '#9d4edd'
         }]);
 
-        setGameState(prev => ({
-          ...prev,
+        const updatedAIGameState = {
+          ...gameState,
           board: newBoard,
-          currentPlayer: 'player',
-          score: { ...prev.score, ai: prev.score.ai + scoreGain },
-          totalScore: { ...prev.totalScore, ai: prev.totalScore.ai + scoreGain },
-          moves: prev.moves + 1,
-          difficulty: Math.min(1, prev.difficulty + 0.02) // Gradual difficulty increase
-        }));
+          currentPlayer: 'player' as const,
+          score: { ...gameState.score, ai: gameState.score.ai + scoreGain },
+          totalScore: { ...gameState.totalScore, ai: gameState.totalScore.ai + scoreGain },
+          moves: gameState.moves + 1,
+          difficulty: Math.min(1, gameState.difficulty + 0.02) // Gradual difficulty increase
+        };
+
+        setGameState(updatedAIGameState);
 
         // Add visual effects
         if (effectsToAdd.length > 0) {
@@ -414,6 +416,13 @@ export default function Game() {
         }
         if (textsToAdd.length > 0) {
           setFloatingTexts(prev => [...prev, ...textsToAdd]);
+        }
+
+        // Check if game should end (board full)
+        const isEmpty = newBoard.flat().some(cell => cell.type === 'empty');
+        if (!isEmpty) {
+          endGame(updatedAIGameState);
+          return;
         }
 
         // Spawn new special cells occasionally
