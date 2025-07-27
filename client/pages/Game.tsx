@@ -313,6 +313,26 @@ export default function Game() {
     }, Math.random() * 1500 + 800);
   }, [gameState, clickStartTime]);
 
+  const endGame = useCallback((finalGameState: any) => {
+    const endData = calculateGameEndData(finalGameState, gameStartTime, reactionTimes);
+
+    // Update end data with additional tracked info
+    const enhancedEndData = {
+      ...endData,
+      specialCellsActivated: finalGameState.specialCellsUsed,
+      comboChain: finalGameState.maxComboChain,
+      combosUsed: finalGameState.comboCount
+    };
+
+    // Check achievements
+    const unlockedAchievements = achievementSystem.current.checkAchievements(enhancedEndData);
+
+    setGameEndData(enhancedEndData);
+    setNewAchievements(unlockedAchievements);
+    setGameState(prev => ({ ...prev, gameEnded: true }));
+    setShowGameEndModal(true);
+  }, [gameStartTime, reactionTimes]);
+
   const aiMove = useCallback(() => {
     setIsThinking(true);
 
