@@ -181,8 +181,45 @@ export default function Game() {
     }
   }, [gameState.moves]);
 
+  const playAgain = useCallback(() => {
+    setGameState({
+      board: Array(8).fill(null).map(() =>
+        Array(8).fill(null).map(() => ({ type: 'empty' }))
+      ),
+      currentPlayer: 'player',
+      score: { player: 0, ai: 0 },
+      moves: 0,
+      phase: 'learning',
+      aiPersonality: 'chameleon',
+      aiLearning: [],
+      playerAbilities: {
+        vision: 1,
+        shield: 1,
+        timeExtra: 1,
+        steal: 1
+      },
+      difficulty: 0.5,
+      multiplierActive: false,
+      shieldActive: false,
+      comboCount: 0,
+      totalScore: { player: 0, ai: 0 },
+      gameEnded: false,
+      specialCellsUsed: 0,
+      maxComboChain: 0,
+      currentComboChain: 0
+    });
+    setReactionTimes([]);
+    setTimeLeft(30);
+    setShowGameEndModal(false);
+    setGameEndData(null);
+    setNewAchievements([]);
+    setVisualEffects([]);
+    setRipples([]);
+    setFloatingTexts([]);
+  }, []);
+
   const handleCellClick = useCallback((row: number, col: number) => {
-    if (gameState.currentPlayer !== 'player') return;
+    if (gameState.currentPlayer !== 'player' || gameState.gameEnded) return;
 
     const cell = gameState.board[row][col];
     if (cell.type !== 'empty' && cell.type !== 'special') return;
