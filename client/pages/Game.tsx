@@ -478,7 +478,7 @@ export default function Game() {
       thief: <Target className="w-6 h-6 text-orange-400" />,
       quantum: <Atom className="w-6 h-6 text-neon-cyan" />,
       neural: <Brain className="w-6 h-6 text-electric-blue" />,
-      virus: <Virus className="w-6 h-6 text-neon-green" />,
+      virus: <Biohazard className="w-6 h-6 text-neon-green" />,
       phoenix: <Circle className="w-6 h-6 text-orange-500" />,
       void: <Circle className="w-6 h-6 text-purple-900" />
     };
