@@ -1,20 +1,27 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
-import { 
-  Brain, 
-  Eye, 
-  Zap, 
-  Shield, 
-  Timer, 
+import { VisualEffects, CellRipple, FloatingText, NeuralNetwork } from "@/components/ui/visual-effects";
+import { MindMirrorAI, ComboSystem } from "@/lib/gameEngine";
+import { SPECIAL_CELLS, getRandomSpecialCell, getSpecialCellSpawnChance } from "@/lib/specialCells";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Brain,
+  Eye,
+  Zap,
+  Shield,
+  Timer,
   ArrowLeft,
   Cpu,
   Target,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  Atom,
+  Virus,
+  Circle
 } from "lucide-react";
 
 // Game types
@@ -45,11 +52,16 @@ interface GameState {
     timeExtra: number;
     steal: number;
   };
+  difficulty: number;
+  multiplierActive: boolean;
+  shieldActive: boolean;
+  comboCount: number;
+  totalScore: { player: number; ai: number };
 }
 
 export default function Game() {
   const [gameState, setGameState] = useState<GameState>({
-    board: Array(8).fill(null).map(() => 
+    board: Array(8).fill(null).map(() =>
       Array(8).fill(null).map(() => ({ type: 'empty' }))
     ),
     currentPlayer: 'player',
@@ -63,14 +75,27 @@ export default function Game() {
       shield: 1,
       timeExtra: 1,
       steal: 1
-    }
+    },
+    difficulty: 0.5,
+    multiplierActive: false,
+    shieldActive: false,
+    comboCount: 0,
+    totalScore: { player: 0, ai: 0 }
   });
+
+  const aiEngine = useRef(new MindMirrorAI());
+  const comboSystem = useRef(new ComboSystem());
+  const [visualEffects, setVisualEffects] = useState<any[]>([]);
+  const [ripples, setRipples] = useState<any[]>([]);
+  const [floatingTexts, setFloatingTexts] = useState<any[]>([]);
+  const [clickStartTime, setClickStartTime] = useState<number>(0);
 
   const [timeLeft, setTimeLeft] = useState(30);
   const [isThinking, setIsThinking] = useState(false);
   const [aiThought, setAiThought] = useState("Observando tus patrones...");
   const [lastClickTime, setLastClickTime] = useState<number[]>([]);
   const [showVision, setShowVision] = useState(false);
+  const [gameProgress, setGameProgress] = useState(0);
 
   // AI personalities and their behaviors
   const personalities = {
@@ -86,18 +111,22 @@ export default function Game() {
     evolution: { name: "Evolución", color: "text-neon-pink", progress: 100 }
   };
 
-  // Initialize special cells
+  // Initialize special cells with new system
   useEffect(() => {
     const newBoard = [...gameState.board];
-    // Add some special cells randomly
-    for (let i = 0; i < 3; i++) {
+    // Add enhanced special cells
+    for (let i = 0; i < 4; i++) {
       const row = Math.floor(Math.random() * 8);
       const col = Math.floor(Math.random() * 8);
-      const specials: CellSpecial[] = ['bomb', 'portal', 'multiplier', 'migrator'];
-      newBoard[row][col] = {
-        type: 'special',
-        special: specials[Math.floor(Math.random() * specials.length)]
-      };
+      if (newBoard[row][col].type === 'empty') {
+        const specialType = getRandomSpecialCell(Math.random() > 0.7 ? 'rare' : 'common');
+        newBoard[row][col] = {
+          type: 'special',
+          special: specialType,
+          charges: SPECIAL_CELLS[specialType].charges,
+          timer: SPECIAL_CELLS[specialType].duration
+        };
+      }
     }
     setGameState(prev => ({ ...prev, board: newBoard }));
   }, []);
@@ -113,25 +142,17 @@ export default function Game() {
     }
   }, [timeLeft, gameState.currentPlayer]);
 
-  // AI thinking simulation
+  // Enhanced AI thinking with engine integration
   useEffect(() => {
     if (isThinking) {
-      const thoughts = [
-        "Analizando tu patrón de clicks...",
-        "Detectando estrés en tu timing...",
-        "Calculando probabilidades cuánticas...",
-        "Evolucionando contra-estrategia...",
-        "Recordando tu último error...",
-        "Prediciendo tu próximo movimiento..."
-      ];
-      
       const interval = setInterval(() => {
-        setAiThought(thoughts[Math.floor(Math.random() * thoughts.length)]);
-      }, 1500);
-
+        setAiThought(aiEngine.current.getAIThought());
+      }, 2000);
       return () => clearInterval(interval);
+    } else {
+      setAiThought(aiEngine.current.getPersonalityInsight());
     }
-  }, [isThinking]);
+  }, [isThinking, gameState.moves]);
 
   // Phase progression
   useEffect(() => {
@@ -145,100 +166,225 @@ export default function Game() {
   }, [gameState.moves]);
 
   const handleCellClick = useCallback((row: number, col: number) => {
-    if (gameState.currentPlayer !== 'player' || gameState.board[row][col].type !== 'empty') return;
+    if (gameState.currentPlayer !== 'player') return;
+
+    const cell = gameState.board[row][col];
+    if (cell.type !== 'empty' && cell.type !== 'special') return;
 
     const now = Date.now();
+    const reactionTime = clickStartTime > 0 ? now - clickStartTime : 2000;
     setLastClickTime(prev => [...prev.slice(-4), now]);
-    
+
+    // Add to AI learning with enhanced data
+    aiEngine.current.addPlayerMove([row, col], reactionTime);
+
     const newBoard = [...gameState.board];
-    newBoard[row][col] = { type: 'player', owner: 'player', glow: true };
-    
-    // Add to AI learning patterns
-    const pattern = `${row},${col}:${now}`;
-    const newLearning = [...gameState.aiLearning, pattern].slice(-20);
-    
+    let scoreGain = 1;
+    let effectsToAdd: any[] = [];
+    let textsToAdd: any[] = [];
+
+    // Handle special cell activation
+    if (cell.type === 'special' && cell.special) {
+      const specialCell = SPECIAL_CELLS[cell.special];
+      const effect = specialCell.effect.onActivate?.(newBoard, [row, col], 'player');
+
+      if (effect) {
+        if (effect.boardChanges) {
+          effect.boardChanges.forEach(change => {
+            newBoard[change.position[0]][change.position[1]] = change.newCell;
+          });
+        }
+        if (effect.specialEffects) {
+          effectsToAdd = effect.specialEffects;
+        }
+        if (effect.scoreChange) {
+          scoreGain += effect.scoreChange.player;
+        }
+        if (effect.message) {
+          textsToAdd.push({
+            id: `msg-${now}`,
+            text: effect.message,
+            position: { x: col * 48 + 100, y: row * 48 + 24 },
+            color: '#00f5ff'
+          });
+        }
+      }
+    } else {
+      newBoard[row][col] = { type: 'player', owner: 'player', glow: true };
+    }
+
+    // Check for combos
+    const combos = comboSystem.current.checkCombos(newBoard, [row, col], 'player');
+    if (combos.length > 0) {
+      combos.forEach(combo => {
+        scoreGain *= 2; // Combo multiplier
+        textsToAdd.push({
+          id: `combo-${now}-${combo.name}`,
+          text: combo.name,
+          position: { x: col * 48 + 24, y: row * 48 - 20 },
+          color: '#ff6b9d',
+          size: 'lg'
+        });
+        effectsToAdd.push({
+          id: `combo-effect-${now}`,
+          type: 'combo',
+          position: { x: col * 48 + 24, y: row * 48 + 24 }
+        });
+      });
+    }
+
+    // Apply multiplier if active
+    if (gameState.multiplierActive) {
+      scoreGain *= 2;
+      setGameState(prev => ({ ...prev, multiplierActive: false }));
+    }
+
+    // Add ripple effect
+    setRipples(prev => [...prev, {
+      id: `ripple-${now}`,
+      position: { x: col * 48 + 24, y: row * 48 + 24 },
+      color: '#00f5ff'
+    }]);
+
     setGameState(prev => ({
       ...prev,
       board: newBoard,
       currentPlayer: 'ai',
-      score: { ...prev.score, player: prev.score.player + 1 },
+      score: { ...prev.score, player: prev.score.player + scoreGain },
+      totalScore: { ...prev.totalScore, player: prev.totalScore.player + scoreGain },
       moves: prev.moves + 1,
-      aiLearning: newLearning
+      comboCount: prev.comboCount + combos.length
     }));
 
+    // Add visual effects
+    if (effectsToAdd.length > 0) {
+      setVisualEffects(prev => [...prev, ...effectsToAdd]);
+    }
+    if (textsToAdd.length > 0) {
+      setFloatingTexts(prev => [...prev, ...textsToAdd]);
+    }
+
     setTimeLeft(30);
-    
+    setClickStartTime(0);
+
     // Trigger AI move after delay
     setTimeout(() => {
       aiMove();
-    }, Math.random() * 2000 + 1000);
-  }, [gameState]);
+    }, Math.random() * 1500 + 800);
+  }, [gameState, clickStartTime]);
 
   const aiMove = useCallback(() => {
     setIsThinking(true);
-    
+
     setTimeout(() => {
-      const newBoard = [...gameState.board];
-      const emptyCells: [number, number][] = [];
-      
-      for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 8; j++) {
-          if (newBoard[i][j].type === 'empty') {
-            emptyCells.push([i, j]);
-          }
-        }
-      }
-      
-      if (emptyCells.length > 0) {
-        // AI decision based on phase and personality
-        let targetCell: [number, number];
-        
-        switch (gameState.phase) {
-          case 'learning':
-            // Random with slight bias toward center
-            targetCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            break;
-          case 'mirror':
-            // Try to mirror player patterns
-            if (gameState.aiLearning.length > 0) {
-              const lastPattern = gameState.aiLearning[gameState.aiLearning.length - 1];
-              const [coords] = lastPattern.split(':');
-              const [lastRow, lastCol] = coords.split(',').map(Number);
-              // Mirror or adjacent to last player move
-              const mirrorTargets = emptyCells.filter(([r, c]) => 
-                Math.abs(r - lastRow) <= 1 && Math.abs(c - lastCol) <= 1
-              );
-              targetCell = mirrorTargets.length > 0 
-                ? mirrorTargets[Math.floor(Math.random() * mirrorTargets.length)]
-                : emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            } else {
-              targetCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      const aiPosition = aiEngine.current.generateMove(gameState, gameState.difficulty);
+
+      if (aiPosition) {
+        const [aiRow, aiCol] = aiPosition;
+        const newBoard = [...gameState.board];
+        const cell = newBoard[aiRow][aiCol];
+
+        let scoreGain = 1;
+        let effectsToAdd: any[] = [];
+        let textsToAdd: any[] = [];
+
+        // Handle special cell activation by AI
+        if (cell.type === 'special' && cell.special) {
+          const specialCell = SPECIAL_CELLS[cell.special];
+          const effect = specialCell.effect.onActivate?.(newBoard, [aiRow, aiCol], 'ai');
+
+          if (effect) {
+            if (effect.boardChanges) {
+              effect.boardChanges.forEach(change => {
+                newBoard[change.position[0]][change.position[1]] = change.newCell;
+              });
             }
-            break;
-          case 'evolution':
-            // Strategic counters and predictions
-            targetCell = emptyCells[0]; // More sophisticated logic would go here
-            break;
-          default:
-            targetCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            if (effect.specialEffects) {
+              effectsToAdd = effect.specialEffects;
+            }
+            if (effect.scoreChange) {
+              scoreGain += effect.scoreChange.ai;
+            }
+            if (effect.message) {
+              textsToAdd.push({
+                id: `ai-msg-${Date.now()}`,
+                text: effect.message,
+                position: { x: aiCol * 48 + 100, y: aiRow * 48 + 24 },
+                color: '#9d4edd'
+              });
+            }
+          }
+        } else {
+          newBoard[aiRow][aiCol] = { type: 'ai', owner: 'ai', glow: true };
         }
-        
-        const [aiRow, aiCol] = targetCell;
-        newBoard[aiRow][aiCol] = { type: 'ai', owner: 'ai', glow: true };
-        
+
+        // Check for AI combos
+        const combos = comboSystem.current.checkCombos(newBoard, [aiRow, aiCol], 'ai');
+        if (combos.length > 0) {
+          scoreGain *= 2;
+          effectsToAdd.push({
+            id: `ai-combo-${Date.now()}`,
+            type: 'combo',
+            position: { x: aiCol * 48 + 24, y: aiRow * 48 + 24 }
+          });
+        }
+
+        // Add AI ripple effect
+        setRipples(prev => [...prev, {
+          id: `ai-ripple-${Date.now()}`,
+          position: { x: aiCol * 48 + 24, y: aiRow * 48 + 24 },
+          color: '#9d4edd'
+        }]);
+
         setGameState(prev => ({
           ...prev,
           board: newBoard,
           currentPlayer: 'player',
-          score: { ...prev.score, ai: prev.score.ai + 1 },
-          moves: prev.moves + 1
+          score: { ...prev.score, ai: prev.score.ai + scoreGain },
+          totalScore: { ...prev.totalScore, ai: prev.totalScore.ai + scoreGain },
+          moves: prev.moves + 1,
+          difficulty: Math.min(1, prev.difficulty + 0.02) // Gradual difficulty increase
         }));
+
+        // Add visual effects
+        if (effectsToAdd.length > 0) {
+          setVisualEffects(prev => [...prev, ...effectsToAdd]);
+        }
+        if (textsToAdd.length > 0) {
+          setFloatingTexts(prev => [...prev, ...textsToAdd]);
+        }
+
+        // Spawn new special cells occasionally
+        if (Math.random() < getSpecialCellSpawnChance(gameProgress)) {
+          const emptyCells: [number, number][] = [];
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              if (newBoard[i][j].type === 'empty') {
+                emptyCells.push([i, j]);
+              }
+            }
+          }
+
+          if (emptyCells.length > 0) {
+            const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            const rarity = gameProgress > 0.5 ? 'rare' : 'common';
+            const specialType = getRandomSpecialCell(Math.random() > 0.8 ? 'epic' : rarity);
+
+            newBoard[randomCell[0]][randomCell[1]] = {
+              type: 'special',
+              special: specialType,
+              timer: SPECIAL_CELLS[specialType].duration
+            };
+
+            setGameState(prev => ({ ...prev, board: newBoard }));
+          }
+        }
       }
-      
+
       setIsThinking(false);
       setTimeLeft(30);
-    }, 2000);
-  }, [gameState]);
+    }, 1500 + Math.random() * 1000);
+  }, [gameState, gameProgress]);
 
   const useAbility = (ability: keyof typeof gameState.playerAbilities) => {
     if (gameState.playerAbilities[ability] <= 0) return;
