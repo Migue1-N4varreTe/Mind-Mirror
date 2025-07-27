@@ -20,7 +20,7 @@ import {
   TrendingUp,
   Sparkles,
   Atom,
-  Virus,
+  Biohazard,
   Circle
 } from "lucide-react";
 
