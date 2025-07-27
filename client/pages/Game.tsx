@@ -415,11 +415,11 @@ export default function Game() {
   };
 
   const getCellStyle = (cell: Cell, row: number, col: number) => {
-    let baseClass = "w-12 h-12 border border-border rounded-lg transition-all duration-300 cursor-pointer ";
-    
+    let baseClass = "w-12 h-12 border border-border rounded-lg transition-all duration-300 cursor-pointer relative overflow-hidden ";
+
     switch (cell.type) {
       case 'empty':
-        baseClass += "bg-card/20 hover:bg-card/40 hover:border-neon-cyan/50";
+        baseClass += "bg-card/20 hover:bg-card/40 hover:border-neon-cyan/50 hover:scale-105";
         break;
       case 'player':
         baseClass += "bg-neon-cyan/20 border-neon-cyan glow";
@@ -428,23 +428,75 @@ export default function Game() {
         baseClass += "bg-neon-purple/20 border-neon-purple glow";
         break;
       case 'special':
-        baseClass += "bg-neon-pink/20 border-neon-pink animate-pulse";
+        if (cell.special && SPECIAL_CELLS[cell.special]) {
+          const specialConfig = SPECIAL_CELLS[cell.special];
+          baseClass += `border-2 animate-pulse`;
+          baseClass += ` bg-gradient-to-br from-${specialConfig.visual.baseColor}/20 to-${specialConfig.visual.glowColor}/10`;
+
+          switch (specialConfig.visual.animation) {
+            case 'spin':
+              baseClass += ' animate-spin';
+              break;
+            case 'pulse':
+              baseClass += ' animate-pulse';
+              break;
+            case 'glow':
+              baseClass += ' pulse-glow';
+              break;
+            case 'quantum':
+              baseClass += ' quantum-border';
+              break;
+          }
+        } else {
+          baseClass += "bg-neon-pink/20 border-neon-pink animate-pulse";
+        }
         break;
     }
-    
+
     if (cell.glow) {
       baseClass += " pulse-glow";
     }
-    
+
     if (showVision && cell.type === 'empty') {
-      // Show AI predictions
-      const prediction = (row + col) % 3;
-      if (prediction === 0) {
-        baseClass += " bg-red-500/20 border-red-500";
+      // Enhanced AI prediction visualization
+      const prediction = aiEngine.current.generateMove(gameState, gameState.difficulty);
+      if (prediction && prediction[0] === row && prediction[1] === col) {
+        baseClass += " bg-red-500/30 border-red-500 animate-pulse";
       }
     }
-    
+
     return baseClass;
+  };
+
+  const getCellIcon = (cell: Cell) => {
+    if (cell.type !== 'special' || !cell.special) return null;
+
+    const iconMap = {
+      bomb: <Zap className="w-6 h-6 text-neon-pink" />,
+      portal: <Sparkles className="w-6 h-6 text-neon-purple" />,
+      multiplier: <TrendingUp className="w-6 h-6 text-yellow-400" />,
+      thief: <Target className="w-6 h-6 text-orange-400" />,
+      quantum: <Atom className="w-6 h-6 text-neon-cyan" />,
+      neural: <Brain className="w-6 h-6 text-electric-blue" />,
+      virus: <Virus className="w-6 h-6 text-neon-green" />,
+      phoenix: <Circle className="w-6 h-6 text-orange-500" />,
+      void: <Circle className="w-6 h-6 text-purple-900" />
+    };
+
+    return iconMap[cell.special as keyof typeof iconMap] || <Circle className="w-6 h-6" />;
+  };
+
+  // Effect cleanup handlers
+  const handleEffectComplete = (id: string) => {
+    setVisualEffects(prev => prev.filter(effect => effect.id !== id));
+  };
+
+  const handleRippleComplete = (id: string) => {
+    setRipples(prev => prev.filter(ripple => ripple.id !== id));
+  };
+
+  const handleTextComplete = (id: string) => {
+    setFloatingTexts(prev => prev.filter(text => text.id !== id));
   };
 
   return (
