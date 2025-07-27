@@ -236,6 +236,9 @@ export default function Game() {
     // Check for combos
     const combos = comboSystem.current.checkCombos(newBoard, [row, col], 'player');
     if (combos.length > 0) {
+      const newComboChain = gameState.currentComboChain + 1;
+      const maxChain = Math.max(gameState.maxComboChain, newComboChain);
+
       combos.forEach((combo, comboIndex) => {
         scoreGain *= 2; // Combo multiplier
         textsToAdd.push({
@@ -251,6 +254,14 @@ export default function Game() {
           position: { x: col * 48 + 24, y: row * 48 + 24 }
         });
       });
+
+      setGameState(prev => ({
+        ...prev,
+        currentComboChain: newComboChain,
+        maxComboChain: maxChain
+      }));
+    } else {
+      setGameState(prev => ({ ...prev, currentComboChain: 0 }));
     }
 
     // Apply multiplier if active
