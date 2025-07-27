@@ -13,6 +13,7 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import Social from "./pages/Social";
 import AITrainer from "./pages/AITrainer";
+import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/social" element={<Social />} />
           <Route path="/ai-trainer" element={<AITrainer />} />
+          <Route path="/events" element={<Events />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
