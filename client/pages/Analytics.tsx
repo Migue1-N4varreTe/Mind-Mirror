@@ -6,12 +6,12 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  Brain, 
-  Target, 
-  Timer, 
-  TrendingUp, 
-  Zap, 
+import {
+  Brain,
+  Target,
+  Timer,
+  TrendingUp,
+  Zap,
   Trophy,
   ArrowLeft,
   Eye,
@@ -21,7 +21,8 @@ import {
   BarChart3,
   Activity,
   Clock,
-  Gamepad2
+  Gamepad2,
+  Sparkles
 } from "lucide-react";
 
 interface PlayerStats {
