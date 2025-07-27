@@ -94,43 +94,77 @@ export default function Index() {
           </Card>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link to="/game">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 justify-center mb-16 max-w-4xl mx-auto">
+            <Link to="/game" className="w-full">
               <Button
                 size="lg"
-                className="bg-neon-cyan text-background hover:bg-neon-cyan/90 glow pulse-glow"
+                className="w-full bg-neon-cyan text-background hover:bg-neon-cyan/90 glow pulse-glow"
               >
                 <Gamepad2 className="w-5 h-5 mr-2" />
-                Comenzar Partida
+                Jugar Ahora
               </Button>
             </Link>
-            <Link to="/profile">
+            <Link to="/profile" className="w-full">
               <Button
                 variant="outline"
                 size="lg"
-                className="border-neon-purple text-neon-purple hover:bg-neon-purple/10"
+                className="w-full border-neon-purple text-neon-purple hover:bg-neon-purple/10"
               >
                 <Users className="w-5 h-5 mr-2" />
                 Mi Perfil
               </Button>
             </Link>
-            <Link to="/analytics">
+            <Link to="/social" className="w-full">
               <Button
                 variant="outline"
                 size="lg"
+                className="w-full border-yellow-400 text-yellow-400 hover:bg-yellow-400/10"
+              >
+                <Trophy className="w-5 h-5 mr-2" />
+                Social & Rankings
+              </Button>
+            </Link>
+            <Link to="/events" className="w-full">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full border-neon-pink text-neon-pink hover:bg-neon-pink/10"
+              >
+                <Calendar className="w-5 h-5 mr-2" />
+                Eventos
+              </Button>
+            </Link>
+          </div>
+
+          {/* Secondary Actions */}
+          <div className="flex flex-wrap gap-3 justify-center mb-16">
+            <Link to="/ai-trainer">
+              <Button
+                variant="outline"
+                size="sm"
                 className="border-electric-blue text-electric-blue hover:bg-electric-blue/10"
               >
-                <TrendingUp className="w-5 h-5 mr-2" />
+                <Brain className="w-4 h-4 mr-2" />
+                Entrenar IA
+              </Button>
+            </Link>
+            <Link to="/analytics">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-neon-green text-neon-green hover:bg-neon-green/10"
+              >
+                <TrendingUp className="w-4 h-4 mr-2" />
                 Analytics
               </Button>
             </Link>
             <Link to="/settings">
               <Button
                 variant="outline"
-                size="lg"
+                size="sm"
                 className="border-neural-gray text-muted-foreground hover:bg-neural-gray/10"
               >
-                <Sparkles className="w-5 h-5 mr-2" />
+                <Sparkles className="w-4 h-4 mr-2" />
                 Configuración
               </Button>
             </Link>
