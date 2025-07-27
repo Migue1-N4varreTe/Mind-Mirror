@@ -558,24 +558,70 @@ export default function Game() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-8 gap-2 mb-4">
-                  {gameState.board.map((row, rowIndex) =>
-                    row.map((cell, colIndex) => (
-                      <div
-                        key={`${rowIndex}-${colIndex}`}
-                        className={getCellStyle(cell, rowIndex, colIndex)}
-                        onClick={() => handleCellClick(rowIndex, colIndex)}
-                      >
-                        {cell.special && (
-                          <div className="w-full h-full flex items-center justify-center">
-                            {cell.special === 'bomb' && <Zap className="w-4 h-4 text-neon-pink" />}
-                            {cell.special === 'portal' && <Sparkles className="w-4 h-4 text-quantum-violet" />}
-                            {cell.special === 'multiplier' && <TrendingUp className="w-4 h-4 text-neon-green" />}
+                <div className="relative">
+                  <div className="grid grid-cols-8 gap-2 mb-4">
+                    {gameState.board.map((row, rowIndex) =>
+                      row.map((cell, colIndex) => (
+                        <motion.div
+                          key={`${rowIndex}-${colIndex}`}
+                          className={getCellStyle(cell, rowIndex, colIndex)}
+                          onClick={() => handleCellClick(rowIndex, colIndex)}
+                          onMouseDown={() => setClickStartTime(Date.now())}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{
+                            duration: 0.3,
+                            delay: (rowIndex + colIndex) * 0.02,
+                            type: "spring",
+                            stiffness: 200
+                          }}
+                        >
+                          <div className="w-full h-full flex items-center justify-center relative">
+                            {getCellIcon(cell)}
+                            {cell.timer && (
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+                                {cell.timer}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    ))
-                  )}
+                        </motion.div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Visual Effects Layer */}
+                  <VisualEffects
+                    effects={visualEffects}
+                    onEffectComplete={handleEffectComplete}
+                  />
+
+                  {/* Ripple Effects */}
+                  <AnimatePresence>
+                    {ripples.map(ripple => (
+                      <CellRipple
+                        key={ripple.id}
+                        position={ripple.position}
+                        color={ripple.color}
+                        onComplete={() => handleRippleComplete(ripple.id)}
+                      />
+                    ))}
+                  </AnimatePresence>
+
+                  {/* Floating Texts */}
+                  <AnimatePresence>
+                    {floatingTexts.map(text => (
+                      <FloatingText
+                        key={text.id}
+                        text={text.text}
+                        position={text.position}
+                        color={text.color}
+                        size={text.size}
+                        onComplete={() => handleTextComplete(text.id)}
+                      />
+                    ))}
+                  </AnimatePresence>
                 </div>
                 
                 {/* Player Abilities */}
