@@ -11,6 +11,8 @@ import Game from "./pages/Game";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+import Social from "./pages/Social";
+import AITrainer from "./pages/AITrainer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/social" element={<Social />} />
+          <Route path="/ai-trainer" element={<AITrainer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
