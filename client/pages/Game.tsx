@@ -277,15 +277,17 @@ export default function Game() {
       color: '#00f5ff'
     }]);
 
-    setGameState(prev => ({
-      ...prev,
+    const updatedGameState = {
+      ...gameState,
       board: newBoard,
-      currentPlayer: 'ai',
-      score: { ...prev.score, player: prev.score.player + scoreGain },
-      totalScore: { ...prev.totalScore, player: prev.totalScore.player + scoreGain },
-      moves: prev.moves + 1,
-      comboCount: prev.comboCount + combos.length
-    }));
+      currentPlayer: 'ai' as const,
+      score: { ...gameState.score, player: gameState.score.player + scoreGain },
+      totalScore: { ...gameState.totalScore, player: gameState.totalScore.player + scoreGain },
+      moves: gameState.moves + 1,
+      comboCount: gameState.comboCount + combos.length
+    };
+
+    setGameState(updatedGameState);
 
     // Add visual effects
     if (effectsToAdd.length > 0) {
@@ -297,6 +299,13 @@ export default function Game() {
 
     setTimeLeft(30);
     setClickStartTime(0);
+
+    // Check if game should end (board full)
+    const isEmpty = newBoard.flat().some(cell => cell.type === 'empty');
+    if (!isEmpty) {
+      endGame(updatedGameState);
+      return;
+    }
 
     // Trigger AI move after delay
     setTimeout(() => {
