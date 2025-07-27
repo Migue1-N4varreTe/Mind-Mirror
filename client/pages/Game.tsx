@@ -190,6 +190,7 @@ export default function Game() {
     const now = Date.now();
     const reactionTime = clickStartTime > 0 ? now - clickStartTime : 2000;
     setLastClickTime(prev => [...prev.slice(-4), now]);
+    setReactionTimes(prev => [...prev, reactionTime]);
 
     // Add to AI learning with enhanced data
     aiEngine.current.addPlayerMove([row, col], reactionTime);
