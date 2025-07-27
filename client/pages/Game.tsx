@@ -216,17 +216,17 @@ export default function Game() {
     // Check for combos
     const combos = comboSystem.current.checkCombos(newBoard, [row, col], 'player');
     if (combos.length > 0) {
-      combos.forEach(combo => {
+      combos.forEach((combo, comboIndex) => {
         scoreGain *= 2; // Combo multiplier
         textsToAdd.push({
-          id: `combo-${now}-${combo.name}`,
+          id: `combo-text-${now}-${comboIndex}`,
           text: combo.name,
           position: { x: col * 48 + 24, y: row * 48 - 20 },
           color: '#ff6b9d',
           size: 'lg'
         });
         effectsToAdd.push({
-          id: `combo-effect-${now}`,
+          id: `combo-effect-${now}-${comboIndex}`,
           type: 'combo',
           position: { x: col * 48 + 24, y: row * 48 + 24 }
         });
