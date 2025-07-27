@@ -114,14 +114,16 @@ export default function Index() {
                 Ver Analytics
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-neural-gray text-muted-foreground hover:bg-neural-gray/10"
-            >
-              <Brain className="w-5 h-5 mr-2" />
-              Cómo Funciona
-            </Button>
+            <Link to="/settings">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-neural-gray text-muted-foreground hover:bg-neural-gray/10"
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                Configuración
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -197,7 +199,7 @@ export default function Index() {
                   <li>• Optimización de estrategias</li>
                   <li>• Predicción cuántica</li>
                   <li>• Contraataques evolucionados</li>
-                  <li>• Desafíos personalizados</li>
+                  <li>�� Desafíos personalizados</li>
                 </ul>
               </CardContent>
             </Card>
