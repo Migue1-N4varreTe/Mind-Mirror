@@ -322,10 +322,12 @@ export default function Game() {
         const combos = comboSystem.current.checkCombos(newBoard, [aiRow, aiCol], 'ai');
         if (combos.length > 0) {
           scoreGain *= 2;
-          effectsToAdd.push({
-            id: `ai-combo-${Date.now()}`,
-            type: 'combo',
-            position: { x: aiCol * 48 + 24, y: aiRow * 48 + 24 }
+          combos.forEach((combo, comboIndex) => {
+            effectsToAdd.push({
+              id: `ai-combo-${Date.now()}-${comboIndex}`,
+              type: 'combo',
+              position: { x: aiCol * 48 + 24, y: aiRow * 48 + 24 }
+            });
           });
         }
 
