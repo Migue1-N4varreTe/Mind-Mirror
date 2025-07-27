@@ -104,14 +104,24 @@ export default function Index() {
                 Comenzar Partida
               </Button>
             </Link>
-            <Link to="/analytics">
+            <Link to="/profile">
               <Button
                 variant="outline"
                 size="lg"
                 className="border-neon-purple text-neon-purple hover:bg-neon-purple/10"
               >
+                <Users className="w-5 h-5 mr-2" />
+                Mi Perfil
+              </Button>
+            </Link>
+            <Link to="/analytics">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-electric-blue text-electric-blue hover:bg-electric-blue/10"
+              >
                 <TrendingUp className="w-5 h-5 mr-2" />
-                Ver Analytics
+                Analytics
               </Button>
             </Link>
             <Link to="/settings">
@@ -199,7 +209,7 @@ export default function Index() {
                   <li>• Optimización de estrategias</li>
                   <li>• Predicción cuántica</li>
                   <li>• Contraataques evolucionados</li>
-                  <li>�� Desafíos personalizados</li>
+                  <li>• Desafíos personalizados</li>
                 </ul>
               </CardContent>
             </Card>
