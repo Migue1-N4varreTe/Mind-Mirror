@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 import { VisualEffects, CellRipple, FloatingText, NeuralNetwork } from "@/components/ui/visual-effects";
 import { MindMirrorAI, ComboSystem } from "@/lib/gameEngine";
 import { SPECIAL_CELLS, getRandomSpecialCell, getSpecialCellSpawnChance } from "@/lib/specialCells";
+import { AchievementSystem, calculateGameEndData, type Achievement, type GameEndData } from "@/lib/achievementSystem";
+import GameEndModal from "@/components/GameEndModal";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain,
@@ -57,6 +59,10 @@ interface GameState {
   shieldActive: boolean;
   comboCount: number;
   totalScore: { player: number; ai: number };
+  gameEnded: boolean;
+  specialCellsUsed: number;
+  maxComboChain: number;
+  currentComboChain: number;
 }
 
 export default function Game() {
@@ -80,15 +86,25 @@ export default function Game() {
     multiplierActive: false,
     shieldActive: false,
     comboCount: 0,
-    totalScore: { player: 0, ai: 0 }
+    totalScore: { player: 0, ai: 0 },
+    gameEnded: false,
+    specialCellsUsed: 0,
+    maxComboChain: 0,
+    currentComboChain: 0
   });
 
   const aiEngine = useRef(new MindMirrorAI());
   const comboSystem = useRef(new ComboSystem());
+  const achievementSystem = useRef(new AchievementSystem());
   const [visualEffects, setVisualEffects] = useState<any[]>([]);
   const [ripples, setRipples] = useState<any[]>([]);
   const [floatingTexts, setFloatingTexts] = useState<any[]>([]);
   const [clickStartTime, setClickStartTime] = useState<number>(0);
+  const [gameStartTime] = useState(Date.now());
+  const [reactionTimes, setReactionTimes] = useState<number[]>([]);
+  const [gameEndData, setGameEndData] = useState<GameEndData | null>(null);
+  const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  const [showGameEndModal, setShowGameEndModal] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(30);
   const [isThinking, setIsThinking] = useState(false);
