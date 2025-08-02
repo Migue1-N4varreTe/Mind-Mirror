@@ -912,37 +912,103 @@ export default function Game() {
               </CardHeader>
               <CardContent>
                 <div className="relative">
-                  <div className="grid grid-cols-8 gap-2 mb-4">
+                  {/* Dynamic CSS Injection */}
+                  {dynamicCSS && (
+                    <style dangerouslySetInnerHTML={{ __html: dynamicCSS }} />
+                  )}
+
+                  <div className={`grid gap-2 mb-4 ${gameState.boardMode === 'hexagonal' ? 'hexagonal-grid' : 'grid-cols-8'}`}>
                     {gameState.board.map((row, rowIndex) =>
-                      row.map((cell, colIndex) => (
-                        <motion.div
-                          key={`${rowIndex}-${colIndex}`}
-                          className={getCellStyle(cell, rowIndex, colIndex)}
-                          onClick={() => handleCellClick(rowIndex, colIndex)}
-                          onMouseDown={() => setClickStartTime(Date.now())}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{
-                            duration: 0.3,
-                            delay: (rowIndex + colIndex) * 0.02,
-                            type: "spring",
-                            stiffness: 200
-                          }}
-                        >
-                          <div className="w-full h-full flex items-center justify-center relative">
-                            {getCellIcon(cell)}
-                            {cell.timer && (
-                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                                {cell.timer}
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      ))
+                      row.map((cell, colIndex) => {
+                        const cellKey = `${rowIndex},${colIndex}`;
+                        const heatIntensity = heatmapData.get(cellKey) || 0;
+                        const predictionValue = predictions.get(cellKey) || 0;
+
+                        return (
+                          <motion.div
+                            key={`${rowIndex}-${colIndex}`}
+                            className={`${getCellStyle(cell, rowIndex, colIndex)} dynamic-card`}
+                            onClick={() => handleCellClick(rowIndex, colIndex)}
+                            onMouseDown={() => setClickStartTime(Date.now())}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{
+                              scale: 1,
+                              opacity: 1,
+                              backgroundColor: gameState.showHeatmap && heatIntensity > 0
+                                ? `rgba(255, ${255 - heatIntensity * 200}, ${255 - heatIntensity * 200}, 0.3)`
+                                : undefined
+                            }}
+                            transition={{
+                              duration: 0.3,
+                              delay: (rowIndex + colIndex) * 0.02,
+                              type: "spring",
+                              stiffness: 200
+                            }}
+                            style={{
+                              background: gameState.gameMode === 'temporal' && gameState.temporalCycle % 6 === (rowIndex + colIndex) % 6
+                                ? 'linear-gradient(45deg, rgba(0,255,0,0.3), rgba(0,255,255,0.3))'
+                                : undefined
+                            }}
+                          >
+                            <div className="w-full h-full flex items-center justify-center relative">
+                              {getCellIcon(cell)}
+
+                              {/* Heatmap intensity indicator */}
+                              {gameState.showHeatmap && heatIntensity > 0.5 && (
+                                <div className="absolute top-0 right-0 w-2 h-2 bg-red-400 rounded-full animate-pulse" />
+                              )}
+
+                              {/* Prediction indicator */}
+                              {gameState.showPredictions && predictionValue > 0.3 && (
+                                <div className="absolute bottom-0 left-0 w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                              )}
+
+                              {/* Temporal cell indicator */}
+                              {gameState.gameMode === 'temporal' && gameState.temporalCycle % 6 === (rowIndex + colIndex) % 6 && (
+                                <div className="absolute inset-0 border-2 border-green-400 rounded animate-pulse" />
+                              )}
+
+                              {cell.timer && (
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+                                  {cell.timer}
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })
                     )}
                   </div>
+
+                  {/* Story Mode Narrative Display */}
+                  {gameState.storyMode && currentNarrative && (
+                    <motion.div
+                      className="mb-4 p-3 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/50"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <p className="text-sm font-mono text-purple-300 italic">
+                        📖 {currentNarrative}
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {/* Mentor Advice Display */}
+                  {gameState.mentorMode && mentorAdvice && (
+                    <motion.div
+                      className="mb-4 p-3 bg-gradient-to-r from-green-900/30 to-cyan-900/30 rounded-lg border border-green-500/50"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <p className="text-sm font-mono text-green-300">
+                        🧠 {mentorAdvice}
+                      </p>
+                    </motion.div>
+                  )}
 
                   {/* Visual Effects Layer */}
                   <VisualEffects
