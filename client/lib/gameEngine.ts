@@ -13,11 +13,29 @@ export interface AIStrategy {
   execute: (gameState: any, patterns: PlayerPattern[]) => [number, number] | null;
 }
 
+export interface AIPersonality {
+  name: string;
+  description: string;
+  strategies: { [key: string]: number }; // strategy weights
+  emotionalTriggers: string[];
+  switchConditions: {
+    frustrationThreshold: number;
+    confidenceThreshold: number;
+    patternComplexityThreshold: number;
+  };
+  mentalState: 'learning' | 'adapting' | 'aggressive' | 'defensive' | 'evolved';
+}
+
 export class MindMirrorAI {
   private patterns: PlayerPattern[] = [];
   private strategies: AIStrategy[] = [];
   private currentPersonality: string = 'chameleon';
   private adaptationLevel: number = 0;
+  private personalities: Map<string, AIPersonality> = new Map();
+  private personalityChangeCooldown: number = 0;
+  private dreamModeData: any[] = [];
+  private mentorMode: boolean = false;
+  private aiThoughts: string[] = [];
   private playerProfile: {
     averageReactionTime: number;
     preferredQuadrants: number[];
