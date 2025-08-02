@@ -681,8 +681,160 @@ export class MindMirrorAI {
       playerProfile: this.playerProfile,
       recentPatterns: this.patterns.slice(-10),
       adaptationLevel: this.adaptationLevel,
-      currentPersonality: this.currentPersonality
+      currentPersonality: this.currentPersonality,
+      personalityHistory: this.aiThoughts,
+      dreamModeData: this.dreamModeData,
+      mentalState: this.personalities.get(this.currentPersonality)?.mentalState,
+      strategicAnalysis: {
+        playerDNA: this.analyzePlayerDNA(),
+        positionClusters: this.calculatePositionClusters(),
+        emotionalTrends: this.getEmotionalTrends(),
+        personalityTriggers: this.getPersonalityTriggers()
+      }
     };
+  }
+
+  private getEmotionalTrends(): any {
+    const emotions = this.patterns.slice(-20).map(p => p.emotionalState);
+    const counts = emotions.reduce((acc, emotion) => {
+      acc[emotion] = (acc[emotion] || 0) + 1;
+      return acc;
+    }, {} as any);
+
+    return {
+      dominant: Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b),
+      distribution: counts,
+      stability: this.calculateEmotionalStability()
+    };
+  }
+
+  private calculateEmotionalStability(): number {
+    const recent = this.patterns.slice(-10).map(p => p.emotionalState);
+    const changes = recent.slice(1).filter((state, i) => state !== recent[i]).length;
+    return Math.max(0, 1 - (changes / 9)); // 0 = very unstable, 1 = very stable
+  }
+
+  private getPersonalityTriggers(): any {
+    return {
+      switchCount: this.aiThoughts.filter(t => t.includes('Personalidad cambiada')).length,
+      currentTriggers: this.personalities.get(this.currentPersonality)?.emotionalTriggers,
+      lastSwitch: this.personalityChangeCooldown > 0 ? 5 - this.personalityChangeCooldown : null
+    };
+  }
+
+  getCurrentPersonalityData(): AIPersonality | undefined {
+    return this.personalities.get(this.currentPersonality);
+  }
+
+  getAllPersonalities(): AIPersonality[] {
+    return Array.from(this.personalities.values());
+  }
+
+  // Dream mode methods
+  enterDreamMode(): void {
+    // Start background pattern analysis
+    this.dreamModeData.push({
+      type: 'dream_start',
+      playerSnapshot: this.analyzePlayerDNA(),
+      timestamp: Date.now()
+    });
+  }
+
+  exitDreamMode(): any {
+    const dreamInsights = this.processDreamData();
+    this.dreamModeData.push({
+      type: 'dream_end',
+      insights: dreamInsights,
+      timestamp: Date.now()
+    });
+
+    return dreamInsights;
+  }
+
+  private processDreamData(): any {
+    const patterns = this.dreamModeData.filter(d => d.type !== 'dream_start' && d.type !== 'dream_end');
+
+    return {
+      learningEvolution: this.calculateLearningEvolution(),
+      predictiveAccuracy: this.calculatePredictiveAccuracy(),
+      personalityOptimization: this.optimizePersonalityWeights(),
+      strategicRecommendations: this.generateStrategicRecommendations()
+    };
+  }
+
+  private calculateLearningEvolution(): any {
+    const snapshots = this.dreamModeData.filter(d => d.playerSnapshot);
+    if (snapshots.length < 2) return null;
+
+    const first = snapshots[0].playerSnapshot;
+    const last = snapshots[snapshots.length - 1].playerSnapshot;
+
+    return {
+      reactionTimeImprovement: (first.reactionTrend[0] - last.reactionTrend.slice(-1)[0]) / first.reactionTrend[0],
+      complexityIncrease: last.confidencePattern.slice(-1)[0] - first.confidencePattern[0],
+      consistencyGrowth: this.calculateConsistencyGrowth(first, last)
+    };
+  }
+
+  private calculateConsistencyGrowth(first: any, last: any): number {
+    const firstVariance = this.calculateVariance(first.reactionTrend);
+    const lastVariance = this.calculateVariance(last.reactionTrend);
+    return firstVariance > 0 ? (firstVariance - lastVariance) / firstVariance : 0;
+  }
+
+  private calculateVariance(values: number[]): number {
+    const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+    const squaredDiffs = values.map(val => Math.pow(val - mean, 2));
+    return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / values.length;
+  }
+
+  private calculatePredictiveAccuracy(): number {
+    // Analyze how accurately the AI predicted player moves
+    const predictions = this.patterns.slice(-20);
+    let correct = 0;
+
+    for (let i = 1; i < predictions.length; i++) {
+      const predicted = this.predictiveStrategy({ board: [] }, predictions.slice(0, i));
+      const actual = predictions[i].position;
+
+      if (predicted && Math.abs(predicted[0] - actual[0]) <= 1 && Math.abs(predicted[1] - actual[1]) <= 1) {
+        correct++;
+      }
+    }
+
+    return predictions.length > 1 ? correct / (predictions.length - 1) : 0;
+  }
+
+  private optimizePersonalityWeights(): any {
+    const personalityPerformance = new Map();
+
+    this.personalities.forEach((personality, name) => {
+      personalityPerformance.set(name, {
+        winRate: Math.random() * 0.4 + 0.3, // Simulated for now
+        adaptationSpeed: Math.random(),
+        playerSatisfaction: Math.random()
+      });
+    });
+
+    return Object.fromEntries(personalityPerformance);
+  }
+
+  private generateStrategicRecommendations(): string[] {
+    const recommendations = [];
+
+    if (this.playerProfile.averageReactionTime > 3000) {
+      recommendations.push("Practica decisiones más rápidas en situaciones de presión");
+    }
+
+    if (this.playerProfile.patternComplexity < 0.3) {
+      recommendations.push("Experimenta con estrategias más variadas");
+    }
+
+    if (this.playerProfile.riskTolerance > 0.8) {
+      recommendations.push("Considera estrategias más conservadoras ocasionalmente");
+    }
+
+    return recommendations;
   }
 }
 
