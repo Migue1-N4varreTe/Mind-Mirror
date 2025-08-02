@@ -795,13 +795,33 @@ export default function Game() {
             </h1>
           </div>
           
-          <div className="text-right">
+          <div className="text-right space-y-2">
             <div className="text-2xl font-bold">
               <span className="text-neon-cyan">{gameState.score.player}</span>
               <span className="text-muted-foreground mx-2">-</span>
               <span className="text-neon-purple">{gameState.score.ai}</span>
             </div>
             <div className="text-sm text-muted-foreground">Movimientos: {gameState.moves}</div>
+
+            {/* Advanced Mode Indicators */}
+            <div className="flex gap-1 text-xs">
+              <Badge variant="outline" className="text-neon-cyan">
+                {gameState.boardMode}
+              </Badge>
+              <Badge variant="outline" className="text-neon-purple">
+                {gameState.gameMode}
+              </Badge>
+              {gameState.mentorMode && (
+                <Badge variant="outline" className="text-neon-green">
+                  Mentor
+                </Badge>
+              )}
+              {gameState.showPredictions && (
+                <Badge variant="outline" className="text-yellow-400">
+                  Predictor
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
