@@ -528,6 +528,24 @@ export default function Game() {
     setTimeout(() => {
       const aiPosition = aiEngine.current.generateMove(gameState, gameState.difficulty);
 
+      // Record AI personality if it changed
+      const currentPersonality = aiEngine.current.getCurrentPersonalityData();
+      if (currentPersonality && currentPersonality.name !== gameState.aiPersonality) {
+        setGameState(prev => ({
+          ...prev,
+          aiPersonality: currentPersonality.name as AIPersonality
+        }));
+
+        if (gameState.storyMode) {
+          storyEngine.current.addGameEvent({
+            type: 'ai_personality',
+            player: 'ai',
+            data: { oldPersonality: gameState.aiPersonality, newPersonality: currentPersonality.name },
+            intensity: 0.9
+          });
+        }
+      }
+
       if (aiPosition) {
         const [aiRow, aiCol] = aiPosition;
         const newBoard = [...gameState.board];
