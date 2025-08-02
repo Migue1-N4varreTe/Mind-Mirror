@@ -357,6 +357,33 @@ export default function Game() {
     // Add to AI learning with enhanced data
     aiEngine.current.addPlayerMove([row, col], reactionTime);
 
+    // Update heatmap with decision data
+    heatmapAnalyzer.current.addDataPoint({
+      position: [row, col],
+      intensity: Math.min(1, 2000 / reactionTime), // Faster = higher intensity
+      type: 'decision',
+      timestamp: now,
+      metadata: { reactionTime, confidence: gameState.moves > 5 ? 0.7 : 0.4 }
+    });
+
+    // Update dynamic theme based on reaction
+    themeEngine.current.updateEmotionalState({
+      reactionTime,
+      confidence: Math.max(0, 1 - (reactionTime / 3000)),
+      consecutiveSuccesses: gameState.currentComboChain
+    });
+
+    // Add story event
+    if (gameState.storyMode) {
+      storyEngine.current.addGameEvent({
+        type: 'move',
+        position: [row, col],
+        player: 'human',
+        data: { reactionTime, confidence: 1 - (reactionTime / 3000) },
+        intensity: Math.min(1, 2000 / reactionTime)
+      });
+    }
+
     const newBoard = [...gameState.board];
     let scoreGain = 1;
     let effectsToAdd: any[] = [];
