@@ -778,7 +778,58 @@ export default function Game() {
   };
 
   return (
-    <div className="min-h-screen bg-background neural-grid p-6">
+    <div className="min-h-screen bg-background neural-grid p-6 dynamic-theme">
+      <style jsx>{`
+        .hexagonal-grid {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 4px;
+        }
+
+        .hexagonal-grid > div {
+          clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+          width: 48px;
+          height: 48px;
+          margin: 2px;
+        }
+
+        .quantum-border {
+          border-image: linear-gradient(45deg, #00f5ff, #9d4edd, #00f5ff) 1;
+          animation: quantum-pulse 2s infinite;
+        }
+
+        .pulse-glow {
+          animation: pulse-glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes quantum-pulse {
+          0%, 100% {
+            border-image: linear-gradient(45deg, #00f5ff, #9d4edd, #00f5ff) 1;
+            filter: brightness(1);
+          }
+          50% {
+            border-image: linear-gradient(45deg, #9d4edd, #00f5ff, #9d4edd) 1;
+            filter: brightness(1.2);
+          }
+        }
+
+        @keyframes pulse-glow {
+          from {
+            box-shadow: 0 0 5px currentColor;
+          }
+          to {
+            box-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
+          }
+        }
+
+        .neural-grid::before {
+          background-size: 30px 30px;
+          background-image:
+            linear-gradient(to right, rgba(0, 245, 255, 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0, 245, 255, 0.1) 1px, transparent 1px);
+        }
+      `}</style>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
