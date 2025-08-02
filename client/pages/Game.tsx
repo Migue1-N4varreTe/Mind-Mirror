@@ -90,7 +90,16 @@ export default function Game() {
     gameEnded: false,
     specialCellsUsed: 0,
     maxComboChain: 0,
-    currentComboChain: 0
+    currentComboChain: 0,
+    // Advanced features
+    boardMode: 'classic',
+    gameMode: 'normal',
+    temporalCycle: 0,
+    showHeatmap: false,
+    showPredictions: false,
+    mentorMode: false,
+    currentTheme: 'calm',
+    storyMode: false
   });
 
   const aiEngine = useRef(new MindMirrorAI());
