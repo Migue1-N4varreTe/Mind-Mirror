@@ -52,6 +52,7 @@ export class MindMirrorAI {
 
   constructor() {
     this.initializeStrategies();
+    this.initializePersonalities();
   }
 
   private initializeStrategies() {
