@@ -223,12 +223,77 @@ export default function Game() {
     if (isThinking) {
       const interval = setInterval(() => {
         setAiThought(aiEngine.current.getAIThought());
+
+        // Check for AI personality changes
+        const currentPersonalityData = aiEngine.current.getCurrentPersonalityData();
+        if (currentPersonalityData && currentPersonalityData.name !== gameState.aiPersonality) {
+          setPersonalityHistory(prev => [...prev, `${gameState.aiPersonality} → ${currentPersonalityData.name}`]);
+        }
       }, 2000);
       return () => clearInterval(interval);
     } else {
       setAiThought(aiEngine.current.getPersonalityInsight());
     }
-  }, [isThinking, gameState.moves]);
+  }, [isThinking, gameState.moves, gameState.aiPersonality]);
+
+  // Dynamic theme updates
+  useEffect(() => {
+    themeEngine.current.onThemeChange((newTheme) => {
+      setGameState(prev => ({ ...prev, currentTheme: newTheme.id }));
+      setDynamicCSS(themeEngine.current.getThemeCSS());
+    });
+  }, []);
+
+  // Temporal cycle updates
+  useEffect(() => {
+    if (gameState.gameMode === 'temporal' && gameState.temporalCycle > 0) {
+      const interval = setInterval(() => {
+        setGameState(prev => ({
+          ...prev,
+          temporalCycle: prev.temporalCycle + 1
+        }));
+      }, 5000); // 5 second cycles
+
+      return () => clearInterval(interval);
+    }
+  }, [gameState.gameMode, gameState.temporalCycle]);
+
+  // Update heatmap and predictions
+  useEffect(() => {
+    if (gameState.showHeatmap || gameState.showPredictions) {
+      const newHeatmap = heatmapAnalyzer.current.getHeatmapForBoard(8);
+      setHeatmapData(newHeatmap);
+
+      if (gameState.showPredictions) {
+        const analytics = aiEngine.current.exportAnalytics();
+        const newPredictions = movementPredictor.current.updatePredictions(
+          gameState,
+          analytics.recentPatterns,
+          analytics
+        );
+        setPredictions(newPredictions);
+      }
+    }
+  }, [gameState.moves, gameState.showHeatmap, gameState.showPredictions]);
+
+  // Story mode narrative updates
+  useEffect(() => {
+    if (gameState.storyMode) {
+      const narrative = storyEngine.current.getCurrentNarrative();
+      setCurrentNarrative(narrative);
+
+      const effects = storyEngine.current.getActiveEffects();
+      setStoryEffects(effects);
+    }
+  }, [gameState.moves, gameState.storyMode]);
+
+  // Mentor advice updates
+  useEffect(() => {
+    if (gameState.mentorMode && gameState.moves > 0) {
+      const advice = aiEngine.current.getMentorAdvice();
+      setMentorAdvice(advice);
+    }
+  }, [gameState.moves, gameState.mentorMode]);
 
   // Phase progression
   useEffect(() => {
