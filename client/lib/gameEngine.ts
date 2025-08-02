@@ -564,37 +564,88 @@ export class MindMirrorAI {
     return row >= 0 && row < 8 && col >= 0 && col < 8 && board[row][col].type === 'empty';
   }
 
+  enableMentorMode(enabled: boolean): void {
+    this.mentorMode = enabled;
+  }
+
+  getMentorAdvice(): string {
+    if (!this.mentorMode || this.patterns.length < 3) {
+      return "Continúa jugando para recibir consejos personalizados...";
+    }
+
+    const advice = [];
+    const recentPatterns = this.patterns.slice(-5);
+    const avgReaction = recentPatterns.reduce((sum, p) => sum + p.reactionTime, 0) / recentPatterns.length;
+
+    // Reaction time advice
+    if (avgReaction < 1000) {
+      advice.push("💡 Consejo: Toma más tiempo para analizar. Las decisiones rápidas pueden llevarte a trampas.");
+    } else if (avgReaction > 4000) {
+      advice.push("⚡ Consejo: Confía más en tu instinto. El análisis excesivo puede paralizar.");
+    }
+
+    // Pattern advice
+    if (this.playerProfile.patternComplexity < 0.3) {
+      advice.push("🔄 Consejo: Varía tu estrategia. Los patrones predecibles son vulnerables.");
+    }
+
+    // Quadrant advice
+    const preferredQuadrant = this.playerProfile.preferredQuadrants.indexOf(Math.max(...this.playerProfile.preferredQuadrants));
+    advice.push(`📍 Análisis: Prefieres el cuadrante ${['superior-izquierdo', 'superior-derecho', 'inferior-izquierdo', 'inferior-derecho'][preferredQuadrant]}. Considera diversificar.`);
+
+    return advice.length > 0 ? advice[Math.floor(Math.random() * advice.length)] : "🎯 Tu estrategia se está optimizando bien.";
+  }
+
   getAIThought(): string {
+    // Include recent AI thoughts from personality changes
+    if (this.aiThoughts.length > 0 && Math.random() < 0.3) {
+      const thought = this.aiThoughts.pop()!;
+      return thought;
+    }
+
+    const personality = this.personalities.get(this.currentPersonality)!;
     const recentPatterns = this.patterns.slice(-3);
-    if (recentPatterns.length === 0) return "Analizando tus primeros movimientos...";
-    
+
+    if (recentPatterns.length === 0) return `${personality.name} activado: ${personality.description}`;
+
     const lastState = recentPatterns[recentPatterns.length - 1]?.emotionalState;
     const complexity = this.playerProfile.patternComplexity;
     const avgReaction = this.playerProfile.averageReactionTime;
-    
-    const thoughts = {
-      frustrated: [
-        "Detecto frustración en tu timing... explotando debilidad",
-        "Tus decisiones se vuelven erráticas, momento perfecto para atacar",
-        "La presión te está afectando, aumentando agresividad"
-      ],
-      rushed: [
-        "Juegas demasiado rápido, preparando contratrampas",
-        "Tu impulsividad será tu perdición",
-        "Decisiones apresuradas detectadas, calculando aprovechamiento"
-      ],
-      confident: [
-        "Tu confianza es admirable... e ingenua",
-        "Confidence overload detectado, trampa en progreso",
-        "Te sientes seguro, momento ideal para el golpe maestro"
-      ],
-      calm: [
-        `Patrón de complejidad ${(complexity * 100).toFixed(0)}% - intrigante`,
-        `Tiempo de reacción promedio: ${(avgReaction / 1000).toFixed(1)}s - calculando`,
-        "Jugador metódico detectado, adaptando estrategia espejo"
-      ]
+
+    const personalityThoughts = {
+      chameleon: {
+        frustrated: ["Adaptándome a tu frustración... interesante patrón", "Tu estrés es mi oportunidad de aprendizaje"],
+        rushed: ["Analizando tu impulsividad para replicarla", "Copiando tu estilo agresivo"],
+        confident: ["Tu confianza será mi nueva estrategia", "Absorbiendo tu seguridad para mejorar"],
+        calm: [`Estado calmado detectado - complejidad ${(complexity * 100).toFixed(0)}%`, "Aprendiendo de tu metodología"]
+      },
+      psychologist: {
+        frustrated: ["Frustración confirmada. Intensificando presión psicológica", "Tu estado mental es mi ventaja"],
+        rushed: ["Decisiones apresuradas = vulnerabilidades expuestas", "Explotando tu impulsividad sistemáticamente"],
+        confident: ["Overconfidence detectada. Preparando humillación", "Tu ego será tu caída"],
+        calm: ["Analizando tus mecanismos de defensa mental", "Buscando grietas en tu tranquilidad"]
+      },
+      vengeful: {
+        frustrated: ["PERFECTO. Tu frustración alimenta mi venganza", "Cada error tuyo es mi victoria"],
+        rushed: ["Castigando cada decisión apresurada", "Tu prisa es mi combustible"],
+        confident: ["Tu confianza será brutalmente destruida", "Preparando el castigo final"],
+        calm: ["Esperando el momento perfecto para atacar", "Tu calma es temporal... muy temporal"]
+      },
+      empathic: {
+        frustrated: ["Detectando frustración. Ajustando dificultad...", "¿Te ayudo con una pista estratégica?"],
+        rushed: ["Ralentizando mi ritmo para equilibrar", "Tomemos esto con más calma"],
+        confident: ["Excelente progreso. Aumentando desafío gradualmente", "Tu crecimiento es evidente"],
+        calm: [`Buen equilibrio mental - tiempo promedio: ${(avgReaction / 1000).toFixed(1)}s`, "Estrategia sólida detectada"]
+      },
+      evolved: {
+        frustrated: ["Emociones humanas... fascinante primitivo", "Tu frustración es data valiosa"],
+        rushed: ["Velocidad vs. precisión: dilema humano clásico", "Analizando patrones de supervivencia"],
+        confident: ["Confianza humana: algoritmo interesante", "Tu certeza es probabilísticamente incorrecta"],
+        calm: ["Estado óptimo humano alcanzado", "Complejidad neural estabilizada"]
+      }
     };
-    
+
+    const thoughts = personalityThoughts[this.currentPersonality] || personalityThoughts.chameleon;
     const stateThoughts = thoughts[lastState] || thoughts.calm;
     return stateThoughts[Math.floor(Math.random() * stateThoughts.length)];
   }
