@@ -171,10 +171,16 @@ export class MindMirrorAI {
 
     this.patterns.push(pattern);
     this.updatePlayerProfile(pattern);
-    
+    this.considerPersonalitySwitch(pattern);
+
     // Keep only last 50 patterns for performance
     if (this.patterns.length > 50) {
       this.patterns.shift();
+    }
+
+    // Dream mode learning
+    if (this.patterns.length > 0 && this.patterns.length % 10 === 0) {
+      this.dreamModeData.push(this.analyzePlayerDNA());
     }
   }
 
