@@ -825,6 +825,61 @@ export default function Game() {
           </div>
         </div>
 
+        {/* Advanced Features Control Panel */}
+        <Card className="mb-6 bg-card/20 backdrop-blur-sm border-neon-cyan/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Sparkles className="w-4 h-4 text-neon-cyan" />
+              Características Avanzadas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={toggleBoardMode}
+                className="border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
+              >
+                Tablero: {gameState.boardMode}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={toggleGameMode}
+                className="border-neon-purple/50 text-neon-purple hover:bg-neon-purple/10"
+              >
+                Modo: {gameState.gameMode}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={toggleMentorMode}
+                className={`border-neon-green/50 hover:bg-neon-green/10 ${
+                  gameState.mentorMode ? 'text-neon-green bg-neon-green/20' : 'text-neon-green'
+                }`}
+              >
+                <Brain className="w-3 h-3 mr-1" />
+                Mentor IA
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={togglePredictions}
+                className={`border-yellow-400/50 hover:bg-yellow-400/10 ${
+                  gameState.showPredictions ? 'text-yellow-400 bg-yellow-400/20' : 'text-yellow-400'
+                }`}
+              >
+                <Target className="w-3 h-3 mr-1" />
+                Predictor
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Game Board */}
           <div className="lg:col-span-2">
