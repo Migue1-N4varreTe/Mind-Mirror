@@ -332,10 +332,193 @@ export class MindMirrorAI {
     }
   }
 
+  private considerPersonalitySwitch(pattern: PlayerPattern): void {
+    if (this.personalityChangeCooldown > 0) {
+      this.personalityChangeCooldown--;
+      return;
+    }
+
+    const currentPersonalityData = this.personalities.get(this.currentPersonality)!;
+    const frustrationLevel = this.patterns.slice(-5).filter(p => p.emotionalState === 'frustrated').length;
+    const avgConfidence = this.patterns.slice(-5).reduce((sum, p) => sum + p.confidence, 0) / 5;
+
+    // Check switch conditions
+    const shouldSwitch =
+      frustrationLevel >= currentPersonalityData.switchConditions.frustrationThreshold ||
+      avgConfidence <= currentPersonalityData.switchConditions.confidenceThreshold ||
+      this.playerProfile.patternComplexity >= currentPersonalityData.switchConditions.patternComplexityThreshold;
+
+    if (shouldSwitch) {
+      this.switchPersonality(pattern.emotionalState);
+      this.personalityChangeCooldown = 5; // Cooldown to prevent rapid switching
+    }
+  }
+
+  private switchPersonality(emotionalState: string): void {
+    const availablePersonalities = Array.from(this.personalities.entries())
+      .filter(([name, personality]) =>
+        name !== this.currentPersonality &&
+        personality.emotionalTriggers.includes(emotionalState)
+      );
+
+    if (availablePersonalities.length > 0) {
+      const [newPersonality] = availablePersonalities[Math.floor(Math.random() * availablePersonalities.length)];
+      const oldPersonality = this.currentPersonality;
+      this.currentPersonality = newPersonality;
+
+      this.aiThoughts.push(`Personalidad cambiada: ${oldPersonality} → ${newPersonality}`);
+
+      // Update strategy weights based on new personality
+      this.updateStrategyWeights();
+    }
+  }
+
+  private updateStrategyWeights(): void {
+    const personality = this.personalities.get(this.currentPersonality)!;
+
+    this.strategies.forEach(strategy => {
+      strategy.weight = personality.strategies[strategy.name] || 0.1;
+    });
+  }
+
+  private mentorStrategy(gameState: any, patterns: PlayerPattern[]): [number, number] | null {
+    if (!this.mentorMode) return null;
+
+    // Suggest a move that teaches good strategy
+    const emptyCells = this.getEmptyCells(gameState.board);
+    if (emptyCells.length === 0) return null;
+
+    // Find strategic positions (corners, edges, center)
+    const strategicMoves = emptyCells.filter(([row, col]) => {
+      // Corners and center are strategic
+      return (row === 0 || row === 7) && (col === 0 || col === 7) || (row >= 3 && row <= 4 && col >= 3 && col <= 4);
+    });
+
+    return strategicMoves.length > 0
+      ? strategicMoves[Math.floor(Math.random() * strategicMoves.length)]
+      : emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  }
+
+  private evolvedStrategy(gameState: any, patterns: PlayerPattern[]): [number, number] | null {
+    if (patterns.length < 10) return null;
+
+    // Advanced pattern analysis with multiple dimensions
+    const playerDNA = this.analyzePlayerDNA();
+    const emptyCells = this.getEmptyCells(gameState.board);
+
+    if (emptyCells.length === 0) return null;
+
+    // Score each empty cell based on multiple factors
+    const scoredCells = emptyCells.map(([row, col]) => {
+      let score = 0;
+
+      // Factor 1: Distance from player's preferred zones
+      const preferredQuadrant = this.playerProfile.preferredQuadrants.indexOf(Math.max(...this.playerProfile.preferredQuadrants));
+      const quadrant = (row < 4 ? 0 : 2) + (col < 4 ? 0 : 1);
+      score += quadrant === preferredQuadrant ? -0.3 : 0.3; // Avoid or target preferred zone
+
+      // Factor 2: Pattern disruption potential
+      score += this.calculateDisruptionScore(row, col, gameState.board);
+
+      // Factor 3: Future move prediction
+      score += this.calculateFuturePotential(row, col, gameState.board);
+
+      return { position: [row, col] as [number, number], score };
+    });
+
+    // Select highest scoring move
+    scoredCells.sort((a, b) => b.score - a.score);
+    return scoredCells[0].position;
+  }
+
+  private analyzePlayerDNA(): any {
+    return {
+      emotionalPattern: this.patterns.slice(-10).map(p => p.emotionalState),
+      reactionTrend: this.patterns.slice(-5).map(p => p.reactionTime),
+      confidencePattern: this.patterns.slice(-5).map(p => p.confidence),
+      positionClusters: this.calculatePositionClusters(),
+      timestamp: Date.now()
+    };
+  }
+
+  private calculatePositionClusters(): any[] {
+    const clusters = [];
+    const positions = this.patterns.map(p => p.position);
+
+    // Simple clustering based on proximity
+    for (let i = 0; i < positions.length; i++) {
+      const [row, col] = positions[i];
+      const nearby = positions.filter(([r, c]) =>
+        Math.abs(r - row) <= 1 && Math.abs(c - col) <= 1
+      );
+
+      if (nearby.length >= 3) {
+        clusters.push({ center: [row, col], density: nearby.length });
+      }
+    }
+
+    return clusters;
+  }
+
+  private calculateDisruptionScore(row: number, col: number, board: any[][]): number {
+    let score = 0;
+
+    // Check how many player patterns this move would disrupt
+    const directions = [[-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1]];
+
+    directions.forEach(([dRow, dCol]) => {
+      const newRow = row + dRow;
+      const newCol = col + dCol;
+
+      if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+        if (board[newRow][newCol].owner === 'player') {
+          score += 0.2; // Points for disrupting player positions
+        }
+      }
+    });
+
+    return score;
+  }
+
+  private calculateFuturePotential(row: number, col: number, board: any[][]): number {
+    // Calculate potential for creating winning lines
+    let potential = 0;
+
+    const directions = [[0,1], [1,0], [1,1], [1,-1]]; // horizontal, vertical, diagonals
+
+    directions.forEach(([dRow, dCol]) => {
+      let lineLength = 1;
+
+      // Check positive direction
+      let r = row + dRow, c = col + dCol;
+      while (r >= 0 && r < 8 && c >= 0 && c < 8 && board[r][c].owner === 'ai') {
+        lineLength++;
+        r += dRow;
+        c += dCol;
+      }
+
+      // Check negative direction
+      r = row - dRow;
+      c = col - dCol;
+      while (r >= 0 && r < 8 && c >= 0 && c < 8 && board[r][c].owner === 'ai') {
+        lineLength++;
+        r -= dRow;
+        c -= dCol;
+      }
+
+      potential += lineLength * 0.1; // More points for longer potential lines
+    });
+
+    return potential;
+  }
+
   generateMove(gameState: any, difficulty: number = 0.5): [number, number] | null {
     const emptyCells = this.getEmptyCells(gameState.board);
     if (emptyCells.length === 0) return null;
-    
+
+    // Update strategy weights based on current personality
+    this.updateStrategyWeights();
+
     // Collect strategy suggestions
     const suggestions = this.strategies
       .map(strategy => ({
@@ -344,23 +527,23 @@ export class MindMirrorAI {
         name: strategy.name
       }))
       .filter(s => s.position && this.isValidPosition(s.position, gameState.board));
-    
+
     if (suggestions.length === 0) {
       // Fallback to random
       return emptyCells[Math.floor(Math.random() * emptyCells.length)];
     }
-    
+
     // Weighted random selection
     const totalWeight = suggestions.reduce((sum, s) => sum + s.weight, 0);
     let random = Math.random() * totalWeight;
-    
+
     for (const suggestion of suggestions) {
       random -= suggestion.weight;
       if (random <= 0) {
         return suggestion.position!;
       }
     }
-    
+
     return suggestions[0].position!;
   }
 
