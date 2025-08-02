@@ -122,6 +122,15 @@ export default function Game() {
   const [showVision, setShowVision] = useState(false);
   const [gameProgress, setGameProgress] = useState(0);
 
+  // Advanced features state
+  const [heatmapData, setHeatmapData] = useState<Map<string, number>>(new Map());
+  const [predictions, setPredictions] = useState<Map<string, number>>(new Map());
+  const [currentNarrative, setCurrentNarrative] = useState<string>("");
+  const [mentorAdvice, setMentorAdvice] = useState<string>("");
+  const [dynamicCSS, setDynamicCSS] = useState<string>("");
+  const [storyEffects, setStoryEffects] = useState<any[]>([]);
+  const [personalityHistory, setPersonalityHistory] = useState<string[]>([]);
+
   // AI personalities and their behaviors
   const personalities = {
     chameleon: "Adapta su estilo mid-game",
