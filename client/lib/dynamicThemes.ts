@@ -1,5 +1,11 @@
 export interface EmotionalState {
-  primary: 'calm' | 'excited' | 'frustrated' | 'confident' | 'focused' | 'stressed';
+  primary:
+    | "calm"
+    | "excited"
+    | "frustrated"
+    | "confident"
+    | "focused"
+    | "stressed";
   intensity: number; // 0-1
   stability: number; // 0-1, how consistent the emotion is
   timestamp: number;
@@ -20,13 +26,13 @@ export interface DynamicTheme {
   };
   effects: {
     particles: boolean;
-    animations: 'subtle' | 'moderate' | 'intense';
+    animations: "subtle" | "moderate" | "intense";
     blur: number;
     glow: boolean;
     shadows: boolean;
   };
   typography: {
-    fontWeight: 'light' | 'normal' | 'medium' | 'bold';
+    fontWeight: "light" | "normal" | "medium" | "bold";
     letterSpacing: number;
     lineHeight: number;
   };
@@ -45,206 +51,206 @@ export class DynamicThemeEngine {
 
   constructor() {
     this.initializeThemes();
-    this.currentTheme = this.themes.get('calm')!;
+    this.currentTheme = this.themes.get("calm")!;
   }
 
   private initializeThemes(): void {
     // Calm Theme - Default state
-    this.themes.set('calm', {
-      id: 'calm',
-      name: 'Serenidad',
-      emotionalTrigger: 'calm',
+    this.themes.set("calm", {
+      id: "calm",
+      name: "Serenidad",
+      emotionalTrigger: "calm",
       colors: {
-        primary: '#0ea5e9', // sky-500
-        secondary: '#06b6d4', // cyan-500
-        accent: '#10b981', // emerald-500
-        background: '#0f172a', // slate-900
-        surface: '#1e293b', // slate-800
-        text: '#f8fafc', // slate-50
-        muted: '#64748b' // slate-500
+        primary: "#0ea5e9", // sky-500
+        secondary: "#06b6d4", // cyan-500
+        accent: "#10b981", // emerald-500
+        background: "#0f172a", // slate-900
+        surface: "#1e293b", // slate-800
+        text: "#f8fafc", // slate-50
+        muted: "#64748b", // slate-500
       },
       effects: {
         particles: false,
-        animations: 'subtle',
+        animations: "subtle",
         blur: 0,
         glow: false,
-        shadows: true
+        shadows: true,
       },
       typography: {
-        fontWeight: 'normal',
+        fontWeight: "normal",
         letterSpacing: 0,
-        lineHeight: 1.5
+        lineHeight: 1.5,
       },
       layout: {
         borderRadius: 8,
         spacing: 16,
-        transition: 300
-      }
+        transition: 300,
+      },
     });
 
     // Excited Theme - High energy, positive
-    this.themes.set('excited', {
-      id: 'excited',
-      name: 'Euforia',
-      emotionalTrigger: 'excited',
+    this.themes.set("excited", {
+      id: "excited",
+      name: "Euforia",
+      emotionalTrigger: "excited",
       colors: {
-        primary: '#f59e0b', // amber-500
-        secondary: '#f97316', // orange-500
-        accent: '#eab308', // yellow-500
-        background: '#1c1917', // stone-900
-        surface: '#292524', // stone-800
-        text: '#fbbf24', // amber-400
-        muted: '#a3a3a3' // neutral-400
+        primary: "#f59e0b", // amber-500
+        secondary: "#f97316", // orange-500
+        accent: "#eab308", // yellow-500
+        background: "#1c1917", // stone-900
+        surface: "#292524", // stone-800
+        text: "#fbbf24", // amber-400
+        muted: "#a3a3a3", // neutral-400
       },
       effects: {
         particles: true,
-        animations: 'intense',
+        animations: "intense",
         blur: 2,
         glow: true,
-        shadows: true
+        shadows: true,
       },
       typography: {
-        fontWeight: 'bold',
+        fontWeight: "bold",
         letterSpacing: 0.5,
-        lineHeight: 1.4
+        lineHeight: 1.4,
       },
       layout: {
         borderRadius: 12,
         spacing: 20,
-        transition: 150
-      }
+        transition: 150,
+      },
     });
 
     // Frustrated Theme - Tension, stress
-    this.themes.set('frustrated', {
-      id: 'frustrated',
-      name: 'Tensión',
-      emotionalTrigger: 'frustrated',
+    this.themes.set("frustrated", {
+      id: "frustrated",
+      name: "Tensión",
+      emotionalTrigger: "frustrated",
       colors: {
-        primary: '#dc2626', // red-600
-        secondary: '#b91c1c', // red-700
-        accent: '#f97316', // orange-500
-        background: '#1f1f1f', // neutral-800
-        surface: '#2d2d2d', // neutral-700
-        text: '#fca5a5', // red-300
-        muted: '#737373' // neutral-500
+        primary: "#dc2626", // red-600
+        secondary: "#b91c1c", // red-700
+        accent: "#f97316", // orange-500
+        background: "#1f1f1f", // neutral-800
+        surface: "#2d2d2d", // neutral-700
+        text: "#fca5a5", // red-300
+        muted: "#737373", // neutral-500
       },
       effects: {
         particles: true,
-        animations: 'intense',
+        animations: "intense",
         blur: 1,
         glow: true,
-        shadows: false
+        shadows: false,
       },
       typography: {
-        fontWeight: 'medium',
+        fontWeight: "medium",
         letterSpacing: 0.3,
-        lineHeight: 1.3
+        lineHeight: 1.3,
       },
       layout: {
         borderRadius: 4,
         spacing: 12,
-        transition: 100
-      }
+        transition: 100,
+      },
     });
 
     // Confident Theme - Bold, assertive
-    this.themes.set('confident', {
-      id: 'confident',
-      name: 'Dominio',
-      emotionalTrigger: 'confident',
+    this.themes.set("confident", {
+      id: "confident",
+      name: "Dominio",
+      emotionalTrigger: "confident",
       colors: {
-        primary: '#7c3aed', // violet-600
-        secondary: '#a855f7', // purple-500
-        accent: '#ec4899', // pink-500
-        background: '#0c0a09', // stone-950
-        surface: '#1c1917', // stone-900
-        text: '#e879f9', // fuchsia-400
-        muted: '#8b5cf6' // violet-400
+        primary: "#7c3aed", // violet-600
+        secondary: "#a855f7", // purple-500
+        accent: "#ec4899", // pink-500
+        background: "#0c0a09", // stone-950
+        surface: "#1c1917", // stone-900
+        text: "#e879f9", // fuchsia-400
+        muted: "#8b5cf6", // violet-400
       },
       effects: {
         particles: false,
-        animations: 'moderate',
+        animations: "moderate",
         blur: 0,
         glow: true,
-        shadows: true
+        shadows: true,
       },
       typography: {
-        fontWeight: 'bold',
+        fontWeight: "bold",
         letterSpacing: 1,
-        lineHeight: 1.6
+        lineHeight: 1.6,
       },
       layout: {
         borderRadius: 16,
         spacing: 24,
-        transition: 400
-      }
+        transition: 400,
+      },
     });
 
     // Focused Theme - Concentration, flow state
-    this.themes.set('focused', {
-      id: 'focused',
-      name: 'Flujo',
-      emotionalTrigger: 'focused',
+    this.themes.set("focused", {
+      id: "focused",
+      name: "Flujo",
+      emotionalTrigger: "focused",
       colors: {
-        primary: '#0891b2', // cyan-600
-        secondary: '#0e7490', // cyan-700
-        accent: '#06b6d4', // cyan-500
-        background: '#001122', // dark blue
-        surface: '#002244', // slightly lighter
-        text: '#67e8f9', // cyan-300
-        muted: '#155e75' // cyan-800
+        primary: "#0891b2", // cyan-600
+        secondary: "#0e7490", // cyan-700
+        accent: "#06b6d4", // cyan-500
+        background: "#001122", // dark blue
+        surface: "#002244", // slightly lighter
+        text: "#67e8f9", // cyan-300
+        muted: "#155e75", // cyan-800
       },
       effects: {
         particles: false,
-        animations: 'subtle',
+        animations: "subtle",
         blur: 0,
         glow: false,
-        shadows: false
+        shadows: false,
       },
       typography: {
-        fontWeight: 'light',
+        fontWeight: "light",
         letterSpacing: -0.5,
-        lineHeight: 1.8
+        lineHeight: 1.8,
       },
       layout: {
         borderRadius: 20,
         spacing: 32,
-        transition: 800
-      }
+        transition: 800,
+      },
     });
 
     // Stressed Theme - Pressure, urgency
-    this.themes.set('stressed', {
-      id: 'stressed',
-      name: 'Presión',
-      emotionalTrigger: 'stressed',
+    this.themes.set("stressed", {
+      id: "stressed",
+      name: "Presión",
+      emotionalTrigger: "stressed",
       colors: {
-        primary: '#e11d48', // rose-600
-        secondary: '#be123c', // rose-700
-        accent: '#f43f5e', // rose-500
-        background: '#1a0a0a', // very dark red
-        surface: '#2a1515', // dark red
-        text: '#fda4af', // rose-300
-        muted: '#881337' // rose-900
+        primary: "#e11d48", // rose-600
+        secondary: "#be123c", // rose-700
+        accent: "#f43f5e", // rose-500
+        background: "#1a0a0a", // very dark red
+        surface: "#2a1515", // dark red
+        text: "#fda4af", // rose-300
+        muted: "#881337", // rose-900
       },
       effects: {
         particles: true,
-        animations: 'intense',
+        animations: "intense",
         blur: 3,
         glow: false,
-        shadows: false
+        shadows: false,
       },
       typography: {
-        fontWeight: 'medium',
+        fontWeight: "medium",
         letterSpacing: 0.8,
-        lineHeight: 1.2
+        lineHeight: 1.2,
       },
       layout: {
         borderRadius: 2,
         spacing: 8,
-        transition: 50
-      }
+        transition: 50,
+      },
     });
   }
 
@@ -256,9 +262,9 @@ export class DynamicThemeEngine {
     patternComplexity?: number;
   }): void {
     const newState = this.analyzeEmotionalState(emotionalData);
-    
+
     this.emotionalHistory.push(newState);
-    
+
     // Keep only last 20 states
     if (this.emotionalHistory.length > 20) {
       this.emotionalHistory.shift();
@@ -275,45 +281,45 @@ export class DynamicThemeEngine {
     consecutiveSuccesses?: number;
     patternComplexity?: number;
   }): EmotionalState {
-    let primary: EmotionalState['primary'] = 'calm';
+    let primary: EmotionalState["primary"] = "calm";
     let intensity = 0.5;
 
     // Analyze reaction time
     if (data.reactionTime < 1000) {
       if (data.confidence > 0.8) {
-        primary = 'excited';
+        primary = "excited";
         intensity = 0.8;
       } else {
-        primary = 'stressed';
+        primary = "stressed";
         intensity = 0.7;
       }
     } else if (data.reactionTime > 4000) {
       if (data.confidence > 0.6) {
-        primary = 'focused';
+        primary = "focused";
         intensity = 0.6;
       } else {
-        primary = 'frustrated';
+        primary = "frustrated";
         intensity = 0.5;
       }
     }
 
     // Analyze confidence
     if (data.confidence > 0.8) {
-      primary = 'confident';
+      primary = "confident";
       intensity = Math.min(1, intensity + 0.3);
     } else if (data.confidence < 0.3) {
-      primary = 'frustrated';
+      primary = "frustrated";
       intensity = Math.min(1, intensity + 0.4);
     }
 
     // Analyze consecutive patterns
     if (data.consecutiveErrors && data.consecutiveErrors >= 3) {
-      primary = 'frustrated';
+      primary = "frustrated";
       intensity = Math.min(1, 0.8 + (data.consecutiveErrors - 3) * 0.1);
     }
 
     if (data.consecutiveSuccesses && data.consecutiveSuccesses >= 3) {
-      primary = 'confident';
+      primary = "confident";
       intensity = Math.min(1, 0.7 + (data.consecutiveSuccesses - 3) * 0.1);
     }
 
@@ -325,7 +331,7 @@ export class DynamicThemeEngine {
       primary,
       intensity,
       stability,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
@@ -339,26 +345,30 @@ export class DynamicThemeEngine {
       }
     }
 
-    return Math.max(0, 1 - (changes / (recentStates.length - 1)));
+    return Math.max(0, 1 - changes / (recentStates.length - 1));
   }
 
   private evaluateThemeChange(): void {
-    const currentState = this.emotionalHistory[this.emotionalHistory.length - 1];
+    const currentState =
+      this.emotionalHistory[this.emotionalHistory.length - 1];
     if (!currentState) return;
 
     // Get dominant emotion from recent history
     const recentStates = this.emotionalHistory.slice(-5);
-    const emotionCounts = recentStates.reduce((acc, state) => {
-      acc[state.primary] = (acc[state.primary] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const emotionCounts = recentStates.reduce(
+      (acc, state) => {
+        acc[state.primary] = (acc[state.primary] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const dominantEmotion = Object.keys(emotionCounts).reduce((a, b) => 
-      emotionCounts[a] > emotionCounts[b] ? a : b
+    const dominantEmotion = Object.keys(emotionCounts).reduce((a, b) =>
+      emotionCounts[a] > emotionCounts[b] ? a : b,
     );
 
     // Check if we should change theme
-    const shouldChangeTheme = 
+    const shouldChangeTheme =
       this.currentTheme.emotionalTrigger !== dominantEmotion &&
       currentState.intensity > 0.6 &&
       currentState.stability > 0.4;
@@ -373,10 +383,10 @@ export class DynamicThemeEngine {
     if (newTheme && newTheme.id !== this.currentTheme.id) {
       const oldTheme = this.currentTheme;
       this.currentTheme = newTheme;
-      
+
       // Notify all callbacks
-      this.transitionCallbacks.forEach(callback => callback(newTheme));
-      
+      this.transitionCallbacks.forEach((callback) => callback(newTheme));
+
       console.log(`🎨 Tema cambiado: ${oldTheme.name} → ${newTheme.name}`);
     }
   }
@@ -387,7 +397,7 @@ export class DynamicThemeEngine {
 
   getThemeCSS(): string {
     const theme = this.currentTheme;
-    
+
     return `
       :root {
         --theme-primary: ${theme.colors.primary};
@@ -407,8 +417,8 @@ export class DynamicThemeEngine {
         --theme-line-height: ${theme.typography.lineHeight};
         
         --theme-blur: ${theme.effects.blur}px;
-        --theme-glow: ${theme.effects.glow ? '0 0 20px var(--theme-accent)' : 'none'};
-        --theme-shadow: ${theme.effects.shadows ? '0 4px 20px rgba(0,0,0,0.3)' : 'none'};
+        --theme-glow: ${theme.effects.glow ? "0 0 20px var(--theme-accent)" : "none"};
+        --theme-shadow: ${theme.effects.shadows ? "0 4px 20px rgba(0,0,0,0.3)" : "none"};
       }
       
       .dynamic-theme {
@@ -475,46 +485,51 @@ export class DynamicThemeEngine {
 
   getParticleConfig(): any {
     const theme = this.currentTheme;
-    
+
     if (!theme.effects.particles) return null;
 
     return {
       particles: {
         number: {
-          value: theme.id === 'excited' ? 50 : theme.id === 'stressed' ? 30 : 20,
+          value:
+            theme.id === "excited" ? 50 : theme.id === "stressed" ? 30 : 20,
         },
         color: {
           value: theme.colors.accent,
         },
         shape: {
-          type: theme.id === 'frustrated' ? 'triangle' : 'circle',
+          type: theme.id === "frustrated" ? "triangle" : "circle",
         },
         opacity: {
-          value: 0.1 + (this.emotionalHistory[this.emotionalHistory.length - 1]?.intensity || 0.5) * 0.4,
+          value:
+            0.1 +
+            (this.emotionalHistory[this.emotionalHistory.length - 1]
+              ?.intensity || 0.5) *
+              0.4,
           random: true,
         },
         size: {
-          value: theme.id === 'excited' ? 8 : 4,
+          value: theme.id === "excited" ? 8 : 4,
           random: true,
         },
         move: {
           enable: true,
-          speed: theme.effects.animations === 'intense' ? 3 : 1,
-          direction: 'none',
+          speed: theme.effects.animations === "intense" ? 3 : 1,
+          direction: "none",
           random: true,
-          out_mode: 'out',
+          out_mode: "out",
         },
       },
       interactivity: {
-        detect_on: 'canvas',
+        detect_on: "canvas",
         events: {
           onhover: {
             enable: true,
-            mode: 'repulse',
+            mode: "repulse",
           },
           onclick: {
             enable: true,
-            mode: 'push',
+            mode: "push",
           },
         },
       },
@@ -529,7 +544,7 @@ export class DynamicThemeEngine {
     const theme = this.themes.get(themeId);
     if (theme) {
       this.currentTheme = theme;
-      this.transitionCallbacks.forEach(callback => callback(theme));
+      this.transitionCallbacks.forEach((callback) => callback(theme));
       return true;
     }
     return false;
@@ -541,27 +556,34 @@ export class DynamicThemeEngine {
 
   getEmotionalAnalysis(): any {
     const recentStates = this.emotionalHistory.slice(-10);
-    
+
     if (recentStates.length === 0) {
       return {
-        dominantEmotion: 'calm',
+        dominantEmotion: "calm",
         averageIntensity: 0.5,
         stability: 1,
-        trends: {}
+        trends: {},
       };
     }
 
-    const emotionCounts = recentStates.reduce((acc, state) => {
-      acc[state.primary] = (acc[state.primary] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const dominantEmotion = Object.keys(emotionCounts).reduce((a, b) => 
-      emotionCounts[a] > emotionCounts[b] ? a : b
+    const emotionCounts = recentStates.reduce(
+      (acc, state) => {
+        acc[state.primary] = (acc[state.primary] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
     );
 
-    const averageIntensity = recentStates.reduce((sum, state) => sum + state.intensity, 0) / recentStates.length;
-    const averageStability = recentStates.reduce((sum, state) => sum + state.stability, 0) / recentStates.length;
+    const dominantEmotion = Object.keys(emotionCounts).reduce((a, b) =>
+      emotionCounts[a] > emotionCounts[b] ? a : b,
+    );
+
+    const averageIntensity =
+      recentStates.reduce((sum, state) => sum + state.intensity, 0) /
+      recentStates.length;
+    const averageStability =
+      recentStates.reduce((sum, state) => sum + state.stability, 0) /
+      recentStates.length;
 
     return {
       dominantEmotion,
@@ -569,27 +591,27 @@ export class DynamicThemeEngine {
       stability: averageStability,
       emotionDistribution: emotionCounts,
       recentTrend: this.getEmotionalTrend(),
-      currentTheme: this.currentTheme.name
+      currentTheme: this.currentTheme.name,
     };
   }
 
   private getEmotionalTrend(): string {
-    if (this.emotionalHistory.length < 5) return 'stable';
+    if (this.emotionalHistory.length < 5) return "stable";
 
     const recent = this.emotionalHistory.slice(-5);
-    const intensities = recent.map(s => s.intensity);
-    
+    const intensities = recent.map((s) => s.intensity);
+
     let increasing = 0;
     let decreasing = 0;
-    
+
     for (let i = 1; i < intensities.length; i++) {
       if (intensities[i] > intensities[i - 1]) increasing++;
       else if (intensities[i] < intensities[i - 1]) decreasing++;
     }
 
-    if (increasing > decreasing + 1) return 'escalating';
-    if (decreasing > increasing + 1) return 'calming';
-    return 'stable';
+    if (increasing > decreasing + 1) return "escalating";
+    if (decreasing > increasing + 1) return "calming";
+    return "stable";
   }
 
   exportThemeData(): any {
@@ -598,7 +620,7 @@ export class DynamicThemeEngine {
       emotionalHistory: this.emotionalHistory.slice(-20),
       analysis: this.getEmotionalAnalysis(),
       themeCSS: this.getThemeCSS(),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 }

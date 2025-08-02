@@ -6,11 +6,11 @@ export interface HexCoordinates {
 
 export interface HexCell {
   coordinates: HexCoordinates;
-  type: 'empty' | 'player' | 'ai' | 'special';
+  type: "empty" | "player" | "ai" | "special";
   specialType?: string;
   id: string;
   isVisible: boolean;
-  temporalState?: 'appearing' | 'disappearing' | 'stable';
+  temporalState?: "appearing" | "disappearing" | "stable";
   temporalCycle?: number;
 }
 
@@ -28,18 +28,18 @@ export class HexagonalBoard {
     for (let q = -this.radius; q <= this.radius; q++) {
       const r1 = Math.max(-this.radius, -q - this.radius);
       const r2 = Math.min(this.radius, -q + this.radius);
-      
+
       for (let r = r1; r <= r2; r++) {
         const s = -q - r;
         const coordinates: HexCoordinates = { q, r, s };
         const id = this.coordsToId(coordinates);
-        
+
         this.cells.set(id, {
           coordinates,
-          type: 'empty',
+          type: "empty",
           id,
           isVisible: true,
-          temporalState: 'stable'
+          temporalState: "stable",
         });
       }
     }
@@ -50,7 +50,7 @@ export class HexagonalBoard {
   }
 
   idToCoords(id: string): HexCoordinates {
-    const [q, r, s] = id.split(',').map(Number);
+    const [q, r, s] = id.split(",").map(Number);
     return { q, r, s };
   }
 
@@ -68,17 +68,21 @@ export class HexagonalBoard {
 
   getNeighbors(coords: HexCoordinates): HexCoordinates[] {
     const directions = [
-      { q: 1, r: 0, s: -1 }, { q: 1, r: -1, s: 0 }, { q: 0, r: -1, s: 1 },
-      { q: -1, r: 0, s: 1 }, { q: -1, r: 1, s: 0 }, { q: 0, r: 1, s: -1 }
+      { q: 1, r: 0, s: -1 },
+      { q: 1, r: -1, s: 0 },
+      { q: 0, r: -1, s: 1 },
+      { q: -1, r: 0, s: 1 },
+      { q: -1, r: 1, s: 0 },
+      { q: 0, r: 1, s: -1 },
     ];
 
     return directions
-      .map(dir => ({
+      .map((dir) => ({
         q: coords.q + dir.q,
         r: coords.r + dir.r,
-        s: coords.s + dir.s
+        s: coords.s + dir.s,
       }))
-      .filter(neighbor => this.cells.has(this.coordsToId(neighbor)));
+      .filter((neighbor) => this.cells.has(this.coordsToId(neighbor)));
   }
 
   getAllCells(): HexCell[] {
@@ -86,20 +90,20 @@ export class HexagonalBoard {
   }
 
   getVisibleCells(): HexCell[] {
-    return this.getAllCells().filter(cell => cell.isVisible);
+    return this.getAllCells().filter((cell) => cell.isVisible);
   }
 
   // Convert hex coordinates to pixel coordinates for rendering
   hexToPixel(coords: HexCoordinates, size: number): { x: number; y: number } {
-    const x = size * (3/2 * coords.q);
-    const y = size * (Math.sqrt(3)/2 * coords.q + Math.sqrt(3) * coords.r);
+    const x = size * ((3 / 2) * coords.q);
+    const y = size * ((Math.sqrt(3) / 2) * coords.q + Math.sqrt(3) * coords.r);
     return { x, y };
   }
 
   // Convert pixel coordinates to hex coordinates
   pixelToHex(x: number, y: number, size: number): HexCoordinates {
-    const q = (2/3 * x) / size;
-    const r = (-1/3 * x + Math.sqrt(3)/3 * y) / size;
+    const q = ((2 / 3) * x) / size;
+    const r = ((-1 / 3) * x + (Math.sqrt(3) / 3) * y) / size;
     const s = -q - r;
 
     // Round to nearest hex
@@ -127,9 +131,11 @@ export class HexagonalBoard {
   }
 
   // Check for winning conditions in hexagonal layout
-  checkWinCondition(playerType: 'player' | 'ai'): boolean {
-    const playerCells = this.getAllCells().filter(cell => cell.type === playerType);
-    
+  checkWinCondition(playerType: "player" | "ai"): boolean {
+    const playerCells = this.getAllCells().filter(
+      (cell) => cell.type === playerType,
+    );
+
     if (playerCells.length < 3) return false;
 
     // Check for lines of 3 or more
@@ -138,22 +144,24 @@ export class HexagonalBoard {
 
   private hasLine(cells: HexCell[], minLength: number): boolean {
     const directions = [
-      { q: 1, r: 0, s: -1 }, { q: 0, r: 1, s: -1 }, { q: -1, r: 1, s: 0 }
+      { q: 1, r: 0, s: -1 },
+      { q: 0, r: 1, s: -1 },
+      { q: -1, r: 1, s: 0 },
     ];
 
     for (const cell of cells) {
       for (const direction of directions) {
         let count = 1;
-        
+
         // Check positive direction
         let current = cell.coordinates;
         while (true) {
           current = {
             q: current.q + direction.q,
             r: current.r + direction.r,
-            s: current.s + direction.s
+            s: current.s + direction.s,
           };
-          
+
           const nextCell = this.getCell(current);
           if (nextCell && nextCell.type === cell.type) {
             count++;
@@ -168,9 +176,9 @@ export class HexagonalBoard {
           current = {
             q: current.q - direction.q,
             r: current.r - direction.r,
-            s: current.s - direction.s
+            s: current.s - direction.s,
           };
-          
+
           const nextCell = this.getCell(current);
           if (nextCell && nextCell.type === cell.type) {
             count++;
@@ -188,18 +196,18 @@ export class HexagonalBoard {
 
   // Temporal cells system
   updateTemporalCells(cycle: number): void {
-    this.getAllCells().forEach(cell => {
+    this.getAllCells().forEach((cell) => {
       if (cell.temporalCycle !== undefined) {
         const cyclePhase = cycle % 6; // 6-cycle pattern
-        
+
         if (cyclePhase === cell.temporalCycle) {
-          cell.temporalState = 'appearing';
+          cell.temporalState = "appearing";
           cell.isVisible = true;
         } else if ((cyclePhase + 3) % 6 === cell.temporalCycle) {
-          cell.temporalState = 'disappearing';
+          cell.temporalState = "disappearing";
           cell.isVisible = false;
         } else {
-          cell.temporalState = 'stable';
+          cell.temporalState = "stable";
         }
       }
     });
@@ -210,7 +218,7 @@ export class HexagonalBoard {
     const cell = this.getCell(coords);
     if (cell) {
       cell.temporalCycle = cycle;
-      cell.temporalState = 'appearing';
+      cell.temporalState = "appearing";
     }
   }
 
@@ -222,19 +230,19 @@ export class HexagonalBoard {
     for (let q = -this.radius; q <= this.radius; q++) {
       const r1 = Math.max(-this.radius, -q - this.radius);
       const r2 = Math.min(this.radius, -q + this.radius);
-      
+
       for (let r = r1; r <= r2; r++) {
         const s = -q - r;
         const coordinates: HexCoordinates = { q, r, s };
         const id = this.coordsToId(coordinates);
-        
+
         if (!newCells.has(id)) {
           newCells.set(id, {
             coordinates,
-            type: 'empty',
+            type: "empty",
             id,
             isVisible: true,
-            temporalState: 'stable'
+            temporalState: "stable",
           });
         }
       }

@@ -1,6 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { HexagonalBoard as HexBoard, HexCoordinates, HexCell } from '../lib/hexagonalGeometry';
+import React, { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  HexagonalBoard as HexBoard,
+  HexCoordinates,
+  HexCell,
+} from "../lib/hexagonalGeometry";
 
 interface Props {
   board: HexBoard;
@@ -21,7 +25,7 @@ export const HexagonalBoard: React.FC<Props> = ({
   playerTurn = true,
   heatmapData,
   showPredictions = false,
-  predictions
+  predictions,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
@@ -33,8 +37,8 @@ export const HexagonalBoard: React.FC<Props> = ({
   }, [temporalCycle, board]);
 
   const getCellColor = (cell: HexCell): string => {
-    if (!cell.isVisible) return 'rgba(0,0,0,0.1)';
-    
+    if (!cell.isVisible) return "rgba(0,0,0,0.1)";
+
     // Heatmap coloring
     if (heatmapData && heatmapData.has(cell.id)) {
       const intensity = heatmapData.get(cell.id)! / 10; // normalize to 0-1
@@ -42,21 +46,23 @@ export const HexagonalBoard: React.FC<Props> = ({
     }
 
     switch (cell.type) {
-      case 'player':
-        return '#00f5ff'; // cyan
-      case 'ai':
-        return '#ff1744'; // red
-      case 'special':
-        return '#ffd700'; // gold
+      case "player":
+        return "#00f5ff"; // cyan
+      case "ai":
+        return "#ff1744"; // red
+      case "special":
+        return "#ffd700"; // gold
       default:
-        return hoveredCell === cell.id ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)';
+        return hoveredCell === cell.id
+          ? "rgba(255,255,255,0.2)"
+          : "rgba(255,255,255,0.1)";
     }
   };
 
   const getCellStroke = (cell: HexCell): string => {
-    if (cell.temporalState === 'appearing') return '#00ff00';
-    if (cell.temporalState === 'disappearing') return '#ff0000';
-    return '#333';
+    if (cell.temporalState === "appearing") return "#00ff00";
+    if (cell.temporalState === "disappearing") return "#ff0000";
+    return "#333";
   };
 
   const getPredictionOpacity = (cell: HexCell): number => {
@@ -73,7 +79,7 @@ export const HexagonalBoard: React.FC<Props> = ({
       const y = centerY + size * Math.sin(angle);
       points.push(`${x},${y}`);
     }
-    return `M ${points.join(' L ')} Z`;
+    return `M ${points.join(" L ")} Z`;
   };
 
   const visibleCells = board.getVisibleCells();
@@ -84,10 +90,10 @@ export const HexagonalBoard: React.FC<Props> = ({
         minX: Math.min(bounds.minX, pixel.x - size),
         maxX: Math.max(bounds.maxX, pixel.x + size),
         minY: Math.min(bounds.minY, pixel.y - size),
-        maxY: Math.max(bounds.maxY, pixel.y + size)
+        maxY: Math.max(bounds.maxY, pixel.y + size),
       };
     },
-    { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity }
+    { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity },
   );
 
   const svgWidth = boardBounds.maxX - boardBounds.minX + size * 2;
@@ -116,7 +122,7 @@ export const HexagonalBoard: React.FC<Props> = ({
             height={size * Math.sqrt(3)}
           >
             <path
-              d={`M 0 ${size * Math.sqrt(3) / 2} L ${size * 1.5} 0 L ${size * 3} ${size * Math.sqrt(3) / 2} L ${size * 3} ${size * Math.sqrt(3)} L ${size * 1.5} ${size * Math.sqrt(3) * 1.5} L 0 ${size * Math.sqrt(3)}`}
+              d={`M 0 ${(size * Math.sqrt(3)) / 2} L ${size * 1.5} 0 L ${size * 3} ${(size * Math.sqrt(3)) / 2} L ${size * 3} ${size * Math.sqrt(3)} L ${size * 1.5} ${size * Math.sqrt(3) * 1.5} L 0 ${size * Math.sqrt(3)}`}
               fill="none"
               stroke="rgba(255,255,255,0.1)"
               strokeWidth="1"
@@ -137,16 +143,16 @@ export const HexagonalBoard: React.FC<Props> = ({
               <motion.g
                 key={cell.id}
                 initial={{ scale: 0, opacity: 0 }}
-                animate={{ 
-                  scale: cell.isVisible ? 1 : 0.3, 
-                  opacity: cell.isVisible ? 1 : 0.3 
+                animate={{
+                  scale: cell.isVisible ? 1 : 0.3,
+                  opacity: cell.isVisible ? 1 : 0.3,
                 }}
                 exit={{ scale: 0, opacity: 0 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 300, 
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
                   damping: 25,
-                  duration: cell.temporalState === 'appearing' ? 0.5 : 0.3
+                  duration: cell.temporalState === "appearing" ? 0.5 : 0.3,
                 }}
               >
                 {/* Main hexagon */}
@@ -154,9 +160,11 @@ export const HexagonalBoard: React.FC<Props> = ({
                   d={hexPath}
                   fill={getCellColor(cell)}
                   stroke={getCellStroke(cell)}
-                  strokeWidth={cell.temporalState !== 'stable' ? 3 : 1}
+                  strokeWidth={cell.temporalState !== "stable" ? 3 : 1}
                   className={`cursor-pointer transition-all duration-200 ${
-                    playerTurn && cell.type === 'empty' ? 'hover:fill-white/30' : ''
+                    playerTurn && cell.type === "empty"
+                      ? "hover:fill-white/30"
+                      : ""
                   }`}
                   onClick={() => onCellClick(cell.coordinates)}
                   onMouseEnter={() => setHoveredCell(cell.id)}
@@ -173,13 +181,13 @@ export const HexagonalBoard: React.FC<Props> = ({
                 )}
 
                 {/* Cell content icons */}
-                {cell.type !== 'empty' && (
+                {cell.type !== "empty" && (
                   <motion.g
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.1 }}
                   >
-                    {cell.type === 'player' && (
+                    {cell.type === "player" && (
                       <circle
                         cx={centerX}
                         cy={centerY}
@@ -189,7 +197,7 @@ export const HexagonalBoard: React.FC<Props> = ({
                         strokeWidth="2"
                       />
                     )}
-                    {cell.type === 'ai' && (
+                    {cell.type === "ai" && (
                       <polygon
                         points={`${centerX},${centerY - size * 0.3} ${centerX + size * 0.25},${centerY + size * 0.15} ${centerX - size * 0.25},${centerY + size * 0.15}`}
                         fill="#ff1744"
@@ -197,10 +205,14 @@ export const HexagonalBoard: React.FC<Props> = ({
                         strokeWidth="2"
                       />
                     )}
-                    {cell.type === 'special' && (
+                    {cell.type === "special" && (
                       <motion.g
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
                       >
                         <polygon
                           points={`${centerX},${centerY - size * 0.3} ${centerX + size * 0.15},${centerY - size * 0.1} ${centerX + size * 0.3},${centerY} ${centerX + size * 0.15},${centerY + size * 0.1} ${centerX},${centerY + size * 0.3} ${centerX - size * 0.15},${centerY + size * 0.1} ${centerX - size * 0.3},${centerY} ${centerX - size * 0.15},${centerY - size * 0.1}`}
@@ -214,7 +226,7 @@ export const HexagonalBoard: React.FC<Props> = ({
                 )}
 
                 {/* Temporal state indicators */}
-                {cell.temporalState === 'appearing' && (
+                {cell.temporalState === "appearing" && (
                   <motion.circle
                     cx={centerX}
                     cy={centerY}
@@ -229,7 +241,7 @@ export const HexagonalBoard: React.FC<Props> = ({
                   />
                 )}
 
-                {cell.temporalState === 'disappearing' && (
+                {cell.temporalState === "disappearing" && (
                   <motion.circle
                     cx={centerX}
                     cy={centerY}
@@ -244,7 +256,7 @@ export const HexagonalBoard: React.FC<Props> = ({
                 )}
 
                 {/* Coordinate labels (for debugging) */}
-                {process.env.NODE_ENV === 'development' && (
+                {process.env.NODE_ENV === "development" && (
                   <text
                     x={centerX}
                     y={centerY + 4}
