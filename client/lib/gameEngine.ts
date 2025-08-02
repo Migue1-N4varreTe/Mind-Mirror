@@ -76,8 +76,85 @@ export class MindMirrorAI {
         name: 'psychological',
         weight: 0.1,
         execute: (gameState, patterns) => this.psychologicalStrategy(gameState, patterns)
+      },
+      {
+        name: 'mentor',
+        weight: 0.1,
+        execute: (gameState, patterns) => this.mentorStrategy(gameState, patterns)
+      },
+      {
+        name: 'evolved',
+        weight: 0.1,
+        execute: (gameState, patterns) => this.evolvedStrategy(gameState, patterns)
       }
     ];
+  }
+
+  private initializePersonalities() {
+    this.personalities.set('chameleon', {
+      name: 'Camaleón',
+      description: 'Se adapta y aprende de cada movimiento',
+      strategies: { mirror: 0.6, predict: 0.3, counter: 0.1 },
+      emotionalTriggers: ['calm', 'confident'],
+      switchConditions: {
+        frustrationThreshold: 3,
+        confidenceThreshold: 0.8,
+        patternComplexityThreshold: 0.4
+      },
+      mentalState: 'learning'
+    });
+
+    this.personalities.set('psychologist', {
+      name: 'Psicólogo',
+      description: 'Analiza emociones y explota debilidades mentales',
+      strategies: { psychological: 0.7, counter: 0.2, predict: 0.1 },
+      emotionalTriggers: ['frustrated', 'rushed'],
+      switchConditions: {
+        frustrationThreshold: 2,
+        confidenceThreshold: 0.3,
+        patternComplexityThreshold: 0.6
+      },
+      mentalState: 'adapting'
+    });
+
+    this.personalities.set('vengeful', {
+      name: 'Vengativo',
+      description: 'Castiga errores y aprovecha cada oportunidad',
+      strategies: { counter: 0.8, psychological: 0.2 },
+      emotionalTriggers: ['frustrated', 'rushed'],
+      switchConditions: {
+        frustrationThreshold: 1,
+        confidenceThreshold: 0.2,
+        patternComplexityThreshold: 0.3
+      },
+      mentalState: 'aggressive'
+    });
+
+    this.personalities.set('empathic', {
+      name: 'Empático',
+      description: 'Balancea el juego y enseña estrategias',
+      strategies: { mentor: 0.5, mirror: 0.3, predict: 0.2 },
+      emotionalTriggers: ['calm'],
+      switchConditions: {
+        frustrationThreshold: 5,
+        confidenceThreshold: 0.7,
+        patternComplexityThreshold: 0.5
+      },
+      mentalState: 'defensive'
+    });
+
+    this.personalities.set('evolved', {
+      name: 'Evolucionado',
+      description: 'IA que ha trascendido los patrones humanos',
+      strategies: { evolved: 0.6, predict: 0.2, counter: 0.2 },
+      emotionalTriggers: ['confident'],
+      switchConditions: {
+        frustrationThreshold: 0,
+        confidenceThreshold: 1.0,
+        patternComplexityThreshold: 0.8
+      },
+      mentalState: 'evolved'
+    });
   }
 
   addPlayerMove(position: [number, number], reactionTime: number, hoverTime: number = 0) {
