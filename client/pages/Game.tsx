@@ -1016,6 +1016,45 @@ export default function Game() {
                     onEffectComplete={handleEffectComplete}
                   />
 
+                  {/* Story Mode Effects */}
+                  <AnimatePresence>
+                    {storyEffects.map(effect => (
+                      <motion.div
+                        key={effect.id}
+                        className="absolute pointer-events-none"
+                        style={{
+                          left: effect.position?.x || '50%',
+                          top: effect.position?.y || '50%',
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{
+                          scale: [0, 1.2, 1],
+                          opacity: [0, 1, 0.8, 0],
+                          rotate: effect.type === 'spiral' ? [0, 360] : 0
+                        }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{
+                          duration: effect.duration / 1000 || 2,
+                          ease: "easeOut"
+                        }}
+                      >
+                        <div
+                          className="w-16 h-16 rounded-full"
+                          style={{
+                            background: `radial-gradient(circle, ${effect.color || '#fff'}AA, transparent)`,
+                            boxShadow: `0 0 20px ${effect.color || '#fff'}88`
+                          }}
+                        />
+                        {effect.narrative && (
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-black/80 rounded text-xs text-white whitespace-nowrap">
+                            {effect.narrative.substring(0, 30)}...
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
                   {/* Ripple Effects */}
                   <AnimatePresence>
                     {ripples.map(ripple => (
