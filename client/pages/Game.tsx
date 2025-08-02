@@ -307,6 +307,10 @@ export default function Game() {
   }, [gameState.moves]);
 
   const playAgain = useCallback(() => {
+    // Reset all systems
+    heatmapAnalyzer.current.clearData();
+    storyEngine.current.startNewStory();
+
     setGameState({
       board: Array(8).fill(null).map(() =>
         Array(8).fill(null).map(() => ({ type: 'empty' }))
@@ -331,8 +335,21 @@ export default function Game() {
       gameEnded: false,
       specialCellsUsed: 0,
       maxComboChain: 0,
-      currentComboChain: 0
+      currentComboChain: 0,
+      // Keep advanced feature states
+      boardMode: gameState.boardMode,
+      gameMode: gameState.gameMode,
+      temporalCycle: gameState.gameMode === 'temporal' ? 1 : 0,
+      hexBoard: gameState.boardMode === 'hexagonal' ? new HexBoard(3) : undefined,
+      infiniteBoard: gameState.boardMode === 'infinite' ? new InfiniteBoardEngine(8) : undefined,
+      showHeatmap: gameState.showHeatmap,
+      showPredictions: gameState.showPredictions,
+      mentorMode: gameState.mentorMode,
+      currentTheme: 'calm',
+      storyMode: gameState.storyMode
     });
+
+    // Reset all state
     setReactionTimes([]);
     setTimeLeft(30);
     setShowGameEndModal(false);
@@ -341,7 +358,16 @@ export default function Game() {
     setVisualEffects([]);
     setRipples([]);
     setFloatingTexts([]);
-  }, []);
+    setHeatmapData(new Map());
+    setPredictions(new Map());
+    setCurrentNarrative("");
+    setMentorAdvice("");
+    setStoryEffects([]);
+    setPersonalityHistory([]);
+
+    // Reset theme to calm
+    themeEngine.current.forceTheme('calm');
+  }, [gameState.boardMode, gameState.gameMode, gameState.showHeatmap, gameState.showPredictions, gameState.mentorMode, gameState.storyMode]);
 
   const handleCellClick = useCallback((row: number, col: number) => {
     if (gameState.currentPlayer !== 'player' || gameState.gameEnded) return;
