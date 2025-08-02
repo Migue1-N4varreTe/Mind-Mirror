@@ -1191,23 +1191,119 @@ export default function Game() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-sm">
                   <Target className="w-4 h-4 text-neon-green" />
-                  Patrones Detectados
+                  Análisis Avanzado
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-1">
-                  {gameState.aiLearning.slice(-3).map((pattern, index) => {
+                <div className="space-y-2 text-xs">
+                  {/* Personality Changes */}
+                  {personalityHistory.length > 0 && (
+                    <div>
+                      <div className="font-semibold text-purple-400">Cambios de Personalidad:</div>
+                      {personalityHistory.slice(-2).map((change, index) => (
+                        <div key={index} className="font-mono text-muted-foreground">
+                          {change}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Heatmap Analysis */}
+                  {gameState.showHeatmap && (
+                    <div>
+                      <div className="font-semibold text-red-400">Zonas Calientes:</div>
+                      <div className="font-mono text-muted-foreground">
+                        Detectadas: {Array.from(heatmapData.values()).filter(v => v > 0.5).length} áreas
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Prediction Stats */}
+                  {gameState.showPredictions && (
+                    <div>
+                      <div className="font-semibold text-yellow-400">Predicciones:</div>
+                      <div className="font-mono text-muted-foreground">
+                        Confianza: {Math.round(Array.from(predictions.values()).reduce((a, b) => a + b, 0) / predictions.size * 100) || 0}%
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Temporal Cycle */}
+                  {gameState.gameMode === 'temporal' && (
+                    <div>
+                      <div className="font-semibold text-green-400">Ciclo Temporal:</div>
+                      <div className="font-mono text-muted-foreground">
+                        Fase {gameState.temporalCycle % 6 + 1}/6
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Story Arc */}
+                  {gameState.storyMode && (
+                    <div>
+                      <div className="font-semibold text-purple-400">Historia:</div>
+                      <div className="font-mono text-muted-foreground">
+                        Arco: {storyEngine.current.getStoryArc()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Original patterns */}
+                  {gameState.aiLearning.slice(-2).map((pattern, index) => {
                     const [coords] = pattern.split(':');
                     return (
-                      <div key={index} className="text-xs font-mono text-muted-foreground">
-                        Posición: {coords}
+                      <div key={index} className="font-mono text-muted-foreground">
+                        Patrón: {coords}
                       </div>
                     );
                   })}
-                  {gameState.aiLearning.length === 0 && (
-                    <div className="text-xs text-muted-foreground">
+
+                  {gameState.aiLearning.length === 0 && !personalityHistory.length && (
+                    <div className="text-muted-foreground">
                       Recopilando datos...
                     </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Advanced Theme Indicator */}
+            <Card className="bg-card/30 backdrop-blur-sm border-neural-gray/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Sparkles className="w-4 h-4 text-neon-pink" />
+                  Estado Emocional
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span>Tema Actual:</span>
+                    <Badge variant="outline" className="dynamic-accent">
+                      {gameState.currentTheme}
+                    </Badge>
+                  </div>
+
+                  {reactionTimes.length > 0 && (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Tiempo Promedio:</span>
+                        <span className="font-mono">
+                          {Math.round(reactionTimes.slice(-5).reduce((a, b) => a + b, 0) / Math.min(5, reactionTimes.length))}ms
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span>Estado:</span>
+                        <span className={`font-mono ${
+                          reactionTimes.slice(-1)[0] < 1500 ? 'text-yellow-400' :
+                          reactionTimes.slice(-1)[0] > 3000 ? 'text-blue-400' : 'text-green-400'
+                        }`}>
+                          {reactionTimes.slice(-1)[0] < 1500 ? 'Rápido' :
+                           reactionTimes.slice(-1)[0] > 3000 ? 'Reflexivo' : 'Equilibrado'}
+                        </span>
+                      </div>
+                    </>
                   )}
                 </div>
               </CardContent>
