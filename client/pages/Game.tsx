@@ -131,6 +131,48 @@ export default function Game() {
   const [storyEffects, setStoryEffects] = useState<any[]>([]);
   const [personalityHistory, setPersonalityHistory] = useState<string[]>([]);
 
+  // Mode switching functions
+  const toggleBoardMode = () => {
+    const modes: BoardMode[] = ['classic', 'hexagonal', 'infinite'];
+    const currentIndex = modes.indexOf(gameState.boardMode);
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+
+    setGameState(prev => ({
+      ...prev,
+      boardMode: nextMode,
+      hexBoard: nextMode === 'hexagonal' ? new HexBoard(3) : undefined,
+      infiniteBoard: nextMode === 'infinite' ? new InfiniteBoardEngine(8) : undefined
+    }));
+  };
+
+  const toggleGameMode = () => {
+    const modes: GameMode[] = ['normal', 'temporal', 'heatmap', 'story'];
+    const currentIndex = modes.indexOf(gameState.gameMode);
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+
+    setGameState(prev => ({
+      ...prev,
+      gameMode: nextMode,
+      showHeatmap: nextMode === 'heatmap',
+      storyMode: nextMode === 'story',
+      temporalCycle: nextMode === 'temporal' ? 1 : 0
+    }));
+  };
+
+  const toggleMentorMode = () => {
+    const newMentorMode = !gameState.mentorMode;
+    aiEngine.current.enableMentorMode(newMentorMode);
+    setGameState(prev => ({ ...prev, mentorMode: newMentorMode }));
+
+    if (newMentorMode) {
+      setMentorAdvice(aiEngine.current.getMentorAdvice());
+    }
+  };
+
+  const togglePredictions = () => {
+    setGameState(prev => ({ ...prev, showPredictions: !prev.showPredictions }));
+  };
+
   // AI personalities and their behaviors
   const personalities = {
     chameleon: "Adapta su estilo mid-game",
