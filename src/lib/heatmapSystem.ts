@@ -1,224 +1,57 @@
+// Mock del sistema de heatmap para análisis de patrones de juego
+
 export interface HeatmapData {
-  position: [number, number];
+  x: number;
+  y: number;
   intensity: number;
-  type: "decision" | "success" | "failure" | "hesitation" | "prediction";
   timestamp: number;
-  metadata?: any;
 }
 
-export interface HeatmapZone {
-  id: string;
-  bounds: { minRow: number; maxRow: number; minCol: number; maxCol: number };
-  intensity: number;
-  type: string;
-  description: string;
+export interface MovementPattern {
+  sequence: Array<{ x: number; y: number; time: number }>;
+  efficiency: number;
+  predictability: number;
 }
 
 export class HeatmapAnalyzer {
   private heatmapData: HeatmapData[] = [];
-  private zones: Map<string, HeatmapZone> = new Map();
-  private maxIntensity: number = 0;
+  private maxDataPoints: number = 1000;
 
-  addDataPoint(data: HeatmapData): void {
-    this.heatmapData.push(data);
-    this.maxIntensity = Math.max(this.maxIntensity, data.intensity);
-
-    // Keep only last 1000 data points for performance
-    if (this.heatmapData.length > 1000) {
-      this.heatmapData.shift();
-    }
-
-    this.updateZones();
-  }
-
-  getHeatmapForBoard(boardSize: number = 8): Map<string, number> {
-    const heatmap = new Map<string, number>();
-
-    for (let row = 0; row < boardSize; row++) {
-      for (let col = 0; col < boardSize; col++) {
-        const cellKey = `${row},${col}`;
-        const intensity = this.calculateCellIntensity(row, col);
-        heatmap.set(cellKey, intensity);
-      }
-    }
-
-    return heatmap;
-  }
-
-  private calculateCellIntensity(row: number, col: number): number {
-    let totalIntensity = 0;
-    let count = 0;
-
-    // Calculate base intensity from direct hits
-    const directHits = this.heatmapData.filter(
-      (data) => data.position[0] === row && data.position[1] === col,
-    );
-
-    directHits.forEach((hit) => {
-      totalIntensity += hit.intensity;
-      count++;
-    });
-
-    // Add influence from nearby cells (gaussian blur effect)
-    this.heatmapData.forEach((data) => {
-      const [dataRow, dataCol] = data.position;
-      const distance = Math.sqrt(
-        Math.pow(row - dataRow, 2) + Math.pow(col - dataCol, 2),
-      );
-
-      if (distance > 0 && distance <= 2) {
-        const influence =
-          data.intensity * Math.exp((-distance * distance) / 2) * 0.3;
-        totalIntensity += influence;
-      }
-    });
-
-    return Math.min(this.maxIntensity, totalIntensity);
-  }
-
-  getDecisionHeatmap(): Map<string, number> {
-    return this.getFilteredHeatmap("decision");
-  }
-
-  getSuccessHeatmap(): Map<string, number> {
-    return this.getFilteredHeatmap("success");
-  }
-
-  getHesitationHeatmap(): Map<string, number> {
-    return this.getFilteredHeatmap("hesitation");
-  }
-
-  getPredictionHeatmap(): Map<string, number> {
-    return this.getFilteredHeatmap("prediction");
-  }
-
-  private getFilteredHeatmap(type: string): Map<string, number> {
-    const filteredData = this.heatmapData.filter((data) => data.type === type);
-    const heatmap = new Map<string, number>();
-
-    for (let row = 0; row < 8; row++) {
-      for (let col = 0; col < 8; col++) {
-        const cellKey = `${row},${col}`;
-        let intensity = 0;
-
-        filteredData.forEach((data) => {
-          const [dataRow, dataCol] = data.position;
-          const distance = Math.sqrt(
-            Math.pow(row - dataRow, 2) + Math.pow(col - dataCol, 2),
-          );
-
-          if (distance === 0) {
-            intensity += data.intensity;
-          } else if (distance <= 1.5) {
-            intensity += data.intensity * Math.exp(-distance) * 0.5;
-          }
-        });
-
-        heatmap.set(cellKey, intensity);
-      }
-    }
-
-    return heatmap;
-  }
-
-  private updateZones(): void {
-    // Clear existing zones
-    this.zones.clear();
-
-    // Identify hot zones (high activity areas)
-    const hotSpots = this.identifyHotSpots();
-    hotSpots.forEach((spot, index) => {
-      this.zones.set(`hot_${index}`, {
-        id: `hot_${index}`,
-        bounds: spot.bounds,
-        intensity: spot.intensity,
-        type: "hot",
-        description: `Zona de alta actividad (${spot.intensity.toFixed(1)})`,
+  addInteraction(x: number, y: number): void {
+    const existing = this.heatmapData.find(point => point.x === x && point.y === y);
+    
+    if (existing) {
+      existing.intensity += 1;
+      existing.timestamp = Date.now();
+    } else {
+      this.heatmapData.push({
+        x,
+        y,
+        intensity: 1,
+        timestamp: Date.now()
       });
-    });
-
-    // Identify cold zones (low activity areas)
-    const coldSpots = this.identifyColdSpots();
-    coldSpots.forEach((spot, index) => {
-      this.zones.set(`cold_${index}`, {
-        id: `cold_${index}`,
-        bounds: spot.bounds,
-        intensity: spot.intensity,
-        type: "cold",
-        description: `Zona evitada (${spot.intensity.toFixed(1)})`,
-      });
-    });
-
-    // Identify pattern zones
-    const patterns = this.identifyPatternZones();
-    patterns.forEach((pattern, index) => {
-      this.zones.set(`pattern_${index}`, {
-        id: `pattern_${index}`,
-        bounds: pattern.bounds,
-        intensity: pattern.intensity,
-        type: "pattern",
-        description: pattern.description,
-      });
-    });
-  }
-
-  private identifyHotSpots(): any[] {
-    const hotSpots = [];
-    const threshold = this.maxIntensity * 0.7;
-
-    for (let row = 0; row < 6; row++) {
-      for (let col = 0; col < 6; col++) {
-        let totalIntensity = 0;
-
-        // Check 3x3 area
-        for (let r = row; r < row + 3; r++) {
-          for (let c = col; c < col + 3; c++) {
-            totalIntensity += this.calculateCellIntensity(r, c);
-          }
-        }
-
-        if (totalIntensity > threshold) {
-          hotSpots.push({
-            bounds: {
-              minRow: row,
-              maxRow: row + 2,
-              minCol: col,
-              maxCol: col + 2,
-            },
-            intensity: totalIntensity / 9,
-          });
-        }
-      }
     }
 
-    return hotSpots;
+    // Limitar el número de puntos de datos
+    if (this.heatmapData.length > this.maxDataPoints) {
+      this.heatmapData.sort((a, b) => b.timestamp - a.timestamp);
+      this.heatmapData = this.heatmapData.slice(0, this.maxDataPoints);
+    }
   }
 
-  private identifyColdSpots(): any[] {
-    const coldSpots = [];
-    const threshold = this.maxIntensity * 0.1;
+  getHotspots(threshold: number = 5): HeatmapData[] {
+    return this.heatmapData.filter(point => point.intensity >= threshold);
+  }
 
-    for (let row = 0; row < 6; row++) {
-      for (let col = 0; col < 6; col++) {
-        let totalIntensity = 0;
+  getColdSpots(threshold: number = 2): Array<{ x: number; y: number }> {
+    const boardSize = 8; // Tamaño del tablero
+    const coldSpots: Array<{ x: number; y: number }> = [];
 
-        // Check 3x3 area
-        for (let r = row; r < row + 3; r++) {
-          for (let c = col; c < col + 3; c++) {
-            totalIntensity += this.calculateCellIntensity(r, c);
-          }
-        }
-
-        if (totalIntensity < threshold) {
-          coldSpots.push({
-            bounds: {
-              minRow: row,
-              maxRow: row + 2,
-              minCol: col,
-              maxCol: col + 2,
-            },
-            intensity: totalIntensity / 9,
-          });
+    for (let x = 0; x < boardSize; x++) {
+      for (let y = 0; y < boardSize; y++) {
+        const point = this.heatmapData.find(p => p.x === x && p.y === y);
+        if (!point || point.intensity < threshold) {
+          coldSpots.push({ x, y });
         }
       }
     }
@@ -226,441 +59,232 @@ export class HeatmapAnalyzer {
     return coldSpots;
   }
 
-  private identifyPatternZones(): any[] {
-    const patterns = [];
-
-    // Identify line patterns
-    this.identifyLinePatterns().forEach((pattern) => patterns.push(pattern));
-
-    // Identify corner preferences
-    this.identifyCornerPatterns().forEach((pattern) => patterns.push(pattern));
-
-    // Identify center patterns
-    this.identifyCenterPatterns().forEach((pattern) => patterns.push(pattern));
-
-    return patterns;
+  getHeatmapIntensity(x: number, y: number): number {
+    const point = this.heatmapData.find(p => p.x === x && p.y === y);
+    return point ? point.intensity : 0;
   }
 
-  private identifyLinePatterns(): any[] {
-    const patterns = [];
+  generateHeatmapVisualization(): string[][] {
+    const boardSize = 8;
+    const visualization: string[][] = [];
 
-    // Horizontal lines
-    for (let row = 0; row < 8; row++) {
-      let intensity = 0;
-      for (let col = 0; col < 8; col++) {
-        intensity += this.calculateCellIntensity(row, col);
+    for (let y = 0; y < boardSize; y++) {
+      const row: string[] = [];
+      for (let x = 0; x < boardSize; x++) {
+        const intensity = this.getHeatmapIntensity(x, y);
+        if (intensity === 0) row.push('⬜');
+        else if (intensity < 3) row.push('🟦');
+        else if (intensity < 6) row.push('🟨');
+        else if (intensity < 10) row.push('🟧');
+        else row.push('🟥');
       }
-
-      if (intensity > this.maxIntensity * 3) {
-        patterns.push({
-          bounds: { minRow: row, maxRow: row, minCol: 0, maxCol: 7 },
-          intensity: intensity / 8,
-          description: `Preferencia línea horizontal ${row + 1}`,
-        });
-      }
+      visualization.push(row);
     }
 
-    // Vertical lines
-    for (let col = 0; col < 8; col++) {
-      let intensity = 0;
-      for (let row = 0; row < 8; row++) {
-        intensity += this.calculateCellIntensity(row, col);
-      }
-
-      if (intensity > this.maxIntensity * 3) {
-        patterns.push({
-          bounds: { minRow: 0, maxRow: 7, minCol: col, maxCol: col },
-          intensity: intensity / 8,
-          description: `Preferencia línea vertical ${col + 1}`,
-        });
-      }
-    }
-
-    return patterns;
+    return visualization;
   }
 
-  private identifyCornerPatterns(): any[] {
-    const patterns = [];
-    const corners = [
-      {
-        name: "superior-izquierda",
-        bounds: { minRow: 0, maxRow: 2, minCol: 0, maxCol: 2 },
-      },
-      {
-        name: "superior-derecha",
-        bounds: { minRow: 0, maxRow: 2, minCol: 5, maxCol: 7 },
-      },
-      {
-        name: "inferior-izquierda",
-        bounds: { minRow: 5, maxRow: 7, minCol: 0, maxCol: 2 },
-      },
-      {
-        name: "inferior-derecha",
-        bounds: { minRow: 5, maxRow: 7, minCol: 5, maxCol: 7 },
-      },
-    ];
+  reset(): void {
+    this.heatmapData = [];
+  }
 
-    corners.forEach((corner) => {
-      let intensity = 0;
-      let count = 0;
+  getAnalytics() {
+    const totalInteractions = this.heatmapData.reduce((sum, point) => sum + point.intensity, 0);
+    const uniquePositions = this.heatmapData.length;
+    const averageIntensity = totalInteractions / (uniquePositions || 1);
+    
+    return {
+      totalInteractions,
+      uniquePositions,
+      averageIntensity,
+      hotspotCount: this.getHotspots().length,
+      coldspotCount: this.getColdSpots().length,
+      coveragePercentage: (uniquePositions / 64) * 100 // 8x8 board
+    };
+  }
+}
 
-      for (let row = corner.bounds.minRow; row <= corner.bounds.maxRow; row++) {
-        for (
-          let col = corner.bounds.minCol;
-          col <= corner.bounds.maxCol;
-          col++
-        ) {
-          intensity += this.calculateCellIntensity(row, col);
-          count++;
-        }
-      }
+export class MovementPredictor {
+  private movementHistory: MovementPattern[] = [];
+  private maxHistorySize: number = 50;
 
-      if (intensity > this.maxIntensity * 1.5) {
-        patterns.push({
-          bounds: corner.bounds,
-          intensity: intensity / count,
-          description: `Preferencia esquina ${corner.name}`,
-        });
+  recordMovement(sequence: Array<{ x: number; y: number; time: number }>): void {
+    if (sequence.length < 2) return;
+
+    const efficiency = this.calculateEfficiency(sequence);
+    const predictability = this.calculatePredictability(sequence);
+
+    const pattern: MovementPattern = {
+      sequence,
+      efficiency,
+      predictability
+    };
+
+    this.movementHistory.push(pattern);
+
+    if (this.movementHistory.length > this.maxHistorySize) {
+      this.movementHistory.shift();
+    }
+  }
+
+  predictNextMove(currentSequence: Array<{ x: number; y: number; time: number }>): { x: number; y: number; confidence: number } | null {
+    if (currentSequence.length < 2) return null;
+
+    // Buscar patrones similares en el historial
+    const similarPatterns = this.findSimilarPatterns(currentSequence);
+    
+    if (similarPatterns.length === 0) {
+      return this.getRandomPrediction();
+    }
+
+    // Predecir basado en patrones similares
+    const predictions = similarPatterns.map(pattern => {
+      const nextIndex = currentSequence.length;
+      return pattern.sequence[nextIndex] || pattern.sequence[pattern.sequence.length - 1];
+    });
+
+    // Calcular la posición más probable
+    const positionCounts = new Map<string, number>();
+    predictions.forEach(pos => {
+      const key = `${pos.x},${pos.y}`;
+      positionCounts.set(key, (positionCounts.get(key) || 0) + 1);
+    });
+
+    let maxCount = 0;
+    let bestPosition = { x: 0, y: 0 };
+    positionCounts.forEach((count, key) => {
+      if (count > maxCount) {
+        maxCount = count;
+        const [x, y] = key.split(',').map(Number);
+        bestPosition = { x, y };
       }
     });
 
-    return patterns;
+    const confidence = maxCount / predictions.length;
+
+    return {
+      ...bestPosition,
+      confidence
+    };
   }
 
-  private identifyCenterPatterns(): any[] {
-    const patterns = [];
-    let centerIntensity = 0;
+  private calculateEfficiency(sequence: Array<{ x: number; y: number; time: number }>): number {
+    if (sequence.length < 2) return 0;
 
-    // Check center 4x4 area
-    for (let row = 2; row < 6; row++) {
-      for (let col = 2; col < 6; col++) {
-        centerIntensity += this.calculateCellIntensity(row, col);
-      }
+    let totalDistance = 0;
+    let totalTime = 0;
+
+    for (let i = 1; i < sequence.length; i++) {
+      const prev = sequence[i - 1];
+      const curr = sequence[i];
+      
+      const distance = Math.sqrt(Math.pow(curr.x - prev.x, 2) + Math.pow(curr.y - prev.y, 2));
+      const time = curr.time - prev.time;
+      
+      totalDistance += distance;
+      totalTime += time;
     }
 
-    if (centerIntensity > this.maxIntensity * 2) {
-      patterns.push({
-        bounds: { minRow: 2, maxRow: 5, minCol: 2, maxCol: 5 },
-        intensity: centerIntensity / 16,
-        description: "Estrategia centrada",
+    // Eficiencia = distancia / tiempo (más eficiente = menos tiempo por distancia)
+    return totalTime > 0 ? totalDistance / totalTime : 0;
+  }
+
+  private calculatePredictability(sequence: Array<{ x: number; y: number; time: number }>): number {
+    if (sequence.length < 3) return 0;
+
+    let consistentMoves = 0;
+    const directions: Array<{ dx: number; dy: number }> = [];
+
+    for (let i = 1; i < sequence.length; i++) {
+      const prev = sequence[i - 1];
+      const curr = sequence[i];
+      directions.push({
+        dx: curr.x - prev.x,
+        dy: curr.y - prev.y
       });
     }
 
-    return patterns;
+    // Contar movimientos en la misma dirección
+    for (let i = 1; i < directions.length; i++) {
+      const prevDir = directions[i - 1];
+      const currDir = directions[i];
+      
+      if (prevDir.dx === currDir.dx && prevDir.dy === currDir.dy) {
+        consistentMoves++;
+      }
+    }
+
+    return directions.length > 0 ? consistentMoves / directions.length : 0;
   }
 
-  getZones(): HeatmapZone[] {
-    return Array.from(this.zones.values());
+  private findSimilarPatterns(targetSequence: Array<{ x: number; y: number; time: number }>): MovementPattern[] {
+    const threshold = 0.7; // Umbral de similitud
+    
+    return this.movementHistory.filter(pattern => {
+      if (pattern.sequence.length < targetSequence.length) return false;
+      
+      let matchingMoves = 0;
+      const compareLength = Math.min(targetSequence.length, pattern.sequence.length);
+      
+      for (let i = 0; i < compareLength; i++) {
+        const target = targetSequence[i];
+        const pattern_move = pattern.sequence[i];
+        
+        if (target.x === pattern_move.x && target.y === pattern_move.y) {
+          matchingMoves++;
+        }
+      }
+      
+      const similarity = matchingMoves / compareLength;
+      return similarity >= threshold;
+    });
   }
 
-  getZoneAnalysis(): any {
-    const zones = this.getZones();
-
+  private getRandomPrediction(): { x: number; y: number; confidence: number } {
     return {
-      totalZones: zones.length,
-      hotZones: zones.filter((z) => z.type === "hot").length,
-      coldZones: zones.filter((z) => z.type === "cold").length,
-      patternZones: zones.filter((z) => z.type === "pattern").length,
-      averageIntensity:
-        zones.reduce((sum, z) => sum + z.intensity, 0) / zones.length || 0,
-      maxZoneIntensity: Math.max(...zones.map((z) => z.intensity), 0),
-      coverage: this.calculateBoardCoverage(),
+      x: Math.floor(Math.random() * 8),
+      y: Math.floor(Math.random() * 8),
+      confidence: 0.1 // Baja confianza para predicciones aleatorias
     };
   }
 
-  private calculateBoardCoverage(): number {
-    let coveredCells = 0;
-
-    for (let row = 0; row < 8; row++) {
-      for (let col = 0; col < 8; col++) {
-        if (this.calculateCellIntensity(row, col) > 0.1) {
-          coveredCells++;
-        }
-      }
+  getMovementAnalytics() {
+    if (this.movementHistory.length === 0) {
+      return {
+        averageEfficiency: 0,
+        averagePredictability: 0,
+        totalPatterns: 0,
+        mostEfficientPattern: null,
+        mostPredictablePattern: null
+      };
     }
 
-    return coveredCells / 64; // Percentage of board covered
-  }
+    const efficiencies = this.movementHistory.map(p => p.efficiency);
+    const predictabilities = this.movementHistory.map(p => p.predictability);
 
-  generateInsights(): string[] {
-    const insights = [];
-    const analysis = this.getZoneAnalysis();
+    const averageEfficiency = efficiencies.reduce((sum, eff) => sum + eff, 0) / efficiencies.length;
+    const averagePredictability = predictabilities.reduce((sum, pred) => sum + pred, 0) / predictabilities.length;
 
-    if (analysis.hotZones > 3) {
-      insights.push(
-        "Tienes múltiples zonas preferidas - estrategia diversificada",
-      );
-    } else if (analysis.hotZones === 1) {
-      insights.push("Te concentras en una zona específica - patrón predecible");
-    }
+    const mostEfficientPattern = this.movementHistory.reduce((best, current) => 
+      current.efficiency > best.efficiency ? current : best
+    );
 
-    if (analysis.coldZones > 2) {
-      insights.push("Evitas ciertas áreas del tablero - considera explorarlas");
-    }
+    const mostPredictablePattern = this.movementHistory.reduce((best, current) =>
+      current.predictability > best.predictability ? current : best
+    );
 
-    if (analysis.coverage < 0.5) {
-      insights.push("Usas menos del 50% del tablero - expande tu territorio");
-    } else if (analysis.coverage > 0.8) {
-      insights.push("Excelente cobertura del tablero - estrategia balanceada");
-    }
-
-    if (analysis.patternZones > 0) {
-      insights.push(
-        `Detectados ${analysis.patternZones} patrones estratégicos claros`,
-      );
-    }
-
-    return insights;
-  }
-
-  exportHeatmapData(): any {
     return {
-      rawData: this.heatmapData.slice(-100), // Last 100 points
-      zones: Array.from(this.zones.values()),
-      analysis: this.getZoneAnalysis(),
-      insights: this.generateInsights(),
-      timestamp: Date.now(),
+      averageEfficiency,
+      averagePredictability,
+      totalPatterns: this.movementHistory.length,
+      mostEfficientPattern,
+      mostPredictablePattern
     };
   }
 
-  clearData(): void {
-    this.heatmapData = [];
-    this.zones.clear();
-    this.maxIntensity = 0;
+  reset(): void {
+    this.movementHistory = [];
   }
 }
 
-// Movement Predictor System
-export class MovementPredictor {
-  private predictionModel: Map<string, number> = new Map();
-  private lastPredictions: Array<{
-    position: [number, number];
-    confidence: number;
-  }> = [];
-
-  updatePredictions(
-    gameState: any,
-    playerPatterns: any[],
-    aiAnalysis: any,
-  ): Map<string, number> {
-    this.predictionModel.clear();
-
-    // Get empty cells
-    const emptyCells = this.getEmptyCells(gameState.board);
-
-    emptyCells.forEach(([row, col]) => {
-      const probability = this.calculateMoveProbability(
-        [row, col],
-        gameState,
-        playerPatterns,
-        aiAnalysis,
-      );
-
-      this.predictionModel.set(`${row},${col}`, probability);
-    });
-
-    return new Map(this.predictionModel);
-  }
-
-  private calculateMoveProbability(
-    position: [number, number],
-    gameState: any,
-    patterns: any[],
-    aiAnalysis: any,
-  ): number {
-    let probability = 0;
-
-    // Factor 1: Pattern continuation
-    probability += this.calculatePatternProbability(position, patterns) * 0.4;
-
-    // Factor 2: Strategic value
-    probability += this.calculateStrategicValue(position, gameState) * 0.3;
-
-    // Factor 3: Emotional state influence
-    probability += this.calculateEmotionalInfluence(position, patterns) * 0.2;
-
-    // Factor 4: Distance from last move
-    probability += this.calculateDistanceInfluence(position, patterns) * 0.1;
-
-    return Math.min(1, Math.max(0, probability));
-  }
-
-  private calculatePatternProbability(
-    position: [number, number],
-    patterns: any[],
-  ): number {
-    if (patterns.length < 3) return 0.5;
-
-    const recentMoves = patterns.slice(-5).map((p) => p.position);
-    const [targetRow, targetCol] = position;
-
-    // Calculate movement vectors
-    const vectors = [];
-    for (let i = 1; i < recentMoves.length; i++) {
-      const prev = recentMoves[i - 1];
-      const curr = recentMoves[i];
-      vectors.push([curr[0] - prev[0], curr[1] - prev[1]]);
-    }
-
-    if (vectors.length === 0) return 0.5;
-
-    // Average vector
-    const avgVector = vectors
-      .reduce((acc, vec) => [acc[0] + vec[0], acc[1] + vec[1]], [0, 0])
-      .map((sum) => sum / vectors.length);
-
-    // Predict next position based on pattern
-    const lastMove = recentMoves[recentMoves.length - 1];
-    const predictedRow = lastMove[0] + avgVector[0];
-    const predictedCol = lastMove[1] + avgVector[1];
-
-    // Calculate distance from prediction
-    const distance = Math.sqrt(
-      Math.pow(targetRow - predictedRow, 2) +
-        Math.pow(targetCol - predictedCol, 2),
-    );
-
-    return Math.exp(-distance / 2); // Closer to prediction = higher probability
-  }
-
-  private calculateStrategicValue(
-    position: [number, number],
-    gameState: any,
-  ): number {
-    const [row, col] = position;
-    let value = 0;
-
-    // Corner bonus
-    if ((row === 0 || row === 7) && (col === 0 || col === 7)) {
-      value += 0.3;
-    }
-
-    // Edge bonus
-    if (row === 0 || row === 7 || col === 0 || col === 7) {
-      value += 0.1;
-    }
-
-    // Center bonus
-    if (row >= 3 && row <= 4 && col >= 3 && col <= 4) {
-      value += 0.2;
-    }
-
-    // Adjacent to own pieces bonus
-    const directions = [
-      [-1, -1],
-      [-1, 0],
-      [-1, 1],
-      [0, -1],
-      [0, 1],
-      [1, -1],
-      [1, 0],
-      [1, 1],
-    ];
-    let adjacentOwn = 0;
-
-    directions.forEach(([dRow, dCol]) => {
-      const newRow = row + dRow;
-      const newCol = col + dCol;
-
-      if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-        if (gameState.board[newRow][newCol].owner === "player") {
-          adjacentOwn++;
-        }
-      }
-    });
-
-    value += (adjacentOwn / 8) * 0.2;
-
-    return value;
-  }
-
-  private calculateEmotionalInfluence(
-    position: [number, number],
-    patterns: any[],
-  ): number {
-    if (patterns.length === 0) return 0.5;
-
-    const lastPattern = patterns[patterns.length - 1];
-    const [row, col] = position;
-
-    switch (lastPattern.emotionalState) {
-      case "frustrated":
-        // More likely to make random moves
-        return 0.3 + Math.random() * 0.4;
-
-      case "confident":
-        // More likely to make bold moves (corners, edges)
-        return row === 0 || row === 7 || col === 0 || col === 7 ? 0.8 : 0.3;
-
-      case "rushed":
-        // More likely to choose nearby positions
-        const lastPos = lastPattern.position;
-        const distance =
-          Math.abs(row - lastPos[0]) + Math.abs(col - lastPos[1]);
-        return Math.max(0, 1 - distance / 4);
-
-      default:
-        return 0.5;
-    }
-  }
-
-  private calculateDistanceInfluence(
-    position: [number, number],
-    patterns: any[],
-  ): number {
-    if (patterns.length === 0) return 0.5;
-
-    const lastMove = patterns[patterns.length - 1].position;
-    const [row, col] = position;
-    const distance = Math.abs(row - lastMove[0]) + Math.abs(col - lastMove[1]);
-
-    // Moderate distance is most likely (not too close, not too far)
-    if (distance >= 2 && distance <= 4) {
-      return 0.8;
-    } else if (distance === 1) {
-      return 0.6;
-    } else {
-      return 0.3;
-    }
-  }
-
-  private getEmptyCells(board: any[][]): [number, number][] {
-    const empty: [number, number][] = [];
-    for (let i = 0; i < board.length; i++) {
-      for (let j = 0; j < board[i].length; j++) {
-        if (board[i][j].type === "empty") {
-          empty.push([i, j]);
-        }
-      }
-    }
-    return empty;
-  }
-
-  getTopPredictions(
-    count: number = 5,
-  ): Array<{ position: [number, number]; confidence: number }> {
-    const predictions = Array.from(this.predictionModel.entries())
-      .map(([key, value]) => {
-        const [row, col] = key.split(",").map(Number);
-        return { position: [row, col] as [number, number], confidence: value };
-      })
-      .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, count);
-
-    this.lastPredictions = predictions;
-    return predictions;
-  }
-
-  validatePrediction(actualMove: [number, number]): number {
-    const prediction = this.lastPredictions.find(
-      (p) => p.position[0] === actualMove[0] && p.position[1] === actualMove[1],
-    );
-
-    return prediction ? prediction.confidence : 0;
-  }
-
-  getPredictionAccuracy(): number {
-    // This would be calculated based on historical validation
-    return Math.random() * 0.5 + 0.4; // Simulated for now
-  }
-}
+export default { HeatmapAnalyzer, MovementPredictor };
