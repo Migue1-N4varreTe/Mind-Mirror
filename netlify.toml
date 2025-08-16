@@ -1,10 +1,177 @@
-[build]
-  command = "npm run build"
-  publish = "dist"
+# ===================================================================
+# MIND MIRROR - CONFIGURACIÓN DE NETLIFY
+# ===================================================================
+# Configuración para despliegue en Netlify
+# ===================================================================
 
-[build.environment]
-  NODE_VERSION = "18"
+[build]
+  # Comando de build
+  command = "npm run build"
+  
+  # Directorio de salida
+  publish = "dist/spa"
+  
+  # Variables de entorno para el build
+  [build.environment]
+    NODE_VERSION = "18"
+    NPM_VERSION = "9"
+
+# ===================================================================
+# FUNCIONES SERVERLESS DE NETLIFY
+# ===================================================================
+
+[functions]
+  # Directorio de funciones
+  directory = "netlify/functions"
+  
+  # Runtime de Node.js
+  node_bundler = "esbuild"
+
+# ===================================================================
+# REDIRECTS Y REWRITES
+# ===================================================================
+
+# SPA routing - todas las rutas van al index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  conditions = {Role = ["admin", "editor"], Country = ["US"]}
+
+# API proxy - redirigir llamadas API a las funciones serverless
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# ===================================================================
+# HEADERS DE SEGURIDAD
+# ===================================================================
+
+[[headers]]
+  for = "/*"
+  
+  [headers.values]
+    # CORS Headers
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    
+    # Security Headers
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Cache Control for static assets
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/api/*"
+  
+  [headers.values]
+    # API specific headers
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
+[[headers]]
+  for = "*.html"
+  
+  [headers.values]
+    # HTML specific headers
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ===================================================================
+# CONFIGURACIÓN DE DESARROLLO
+# ===================================================================
+
+[dev]
+  # Comando para desarrollo local
+  command = "npm run dev"
+  
+  # Puerto para desarrollo
+  port = 8080
+  
+  # Configuración del proxy para desarrollo
+  [dev.proxy]
+    "/api/*" = "http://localhost:8080"
+
+# ===================================================================
+# CONFIGURACIÓN DE CONTEXTO
+# ===================================================================
+
+# Producción
+[context.production]
+  [context.production.environment]
+    NODE_ENV = "production"
+    VITE_API_URL = "/.netlify/functions"
+
+# Preview/Deploy previews
+[context.deploy-preview]
+  [context.deploy-preview.environment]
+    NODE_ENV = "preview"
+    VITE_API_URL = "/.netlify/functions"
+
+# Branch deploys
+[context.branch-deploy]
+  [context.branch-deploy.environment]
+    NODE_ENV = "development"
+    VITE_API_URL = "/.netlify/functions"
+
+# ===================================================================
+# CONFIGURACIÓN DE FORMULARIOS
+# ===================================================================
+
+# Si necesitas formularios de contacto (opcional)
+# [forms]
+#   settings = true
+
+# ===================================================================
+# CONFIGURACIÓN DE EDGE FUNCTIONS (OPCIONAL)
+# ===================================================================
+
+# Si quieres usar Netlify Edge Functions para mejor rendimiento
+# [edge_functions]
+#   [[edge_functions.function]]
+#     function = "analytics"
+#     path = "/api/analytics/*"
+
+# ===================================================================
+# CONFIGURACIÓN DE SPLIT TESTING (OPCIONAL)
+# ===================================================================
+
+# Para A/B testing de características del juego
+# [[splits]]
+#   id = "ai-difficulty"
+#   [[splits.branches]]
+#     name = "easy"
+#     percentage = 50
+#   [[splits.branches]]
+#     name = "hard"
+#     percentage = 50
+
+# ===================================================================
+# PLUGINS DE NETLIFY
+# ===================================================================
+
+[[plugins]]
+  package = "@netlify/plugin-sitemap"
+  
+  [plugins.inputs]
+    buildDir = "dist/spa"
+    exclude = [
+      "/api/*",
+      "/admin/*"
+    ]
+
+# Plugin para optimización de imágenes (opcional)
+# [[plugins]]
+#   package = "netlify-plugin-image-optim"
+
+# Plugin para análisis de bundle (desarrollo)
+# [[plugins]]
+#   package = "netlify-plugin-webpack-bundle-analyzer"
+#   
+#   [plugins.inputs]
+#     enabled = false  # Solo activar en desarrollo
