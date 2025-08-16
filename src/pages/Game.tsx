@@ -32,7 +32,9 @@ import type { Player, GameConfiguration, GAME_CONFIG_DEFAULTS } from '@shared/ga
 
 export default function Game() {
   const [user, loading] = useAuthState(auth);
-  const { currentGame, startGame, endGame, showHeatmap, showPredictions, mentorMode, toggleHeatmap, togglePredictions, toggleMentorMode } = useGameStore();
+  const { showHeatmap, showPredictions, mentorMode, toggleHeatmap, togglePredictions, toggleMentorMode } = useGameStore();
+  const { isConnected, isChecking, checkConnection } = useAPIConnection();
+
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeTab, setActiveTab] = useState('play');
   const [gameEndData, setGameEndData] = useState<GameEndData | null>(null);
@@ -40,22 +42,89 @@ export default function Game() {
   const [showGameEndModal, setShowGameEndModal] = useState(false);
   const [achievementSystem] = useState(new AchievementSystem());
 
-  const handleGameStart = () => {
+  // New state for enhanced game management
+  const [currentSession, setCurrentSession] = useState<GameSession | null>(null);
+  const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
+  const [gameConfiguration, setGameConfiguration] = useState<GameConfiguration>(GAME_CONFIG_DEFAULTS);
+  const [isStartingGame, setIsStartingGame] = useState(false);
+
+  // Check connection status on mount
+  useEffect(() => {
+    checkConnection();
+  }, []);
+
+  // Initialize player when user changes
+  useEffect(() => {
+    if (user && !currentPlayer) {
+      initializePlayer();
+    } else if (!user) {
+      setCurrentPlayer(null);
+      setCurrentSession(null);
+    }
+  }, [user, currentPlayer]);
+
+  const initializePlayer = async () => {
+    if (!user) return;
+
+    try {
+      const player = await enhancedGameService.createOrGetPlayer({
+        nombre: user.displayName || 'Jugador',
+        email: user.email || undefined,
+        userId: user.uid
+      });
+      setCurrentPlayer(player);
+    } catch (error) {
+      console.error('Error initializing player:', error);
+    }
+  };
+
+  const handleGameStart = async () => {
     if (!user) {
       setShowAuthModal(true);
       return;
     }
-    startGame();
-    setActiveTab('play');
+
+    if (!currentPlayer) {
+      await initializePlayer();
+      return;
+    }
+
+    setIsStartingGame(true);
+    try {
+      const session = await enhancedGameService.startNewGame(currentPlayer, gameConfiguration);
+      setCurrentSession(session);
+      setActiveTab('play');
+    } catch (error) {
+      console.error('Error starting game:', error);
+      // TODO: Show error message to user
+    } finally {
+      setIsStartingGame(false);
+    }
   };
 
-  const handleGameEnd = (gameData: any) => {
-    const achievements = achievementSystem.checkAchievements(gameData);
-    setGameEndData(gameData);
-    setNewAchievements(achievements);
-    setShowGameEndModal(false);
-    endGame();
-    setTimeout(() => setShowGameEndModal(true), 500);
+  const handleGameEnd = async (gameData: any) => {
+    try {
+      // End game through enhanced service
+      const result = await enhancedGameService.endGame(gameData.winner, gameData.reason);
+
+      if (result.success) {
+        setGameEndData({
+          ...gameData,
+          analytics: result.analytics
+        });
+        setNewAchievements(result.achievements || []);
+        setCurrentSession(null);
+        setShowGameEndModal(true);
+      }
+    } catch (error) {
+      console.error('Error ending game:', error);
+      // Fallback to local handling
+      const achievements = achievementSystem.checkAchievements(gameData);
+      setGameEndData(gameData);
+      setNewAchievements(achievements);
+      setCurrentSession(null);
+      setShowGameEndModal(true);
+    }
   };
 
   const playAgain = () => {
