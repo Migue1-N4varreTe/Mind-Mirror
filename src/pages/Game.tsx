@@ -191,8 +191,12 @@ export default function Game() {
           </TabsList>
 
           <TabsContent value="play" className="space-y-6">
-            {currentGame?.isActive ? (
-              <EnhancedGameBoard onGameEnd={handleGameEnd} />
+            {currentSession?.isActive ? (
+              <EnhancedGameBoard
+                onGameEnd={handleGameEnd}
+                gameSession={currentSession}
+                gameService={enhancedGameService}
+              />
             ) : (
               <div className="text-center py-20">
                 <motion.div
@@ -205,13 +209,21 @@ export default function Game() {
                   <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                     Enfréntate a una IA que aprende de cada movimiento que haces
                   </p>
-                  <Button 
-                    size="lg" 
+                  {!isConnected && (
+                    <div className="bg-orange-400/10 border border-orange-400/20 rounded-lg p-4 mb-6 max-w-md mx-auto">
+                      <p className="text-orange-400 text-sm">
+                        Modo offline: Las partidas se guardarán localmente y se sincronizarán cuando te conectes
+                      </p>
+                    </div>
+                  )}
+                  <Button
+                    size="lg"
                     onClick={handleGameStart}
+                    disabled={isStartingGame || loading}
                     className="bg-neon-cyan text-background hover:bg-neon-cyan/90 glow"
                   >
                     <Play className="w-5 h-5 mr-2" />
-                    Iniciar Partida
+                    {isStartingGame ? 'Iniciando...' : 'Iniciar Partida'}
                   </Button>
                 </motion.div>
               </div>
