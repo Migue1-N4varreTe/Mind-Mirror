@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { reflection } from "../../../ai";
-import { Button } from "../ui/button";
-import { Textarea } from "../ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Sparkles } from "lucide-react";
 
 interface ReflectionResult {
