@@ -156,12 +156,21 @@ export default function Game() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Connection Status */}
+            <Badge
+              variant="outline"
+              className={isConnected ? "text-neon-green border-neon-green" : "text-orange-400 border-orange-400"}
+            >
+              {isConnected ? <Wifi className="w-3 h-3 mr-1" /> : <WifiOff className="w-3 h-3 mr-1" />}
+              {isChecking ? 'Conectando...' : isConnected ? 'Online' : 'Offline'}
+            </Badge>
+
             {user ? (
               <Badge variant="outline" className="text-neon-cyan border-neon-cyan">
                 {user.displayName || 'Jugador'}
               </Badge>
             ) : (
-              <Button 
+              <Button
                 onClick={() => setShowAuthModal(true)}
                 variant="outline"
                 size="sm"
