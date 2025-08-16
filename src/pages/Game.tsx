@@ -5,17 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  ArrowLeft, 
-  Brain, 
-  Eye, 
-  Gamepad2, 
-  Settings, 
+import {
+  ArrowLeft,
+  Brain,
+  Eye,
+  Gamepad2,
+  Settings,
   BarChart3,
   Users,
   Sparkles,
   Play,
-  User
+  User,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../config/firebase';
@@ -23,7 +25,10 @@ import { useGameStore } from '../store/gameStore';
 import EnhancedGameBoard from '../components/game/EnhancedGameBoard';
 import GameEndModal from '@/components/GameEndModal';
 import AuthModal from '../components/auth/AuthModal';
+import { enhancedGameService, type GameSession } from '../services/enhancedGameService';
+import { useAPIConnection } from '../services/apiClient';
 import { AchievementSystem, type Achievement, type GameEndData } from '@/lib/achievementSystem';
+import type { Player, GameConfiguration, GAME_CONFIG_DEFAULTS } from '@shared/game-api';
 
 export default function Game() {
   const [user, loading] = useAuthState(auth);
