@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { narrative } from "../../../ai";
+import { narrative, emotionalSymbols, elementalColors } from "@/lib/aiMock";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, BookOpen, Star } from "lucide-react";
-import { emotionalSymbols, elementalColors } from "../../../ai";
 
 interface SummaryResult {
   summary: string;
