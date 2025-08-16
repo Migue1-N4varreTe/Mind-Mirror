@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { 
-  Sparkles, 
-  Heart, 
-  Target, 
-  MessageCircle, 
+import {
+  Sparkles,
+  Heart,
+  Target,
+  MessageCircle,
   BookOpen,
   Eye,
   Hammer,
-  Crystal
+  Gem
 } from "lucide-react";
 
 import ReflectionCard from "../components/mindmirror/ReflectionCard";
@@ -62,7 +62,7 @@ export default function MindMirror() {
                     <span>Preguntas introspectivas</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
-                    <Crystal className="w-4 h-4 text-neon-cyan" />
+                    <Gem className="w-4 h-4 text-neon-cyan" />
                     <span>Feedback poético</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
@@ -112,7 +112,7 @@ export default function MindMirror() {
             >
               <CardHeader className="text-center pb-4">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-neon-purple to-neon-pink flex items-center justify-center">
-                  <Crystal className="w-8 h-8 text-white" />
+                  <Gem className="w-8 h-8 text-white" />
                 </div>
                 <CardTitle className="text-2xl">🔮 Visionario Místico</CardTitle>
               </CardHeader>
@@ -122,7 +122,7 @@ export default function MindMirror() {
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-center gap-2">
-                    <Crystal className="w-4 h-4 text-neon-purple" />
+                    <Gem className="w-4 h-4 text-neon-purple" />
                     <span>Arquetipos místicos</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
