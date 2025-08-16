@@ -2,25 +2,25 @@
  * ===================================================================
  * MIND MIRROR - MÓDULO DE APRENDIZAJE DE IA
  * ===================================================================
- * 
+ *
  * PROPÓSITO:
  * - Implementar aprendizaje adaptativo real de la IA
  * - Mantener memoria persistente entre sesiones
  * - Ajustar dificultad progresivamente según el rendimiento del jugador
  * - Evolucionar estrategias basadas en patrones de éxito/fracaso
- * 
+ *
  * ENTRADAS:
  * - Resultados de partidas anteriores
  * - Análisis de efectividad de estrategias
  * - Feedback del sistema de progreso del jugador
  * - Patrones detectados por el PatternAnalyzer
- * 
+ *
  * SALIDAS:
  * - Parámetros de configuración actualizados para la IA
  * - Nuevas estrategias aprendidas
  * - Ajustes de dificultad automáticos
  * - Métricas de aprendizaje para análisis
- * 
+ *
  * OPTIMIZACIONES:
  * - Algoritmos de aprendizaje incremental para tiempo real
  * - Compresión inteligente de datos históricos
@@ -29,7 +29,7 @@
  * ===================================================================
  */
 
-import { PlayerProfile } from './AIEngine';
+import { PlayerProfile } from "./AIEngine";
 
 export interface LearningData {
   strategyId: string;
@@ -41,7 +41,7 @@ export interface LearningData {
 }
 
 export interface GameLearningContext {
-  gamePhase: 'early' | 'mid' | 'late';
+  gamePhase: "early" | "mid" | "late";
   playerStyle: string;
   difficultyLevel: number;
   boardState: string; // Representación compacta del estado
@@ -52,7 +52,7 @@ export interface GameLearningContext {
 export interface StrategyOutcome {
   success: boolean;
   scoreGained: number;
-  playerResponse: 'blocked' | 'adapted' | 'frustrated' | 'impressed';
+  playerResponse: "blocked" | "adapted" | "frustrated" | "impressed";
   strategicValue: number;
   unexpectedResult: boolean;
 }
@@ -69,13 +69,21 @@ export interface AdaptationRule {
 }
 
 export interface LearningTrigger {
-  type: 'pattern_detected' | 'player_improvement' | 'strategy_ineffective' | 'time_based';
+  type:
+    | "pattern_detected"
+    | "player_improvement"
+    | "strategy_ineffective"
+    | "time_based";
   condition: any;
   threshold: number;
 }
 
 export interface AdaptationAction {
-  type: 'adjust_difficulty' | 'change_strategy' | 'modify_weights' | 'introduce_variation';
+  type:
+    | "adjust_difficulty"
+    | "change_strategy"
+    | "modify_weights"
+    | "introduce_variation";
   parameters: any;
   magnitude: number;
 }
@@ -102,13 +110,13 @@ export class LearningModule {
   private strategyEffectiveness = new Map<string, number[]>();
   private difficultyAdjustments = new Map<string, number[]>(); // por jugador
   private learningMetrics: LearningMetrics;
-  
+
   // Configuración del aprendizaje
   private readonly MAX_LEARNING_DATA = 10000;
   private readonly ADAPTATION_THRESHOLD = 0.3;
   private readonly LEARNING_RATE = 0.1;
   private readonly EXPLORATION_RATE = 0.2; // Balance exploración vs explotación
-  
+
   // Cache y optimización
   private strategyCache = new Map<string, any>();
   private recentAnalysis = new Map<string, Date>();
@@ -128,7 +136,7 @@ export class LearningModule {
     strategyUsed: string,
     context: GameLearningContext,
     outcome: StrategyOutcome,
-    playerProfile: Partial<PlayerProfile>
+    playerProfile: Partial<PlayerProfile>,
   ): void {
     const learningData: LearningData = {
       strategyId: strategyUsed,
@@ -136,11 +144,11 @@ export class LearningModule {
       outcome,
       effectiveness: this.calculateEffectiveness(outcome),
       timestamp: new Date(),
-      playerProfile
+      playerProfile,
     };
 
     this.learningData.push(learningData);
-    
+
     // Limitar tamaño de datos para optimización
     if (this.learningData.length > this.MAX_LEARNING_DATA) {
       this.compressOldData();
@@ -148,10 +156,10 @@ export class LearningModule {
 
     // Actualizar efectividad de estrategia
     this.updateStrategyEffectiveness(strategyUsed, learningData.effectiveness);
-    
+
     // Triggear análisis de adaptación
     this.triggerAdaptationAnalysis(learningData);
-    
+
     // Actualizar métricas
     this.updateLearningMetrics();
   }
@@ -162,7 +170,10 @@ export class LearningModule {
    * ===================================================================
    */
 
-  public analyzeAndAdapt(playerId: string, recentGames: any[]): {
+  public analyzeAndAdapt(
+    playerId: string,
+    recentGames: any[],
+  ): {
     adaptationsMade: AdaptationAction[];
     difficultyAdjustment: number;
     newStrategies: string[];
@@ -175,22 +186,22 @@ export class LearningModule {
 
     // Analizar tendencias recientes del jugador
     const playerTrends = this.analyzePlayerTrends(playerId, recentGames);
-    
+
     // Evaluar cada regla de adaptación
     for (const rule of this.adaptationRules.values()) {
       if (this.shouldTriggerRule(rule, playerTrends)) {
         const adaptation = this.executeAdaptation(rule, playerTrends);
         adaptations.push(adaptation.action);
         reasoning.push(adaptation.reasoning);
-        
-        if (adaptation.action.type === 'adjust_difficulty') {
+
+        if (adaptation.action.type === "adjust_difficulty") {
           difficultyAdjustment += adaptation.action.parameters.adjustment;
         }
-        
-        if (adaptation.action.type === 'change_strategy') {
+
+        if (adaptation.action.type === "change_strategy") {
           newStrategies.push(adaptation.action.parameters.strategyId);
         }
-        
+
         // Actualizar regla
         rule.timesUsed++;
         rule.lastApplied = new Date();
@@ -201,14 +212,14 @@ export class LearningModule {
     if (this.shouldExploreNewStrategies(playerTrends)) {
       const exploredStrategies = this.exploreNewStrategies(playerTrends);
       newStrategies.push(...exploredStrategies);
-      reasoning.push('Explorando nuevas estrategias para mantener el desafío');
+      reasoning.push("Explorando nuevas estrategias para mantener el desafío");
     }
 
     return {
       adaptationsMade: adaptations,
       difficultyAdjustment,
       newStrategies,
-      reasoning
+      reasoning,
     };
   }
 
@@ -219,48 +230,55 @@ export class LearningModule {
    */
 
   public calculateOptimalDifficulty(
-    playerId: string, 
+    playerId: string,
     currentDifficulty: number,
-    recentPerformance: number[]
+    recentPerformance: number[],
   ): {
     newDifficulty: number;
     confidence: number;
     reasoning: string;
   } {
     const playerHistory = this.difficultyAdjustments.get(playerId) || [];
-    
+
     // Analizar tendencias de rendimiento
     const performanceTrend = this.calculatePerformanceTrend(recentPerformance);
-    const optimalChallengeZone = this.findOptimalChallengeZone(playerHistory, recentPerformance);
-    
+    const optimalChallengeZone = this.findOptimalChallengeZone(
+      playerHistory,
+      recentPerformance,
+    );
+
     let newDifficulty = currentDifficulty;
-    let reasoning = '';
-    
+    let reasoning = "";
+
     // Lógica de ajuste basada en rendimiento
     if (performanceTrend > 0.7) {
       // Jugador mejorando consistentemente - aumentar dificultad
       newDifficulty = Math.min(1.0, currentDifficulty + 0.1);
-      reasoning = 'Rendimiento mejorado detectado - incrementando desafío';
+      reasoning = "Rendimiento mejorado detectado - incrementando desafío";
     } else if (performanceTrend < 0.3) {
       // Jugador struggling - reducir dificultad
       newDifficulty = Math.max(0.1, currentDifficulty - 0.1);
-      reasoning = 'Dificultad excesiva detectada - ajustando para mejor experiencia';
+      reasoning =
+        "Dificultad excesiva detectada - ajustando para mejor experiencia";
     } else if (this.isInComfortZone(recentPerformance)) {
       // En zona de confort - ligero aumento para mantener crecimiento
       newDifficulty = Math.min(1.0, currentDifficulty + 0.05);
-      reasoning = 'Zona de confort detectada - introduciendo variación gradual';
+      reasoning = "Zona de confort detectada - introduciendo variación gradual";
     }
 
     // Suavizar cambios drásticos
     const maxChange = 0.15;
     newDifficulty = Math.max(
       currentDifficulty - maxChange,
-      Math.min(currentDifficulty + maxChange, newDifficulty)
+      Math.min(currentDifficulty + maxChange, newDifficulty),
     );
 
     // Calcular confianza en el ajuste
-    const confidence = this.calculateAdjustmentConfidence(playerHistory, recentPerformance);
-    
+    const confidence = this.calculateAdjustmentConfidence(
+      playerHistory,
+      recentPerformance,
+    );
+
     // Registrar el ajuste
     playerHistory.push(newDifficulty);
     this.difficultyAdjustments.set(playerId, playerHistory);
@@ -268,7 +286,7 @@ export class LearningModule {
     return {
       newDifficulty,
       confidence,
-      reasoning
+      reasoning,
     };
   }
 
@@ -281,17 +299,20 @@ export class LearningModule {
   public learnFromPlayerBehavior(
     playerId: string,
     playerMoves: any[],
-    gameContext: any
+    gameContext: any,
   ): string[] {
     const learnedStrategies: string[] = [];
-    
+
     // Analizar patrones únicos del jugador
     const uniquePatterns = this.identifyUniquePatterns(playerMoves);
-    
+
     // Crear contrastrategias para patrones efectivos
     for (const pattern of uniquePatterns) {
       if (pattern.effectiveness > 0.7) {
-        const counterStrategy = this.createCounterStrategy(pattern, gameContext);
+        const counterStrategy = this.createCounterStrategy(
+          pattern,
+          gameContext,
+        );
         if (counterStrategy) {
           learnedStrategies.push(counterStrategy.id);
           this.addNewStrategy(counterStrategy);
@@ -321,37 +342,41 @@ export class LearningModule {
   public predictPlayerResponse(
     plannedStrategy: string,
     playerProfile: PlayerProfile,
-    gameContext: any
+    gameContext: any,
   ): {
     likelyResponse: string;
     confidence: number;
     alternativeResponses: string[];
-    recommendation: 'proceed' | 'modify' | 'abort';
+    recommendation: "proceed" | "modify" | "abort";
   } {
     // Buscar situaciones similares en datos históricos
-    const similarSituations = this.findSimilarSituations(plannedStrategy, playerProfile, gameContext);
-    
+    const similarSituations = this.findSimilarSituations(
+      plannedStrategy,
+      playerProfile,
+      gameContext,
+    );
+
     // Analizar respuestas históricas
     const responseAnalysis = this.analyzeHistoricalResponses(similarSituations);
-    
+
     // Predecir respuesta más probable
     const likelyResponse = responseAnalysis.mostCommon;
     const confidence = responseAnalysis.confidence;
-    
+
     // Generar recomendación
-    let recommendation: 'proceed' | 'modify' | 'abort' = 'proceed';
-    
+    let recommendation: "proceed" | "modify" | "abort" = "proceed";
+
     if (confidence < 0.4) {
-      recommendation = 'abort'; // Muy incierto
+      recommendation = "abort"; // Muy incierto
     } else if (responseAnalysis.negativeOutcomeProbability > 0.6) {
-      recommendation = 'modify'; // Probable resultado negativo
+      recommendation = "modify"; // Probable resultado negativo
     }
 
     return {
       likelyResponse,
       confidence,
       alternativeResponses: responseAnalysis.alternatives,
-      recommendation
+      recommendation,
     };
   }
 
@@ -365,10 +390,14 @@ export class LearningModule {
     // Agrupar datos antiguos por estrategia y contexto similar
     const compressionMap = new Map<string, LearningData[]>();
     const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 días
-    
-    const oldData = this.learningData.filter(data => data.timestamp < cutoffDate);
-    const recentData = this.learningData.filter(data => data.timestamp >= cutoffDate);
-    
+
+    const oldData = this.learningData.filter(
+      (data) => data.timestamp < cutoffDate,
+    );
+    const recentData = this.learningData.filter(
+      (data) => data.timestamp >= cutoffDate,
+    );
+
     // Agrupar datos antiguos
     for (const data of oldData) {
       const key = `${data.strategyId}_${data.context.gamePhase}_${data.context.playerStyle}`;
@@ -420,14 +449,14 @@ export class LearningModule {
       strategyEffectiveness: Array.from(this.strategyEffectiveness.entries()),
       difficultyAdjustments: Array.from(this.difficultyAdjustments.entries()),
       learningMetrics: this.learningMetrics,
-      exportDate: new Date().toISOString()
+      exportDate: new Date().toISOString(),
     });
   }
 
   public importMetrics(data: string): boolean {
     try {
       const parsed = JSON.parse(data);
-      
+
       if (parsed.learningData) {
         this.learningData = parsed.learningData;
       }
@@ -446,7 +475,7 @@ export class LearningModule {
 
       return true;
     } catch (error) {
-      console.error('Failed to import learning metrics:', error);
+      console.error("Failed to import learning metrics:", error);
       return false;
     }
   }
@@ -466,49 +495,49 @@ export class LearningModule {
       learningVelocity: 0.1,
       memoryEfficiency: 0.8,
       predictionAccuracy: 0.6,
-      playerSatisfactionTrend: 0.7
+      playerSatisfactionTrend: 0.7,
     };
   }
 
   private initializeBaseAdaptationRules(): void {
     // Regla: Ajustar dificultad por rendimiento
-    this.adaptationRules.set('difficulty_by_performance', {
-      id: 'difficulty_by_performance',
-      name: 'Ajuste de Dificultad por Rendimiento',
+    this.adaptationRules.set("difficulty_by_performance", {
+      id: "difficulty_by_performance",
+      name: "Ajuste de Dificultad por Rendimiento",
       trigger: {
-        type: 'pattern_detected',
-        condition: 'consistent_performance_change',
-        threshold: 0.2
+        type: "pattern_detected",
+        condition: "consistent_performance_change",
+        threshold: 0.2,
       },
       action: {
-        type: 'adjust_difficulty',
+        type: "adjust_difficulty",
         parameters: { factor: 0.1 },
-        magnitude: 0.1
+        magnitude: 0.1,
       },
       confidence: 0.8,
       successRate: 0.75,
       lastApplied: new Date(0),
-      timesUsed: 0
+      timesUsed: 0,
     });
 
     // Regla: Cambiar estrategia si es inefectiva
-    this.adaptationRules.set('strategy_effectiveness', {
-      id: 'strategy_effectiveness',
-      name: 'Cambio por Estrategia Inefectiva',
+    this.adaptationRules.set("strategy_effectiveness", {
+      id: "strategy_effectiveness",
+      name: "Cambio por Estrategia Inefectiva",
       trigger: {
-        type: 'strategy_ineffective',
-        condition: 'low_success_rate',
-        threshold: 0.3
+        type: "strategy_ineffective",
+        condition: "low_success_rate",
+        threshold: 0.3,
       },
       action: {
-        type: 'change_strategy',
+        type: "change_strategy",
         parameters: { exploration: true },
-        magnitude: 0.5
+        magnitude: 0.5,
       },
       confidence: 0.7,
       successRate: 0.65,
       lastApplied: new Date(0),
-      timesUsed: 0
+      timesUsed: 0,
     });
   }
 
@@ -520,13 +549,16 @@ export class LearningModule {
     return Math.max(0, Math.min(1, effectiveness));
   }
 
-  private updateStrategyEffectiveness(strategyId: string, effectiveness: number): void {
+  private updateStrategyEffectiveness(
+    strategyId: string,
+    effectiveness: number,
+  ): void {
     if (!this.strategyEffectiveness.has(strategyId)) {
       this.strategyEffectiveness.set(strategyId, []);
     }
     const values = this.strategyEffectiveness.get(strategyId)!;
     values.push(effectiveness);
-    
+
     // Mantener solo los últimos 50 valores
     if (values.length > 50) {
       values.splice(0, values.length - 50);
@@ -540,25 +572,75 @@ export class LearningModule {
 
   private updateLearningMetrics(): void {
     // Actualizar métricas basadas en datos recientes
-    this.learningMetrics.memoryEfficiency = Math.min(1, 1 - (this.learningData.length / this.MAX_LEARNING_DATA));
+    this.learningMetrics.memoryEfficiency = Math.min(
+      1,
+      1 - this.learningData.length / this.MAX_LEARNING_DATA,
+    );
   }
 
   // Implementaciones placeholder para métodos complejos
-  private analyzePlayerTrends(playerId: string, recentGames: any[]): any { return {}; }
-  private shouldTriggerRule(rule: AdaptationRule, trends: any): boolean { return false; }
-  private executeAdaptation(rule: AdaptationRule, trends: any): any { return { action: rule.action, reasoning: 'Test' }; }
-  private shouldExploreNewStrategies(trends: any): boolean { return Math.random() < this.EXPLORATION_RATE; }
-  private exploreNewStrategies(trends: any): string[] { return []; }
-  private calculatePerformanceTrend(performance: number[]): number { return 0.5; }
-  private findOptimalChallengeZone(history: number[], performance: number[]): number { return 0.5; }
-  private isInComfortZone(performance: number[]): boolean { return false; }
-  private calculateAdjustmentConfidence(history: number[], performance: number[]): number { return 0.7; }
-  private identifyUniquePatterns(moves: any[]): any[] { return []; }
-  private createCounterStrategy(pattern: any, context: any): any { return null; }
-  private addNewStrategy(strategy: any): void { }
-  private identifyCreativeMoves(moves: any[]): any[] { return []; }
-  private createInspiredStrategy(move: any, context: any): any { return null; }
-  private findSimilarSituations(strategy: string, profile: PlayerProfile, context: any): any[] { return []; }
-  private analyzeHistoricalResponses(situations: any[]): any { return { mostCommon: 'adapted', confidence: 0.6, alternatives: [], negativeOutcomeProbability: 0.3 }; }
-  private compressDataGroup(group: LearningData[]): LearningData { return group[0]; }
+  private analyzePlayerTrends(playerId: string, recentGames: any[]): any {
+    return {};
+  }
+  private shouldTriggerRule(rule: AdaptationRule, trends: any): boolean {
+    return false;
+  }
+  private executeAdaptation(rule: AdaptationRule, trends: any): any {
+    return { action: rule.action, reasoning: "Test" };
+  }
+  private shouldExploreNewStrategies(trends: any): boolean {
+    return Math.random() < this.EXPLORATION_RATE;
+  }
+  private exploreNewStrategies(trends: any): string[] {
+    return [];
+  }
+  private calculatePerformanceTrend(performance: number[]): number {
+    return 0.5;
+  }
+  private findOptimalChallengeZone(
+    history: number[],
+    performance: number[],
+  ): number {
+    return 0.5;
+  }
+  private isInComfortZone(performance: number[]): boolean {
+    return false;
+  }
+  private calculateAdjustmentConfidence(
+    history: number[],
+    performance: number[],
+  ): number {
+    return 0.7;
+  }
+  private identifyUniquePatterns(moves: any[]): any[] {
+    return [];
+  }
+  private createCounterStrategy(pattern: any, context: any): any {
+    return null;
+  }
+  private addNewStrategy(strategy: any): void {}
+  private identifyCreativeMoves(moves: any[]): any[] {
+    return [];
+  }
+  private createInspiredStrategy(move: any, context: any): any {
+    return null;
+  }
+  private findSimilarSituations(
+    strategy: string,
+    profile: PlayerProfile,
+    context: any,
+  ): any[] {
+    return [];
+  }
+  private analyzeHistoricalResponses(situations: any[]): any {
+    return {
+      mostCommon: "adapted",
+      confidence: 0.6,
+      alternatives: [],
+      negativeOutcomeProbability: 0.3,
+    };
+  }
+  private compressDataGroup(group: LearningData[]): LearningData {
+    return group[0];
+  }
 }

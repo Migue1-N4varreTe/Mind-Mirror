@@ -2,19 +2,19 @@
  * ===================================================================
  * MIND MIRROR - MOTOR DE JUEGO REFACTORIZADO
  * ===================================================================
- * 
+ *
  * PROPÓSITO:
  * - Reemplazar el gameEngine.ts fragmentado con arquitectura unificada
  * - Integrar todos los sistemas: IA, progreso, recursos, feedback
  * - Optimizar flujo de juego para máximo rendimiento
  * - Proporcionar API limpia y extensible para componentes UI
- * 
+ *
  * MEJORAS DE ARQUITECTURA:
  * - Separación clara de responsabilidades
  * - Patrón Observer para eventos de juego
  * - Sistema de plugins para funcionalidades opcionales
  * - Cache inteligente y optimizaciones de memoria
- * 
+ *
  * COMPATIBILIDAD:
  * - Mantiene interfaz compatible con componentes existentes
  * - Migración gradual sin romper funcionalidad actual
@@ -22,15 +22,30 @@
  * ===================================================================
  */
 
-import { AIEngine, PlayerProfile } from './ai/AIEngine';
-import { PlayerProgressSystem, CognitiveProfile, PlayerResources } from './player/PlayerProgressSystem';
-import { LearningModule } from './ai/LearningModule';
-import { HeatmapAnalyzer } from '@/lib/heatmapSystem';
-import { AchievementSystem } from '@/lib/achievementSystem';
+import { AIEngine, PlayerProfile } from "./ai/AIEngine";
+import {
+  PlayerProgressSystem,
+  CognitiveProfile,
+  PlayerResources,
+} from "./player/PlayerProgressSystem";
+import { LearningModule } from "./ai/LearningModule";
+import { HeatmapAnalyzer } from "@/lib/heatmapSystem";
+import { AchievementSystem } from "@/lib/achievementSystem";
 
-export type GameMode = 'classic' | 'mirror' | 'shadow' | 'rulebreaker' | 'infinite' | 'tutorial';
-export type GamePhase = 'learning' | 'mirror' | 'evolution' | 'mastery';
-export type GameState = 'initializing' | 'active' | 'paused' | 'completed' | 'error';
+export type GameMode =
+  | "classic"
+  | "mirror"
+  | "shadow"
+  | "rulebreaker"
+  | "infinite"
+  | "tutorial";
+export type GamePhase = "learning" | "mirror" | "evolution" | "mastery";
+export type GameState =
+  | "initializing"
+  | "active"
+  | "paused"
+  | "completed"
+  | "error";
 
 export interface GameConfiguration {
   mode: GameMode;
@@ -61,16 +76,22 @@ export interface GameSession {
 export interface GameMove {
   id: string;
   position: [number, number];
-  player: 'human' | 'ai';
+  player: "human" | "ai";
   timestamp: Date;
   reactionTime?: number;
-  outcome: 'success' | 'blocked' | 'combo' | 'special';
+  outcome: "success" | "blocked" | "combo" | "special";
   context: any;
 }
 
 export interface GameEvent {
   id: string;
-  type: 'move' | 'combo' | 'special_activated' | 'phase_change' | 'achievement' | 'feedback';
+  type:
+    | "move"
+    | "combo"
+    | "special_activated"
+    | "phase_change"
+    | "achievement"
+    | "feedback";
   timestamp: Date;
   data: any;
   significance: number; // 0-1
@@ -85,7 +106,7 @@ export interface GameAnalytics {
     innovationScore: number;
     adaptabilityScore: number;
   };
-  
+
   playerPerformance: {
     averageReactionTime: number;
     decisionAccuracy: number;
@@ -93,14 +114,14 @@ export interface GameAnalytics {
     pressureHandling: number;
     learningIndicators: string[];
   };
-  
+
   aiPerformance: {
     strategiesUsed: string[];
     adaptationsMade: number;
     predictionAccuracy: number;
     challengeLevel: number;
   };
-  
+
   insights: {
     keyMoments: GameEvent[];
     improvementAreas: string[];
@@ -120,17 +141,17 @@ export class RefactoredGameEngine {
   private learningModule: LearningModule;
   private heatmapAnalyzer: HeatmapAnalyzer;
   private achievementSystem: AchievementSystem;
-  
+
   private currentSession: GameSession | null = null;
-  private gameState: GameState = 'initializing';
+  private gameState: GameState = "initializing";
   private eventListeners = new Map<string, Function[]>();
-  
+
   // Cache y optimización
   private analysisCache = new Map<string, any>();
   private performanceMetrics = {
     avgProcessingTime: 0,
     totalOperations: 0,
-    memoryUsage: 0
+    memoryUsage: 0,
   };
 
   constructor() {
@@ -139,7 +160,7 @@ export class RefactoredGameEngine {
     this.learningModule = new LearningModule();
     this.heatmapAnalyzer = new HeatmapAnalyzer();
     this.achievementSystem = new AchievementSystem();
-    
+
     this.initializeEventSystem();
   }
 
@@ -150,11 +171,11 @@ export class RefactoredGameEngine {
    */
 
   public async startNewSession(
-    playerId: string, 
-    configuration: GameConfiguration
+    playerId: string,
+    configuration: GameConfiguration,
   ): Promise<GameSession> {
     const startTime = performance.now();
-    
+
     try {
       // Crear nueva sesión
       const session: GameSession = {
@@ -162,19 +183,20 @@ export class RefactoredGameEngine {
         playerId,
         configuration,
         startTime: new Date(),
-        currentPhase: 'learning',
+        currentPhase: "learning",
         moves: [],
         score: { player: 0, ai: 0 },
-        resources: this.progressSystem.getPlayerResources(playerId) || 
-                  this.progressSystem.initializePlayerResources(playerId),
+        resources:
+          this.progressSystem.getPlayerResources(playerId) ||
+          this.progressSystem.initializePlayerResources(playerId),
         events: [],
-        metadata: {}
+        metadata: {},
       };
 
       // Configurar IA para esta sesión
       this.aiEngine.setPersonality(configuration.aiPersonality as any);
       this.aiEngine.setDifficulty(configuration.difficulty);
-      
+
       // Configurar modo de juego
       const gameMode = this.mapConfigurationToAIMode(configuration.mode);
       this.aiEngine.setMode(gameMode);
@@ -186,62 +208,60 @@ export class RefactoredGameEngine {
       }
 
       this.currentSession = session;
-      this.gameState = 'active';
-      
+      this.gameState = "active";
+
       // Emitir evento de inicio
-      this.emitEvent('session_started', { session });
-      
+      this.emitEvent("session_started", { session });
+
       this.recordPerformanceMetric(performance.now() - startTime);
       return session;
-      
     } catch (error) {
-      this.gameState = 'error';
+      this.gameState = "error";
       throw new Error(`Failed to start session: ${error}`);
     }
   }
 
   public async endSession(): Promise<GameAnalytics> {
     if (!this.currentSession) {
-      throw new Error('No active session to end');
+      throw new Error("No active session to end");
     }
 
     const startTime = performance.now();
-    
+
     try {
       // Completar sesión
       this.currentSession.endTime = new Date();
-      this.gameState = 'completed';
-      
+      this.gameState = "completed";
+
       // Generar análisis completo
       const analytics = await this.generateGameAnalytics();
-      
+
       // Procesar aprendizaje de IA
       await this.processAILearning();
-      
+
       // Actualizar progreso del jugador
       const sessionFeedback = this.progressSystem.recordGameSession(
         this.currentSession.playerId,
         analytics.sessionSummary,
         this.currentSession.moves,
-        this.currentSession.metadata
+        this.currentSession.metadata,
       );
-      
+
       // Emitir eventos finales
-      this.emitEvent('session_completed', { 
-        session: this.currentSession, 
-        analytics, 
-        feedback: sessionFeedback 
+      this.emitEvent("session_completed", {
+        session: this.currentSession,
+        analytics,
+        feedback: sessionFeedback,
       });
-      
+
       // Limpiar sesión actual
       const completedSession = this.currentSession;
       this.currentSession = null;
-      
+
       this.recordPerformanceMetric(performance.now() - startTime);
       return analytics;
-      
     } catch (error) {
-      this.gameState = 'error';
+      this.gameState = "error";
       throw new Error(`Failed to end session: ${error}`);
     }
   }
@@ -253,8 +273,8 @@ export class RefactoredGameEngine {
    */
 
   public async processPlayerMove(
-    position: [number, number], 
-    context: any
+    position: [number, number],
+    context: any,
   ): Promise<{
     moveAccepted: boolean;
     moveResult: any;
@@ -262,8 +282,8 @@ export class RefactoredGameEngine {
     gameEvents: GameEvent[];
     feedbackMessages: string[];
   }> {
-    if (!this.currentSession || this.gameState !== 'active') {
-      throw new Error('No active game session');
+    if (!this.currentSession || this.gameState !== "active") {
+      throw new Error("No active game session");
     }
 
     const startTime = performance.now();
@@ -278,61 +298,62 @@ export class RefactoredGameEngine {
           moveAccepted: false,
           moveResult: { error: isValidMove.reason },
           gameEvents: [],
-          feedbackMessages: [isValidMove.reason]
+          feedbackMessages: [isValidMove.reason],
         };
       }
 
       // Registrar movimiento del jugador
-      const playerMove = this.registerMove(position, 'human', context);
-      
+      const playerMove = this.registerMove(position, "human", context);
+
       // Procesar efectos del movimiento
       const moveResult = await this.processMoveEffects(playerMove, context);
-      
+
       // Actualizar recursos del jugador
       this.updatePlayerResources(moveResult);
-      
+
       // Generar eventos de juego
       gameEvents.push(...this.generateMoveEvents(playerMove, moveResult));
-      
+
       // Obtener respuesta de IA
       const aiResponse = await this.getAIResponse(context);
-      
+
       // Procesar movimiento de IA si está disponible
       if (aiResponse.move) {
-        const aiMove = this.registerMove(aiResponse.move, 'ai', context);
+        const aiMove = this.registerMove(aiResponse.move, "ai", context);
         const aiMoveResult = await this.processMoveEffects(aiMove, context);
         gameEvents.push(...this.generateMoveEvents(aiMove, aiMoveResult));
       }
-      
+
       // Generar feedback en tiempo real
       if (this.currentSession.configuration.enableFeedback) {
-        feedbackMessages.push(...this.generateRealTimeFeedback(playerMove, moveResult));
+        feedbackMessages.push(
+          ...this.generateRealTimeFeedback(playerMove, moveResult),
+        );
       }
-      
+
       // Verificar condiciones de fin de juego
       const gameEndCheck = this.checkGameEndConditions();
       if (gameEndCheck.shouldEnd) {
         gameEvents.push({
           id: `event_${Date.now()}`,
-          type: 'phase_change',
+          type: "phase_change",
           timestamp: new Date(),
           data: { reason: gameEndCheck.reason },
-          significance: 1.0
+          significance: 1.0,
         });
       }
 
       this.recordPerformanceMetric(performance.now() - startTime);
-      
+
       return {
         moveAccepted: true,
         moveResult,
         aiResponse,
         gameEvents,
-        feedbackMessages
+        feedbackMessages,
       };
-      
     } catch (error) {
-      this.gameState = 'error';
+      this.gameState = "error";
       throw new Error(`Failed to process move: ${error}`);
     }
   }
@@ -345,7 +366,7 @@ export class RefactoredGameEngine {
 
   public async generateGameAnalytics(): Promise<GameAnalytics> {
     if (!this.currentSession) {
-      throw new Error('No active session for analytics');
+      throw new Error("No active session for analytics");
     }
 
     const cacheKey = `analytics_${this.currentSession.sessionId}`;
@@ -357,7 +378,7 @@ export class RefactoredGameEngine {
       sessionSummary: this.calculateSessionSummary(),
       playerPerformance: this.analyzePlayerPerformance(),
       aiPerformance: this.analyzeAIPerformance(),
-      insights: await this.generateInsights()
+      insights: await this.generateInsights(),
     };
 
     this.analysisCache.set(cacheKey, analytics);
@@ -373,11 +394,11 @@ export class RefactoredGameEngine {
   } {
     if (!this.currentSession) {
       return {
-        currentPhase: 'learning',
+        currentPhase: "learning",
         playerState: {},
         aiState: {},
         recommendations: [],
-        upcomingChallenges: []
+        upcomingChallenges: [],
       };
     }
 
@@ -386,7 +407,7 @@ export class RefactoredGameEngine {
       playerState: this.analyzeCurrentPlayerState(),
       aiState: this.analyzeCurrentAIState(),
       recommendations: this.generateCurrentRecommendations(),
-      upcomingChallenges: this.predictUpcomingChallenges()
+      upcomingChallenges: this.predictUpcomingChallenges(),
     };
   }
 
@@ -415,7 +436,7 @@ export class RefactoredGameEngine {
 
   private emitEvent(eventType: string, data: any): void {
     const listeners = this.eventListeners.get(eventType) || [];
-    listeners.forEach(callback => {
+    listeners.forEach((callback) => {
       try {
         callback(data);
       } catch (error) {
@@ -443,26 +464,26 @@ export class RefactoredGameEngine {
   }
 
   public pauseSession(): void {
-    if (this.gameState === 'active') {
-      this.gameState = 'paused';
-      this.emitEvent('session_paused', { session: this.currentSession });
+    if (this.gameState === "active") {
+      this.gameState = "paused";
+      this.emitEvent("session_paused", { session: this.currentSession });
     }
   }
 
   public resumeSession(): void {
-    if (this.gameState === 'paused') {
-      this.gameState = 'active';
-      this.emitEvent('session_resumed', { session: this.currentSession });
+    if (this.gameState === "paused") {
+      this.gameState = "active";
+      this.emitEvent("session_resumed", { session: this.currentSession });
     }
   }
 
   public updateConfiguration(newConfig: Partial<GameConfiguration>): void {
     if (this.currentSession) {
-      this.currentSession.configuration = { 
-        ...this.currentSession.configuration, 
-        ...newConfig 
+      this.currentSession.configuration = {
+        ...this.currentSession.configuration,
+        ...newConfig,
       };
-      
+
       // Aplicar cambios a subsistemas
       if (newConfig.difficulty !== undefined) {
         this.aiEngine.setDifficulty(newConfig.difficulty);
@@ -470,8 +491,8 @@ export class RefactoredGameEngine {
       if (newConfig.aiPersonality !== undefined) {
         this.aiEngine.setPersonality(newConfig.aiPersonality as any);
       }
-      
-      this.emitEvent('configuration_updated', { newConfig });
+
+      this.emitEvent("configuration_updated", { newConfig });
     }
   }
 
@@ -482,7 +503,10 @@ export class RefactoredGameEngine {
    */
 
   // Métodos para mantener compatibilidad con el sistema anterior
-  public legacyGenerateMove(gameState: any, difficulty: number): [number, number] | null {
+  public legacyGenerateMove(
+    gameState: any,
+    difficulty: number,
+  ): [number, number] | null {
     // Adaptar llamada al nuevo sistema de IA
     const context = this.adaptLegacyGameState(gameState);
     const analysis = this.aiEngine.analyzeGame(context);
@@ -492,12 +516,12 @@ export class RefactoredGameEngine {
   public legacyGetGameState(): any {
     // Adaptar estado actual al formato legado
     if (!this.currentSession) return null;
-    
+
     return {
       score: this.currentSession.score,
       moves: this.currentSession.moves.length,
       phase: this.currentSession.currentPhase,
-      aiPersonality: this.currentSession.configuration.aiPersonality
+      aiPersonality: this.currentSession.configuration.aiPersonality,
     };
   }
 
@@ -509,16 +533,16 @@ export class RefactoredGameEngine {
 
   private initializeEventSystem(): void {
     // Configurar listeners internos del sistema
-    this.addEventListener('move_processed', (data) => {
+    this.addEventListener("move_processed", (data) => {
       this.heatmapAnalyzer.addDataPoint({
         position: data.move.position,
         intensity: 1,
-        type: 'move',
-        timestamp: Date.now()
+        type: "move",
+        timestamp: Date.now(),
       });
     });
 
-    this.addEventListener('session_completed', (data) => {
+    this.addEventListener("session_completed", (data) => {
       // Limpiar caches al finalizar sesión
       this.analysisCache.clear();
     });
@@ -526,39 +550,48 @@ export class RefactoredGameEngine {
 
   private recordPerformanceMetric(processingTime: number): void {
     this.performanceMetrics.totalOperations++;
-    this.performanceMetrics.avgProcessingTime = 
-      (this.performanceMetrics.avgProcessingTime * (this.performanceMetrics.totalOperations - 1) + processingTime) / 
+    this.performanceMetrics.avgProcessingTime =
+      (this.performanceMetrics.avgProcessingTime *
+        (this.performanceMetrics.totalOperations - 1) +
+        processingTime) /
       this.performanceMetrics.totalOperations;
   }
 
   private mapConfigurationToAIMode(gameMode: GameMode): any {
     const modeMap = {
-      'classic': 'learning',
-      'mirror': 'mirror', 
-      'shadow': 'shadow',
-      'rulebreaker': 'rulebreaker',
-      'infinite': 'evolution',
-      'tutorial': 'learning'
+      classic: "learning",
+      mirror: "mirror",
+      shadow: "shadow",
+      rulebreaker: "rulebreaker",
+      infinite: "evolution",
+      tutorial: "learning",
     };
-    return modeMap[gameMode] || 'learning';
+    return modeMap[gameMode] || "learning";
   }
 
   // Implementaciones placeholder que se completarían
-  private validateMove(position: [number, number], context: any): { valid: boolean; reason?: string } {
+  private validateMove(
+    position: [number, number],
+    context: any,
+  ): { valid: boolean; reason?: string } {
     return { valid: true };
   }
 
-  private registerMove(position: [number, number], player: 'human' | 'ai', context: any): GameMove {
+  private registerMove(
+    position: [number, number],
+    player: "human" | "ai",
+    context: any,
+  ): GameMove {
     const move: GameMove = {
       id: `move_${Date.now()}`,
       position,
       player,
       timestamp: new Date(),
       reactionTime: context.reactionTime,
-      outcome: 'success',
-      context
+      outcome: "success",
+      context,
     };
-    
+
     this.currentSession!.moves.push(move);
     return move;
   }
@@ -576,31 +609,34 @@ export class RefactoredGameEngine {
   private generateMoveEvents(move: GameMove, result: any): GameEvent[] {
     const event: GameEvent = {
       id: `event_${Date.now()}`,
-      type: 'move',
+      type: "move",
       timestamp: move.timestamp,
       data: { move, result },
-      significance: 0.5
+      significance: 0.5,
     };
-    
+
     this.currentSession!.events.push(event);
     return [event];
   }
 
   private async getAIResponse(context: any): Promise<any> {
     if (!this.currentSession) return { move: null };
-    
+
     const gameContext = {
       board: context.board || [],
-      currentPlayer: 'ai' as const,
+      currentPlayer: "ai" as const,
       score: this.currentSession.score,
       moves: this.currentSession.moves.length,
       phase: this.currentSession.currentPhase,
       timeRemaining: context.timeRemaining || 30,
       difficulty: this.currentSession.configuration.difficulty,
-      specialCellsAvailable: 0
+      specialCellsAvailable: 0,
     };
 
-    const analysis = this.aiEngine.analyzeGame(gameContext, this.currentSession.playerId);
+    const analysis = this.aiEngine.analyzeGame(
+      gameContext,
+      this.currentSession.playerId,
+    );
     return { move: analysis.recommendedMove, analysis };
   }
 
@@ -614,17 +650,22 @@ export class RefactoredGameEngine {
 
   private calculateSessionSummary(): any {
     if (!this.currentSession) return {};
-    
-    const duration = this.currentSession.endTime ? 
-      this.currentSession.endTime.getTime() - this.currentSession.startTime.getTime() : 0;
-    
+
+    const duration = this.currentSession.endTime
+      ? this.currentSession.endTime.getTime() -
+        this.currentSession.startTime.getTime()
+      : 0;
+
     return {
       duration,
       totalMoves: this.currentSession.moves.length,
-      winnerScore: Math.max(this.currentSession.score.player, this.currentSession.score.ai),
+      winnerScore: Math.max(
+        this.currentSession.score.player,
+        this.currentSession.score.ai,
+      ),
       efficiencyRating: 0.75,
-      innovationScore: 0.60,
-      adaptabilityScore: 0.70
+      innovationScore: 0.6,
+      adaptabilityScore: 0.7,
     };
   }
 
@@ -632,36 +673,46 @@ export class RefactoredGameEngine {
     return {
       averageReactionTime: 2000,
       decisionAccuracy: 0.75,
-      patternConsistency: 0.60,
-      pressureHandling: 0.70,
-      learningIndicators: ['Mejorando reconocimiento de patrones']
+      patternConsistency: 0.6,
+      pressureHandling: 0.7,
+      learningIndicators: ["Mejorando reconocimiento de patrones"],
     };
   }
 
   private analyzeAIPerformance(): any {
     return {
-      strategiesUsed: ['adaptive', 'counter'],
+      strategiesUsed: ["adaptive", "counter"],
       adaptationsMade: 3,
       predictionAccuracy: 0.65,
-      challengeLevel: this.currentSession?.configuration.difficulty || 0.5
+      challengeLevel: this.currentSession?.configuration.difficulty || 0.5,
     };
   }
 
   private async generateInsights(): Promise<any> {
     return {
       keyMoments: [],
-      improvementAreas: ['Velocidad de decisión'],
-      strengthsShown: ['Pensamiento estratégico'],
-      nextRecommendations: ['Practicar bajo presión']
+      improvementAreas: ["Velocidad de decisión"],
+      strengthsShown: ["Pensamiento estratégico"],
+      nextRecommendations: ["Practicar bajo presión"],
     };
   }
 
-  private analyzeCurrentPlayerState(): any { return {}; }
-  private analyzeCurrentAIState(): any { return {}; }
-  private generateCurrentRecommendations(): string[] { return []; }
-  private predictUpcomingChallenges(): string[] { return []; }
-  private adaptLegacyGameState(gameState: any): any { return {}; }
-  private async processAILearning(): Promise<void> { }
+  private analyzeCurrentPlayerState(): any {
+    return {};
+  }
+  private analyzeCurrentAIState(): any {
+    return {};
+  }
+  private generateCurrentRecommendations(): string[] {
+    return [];
+  }
+  private predictUpcomingChallenges(): string[] {
+    return [];
+  }
+  private adaptLegacyGameState(gameState: any): any {
+    return {};
+  }
+  private async processAILearning(): Promise<void> {}
 }
 
 /**
