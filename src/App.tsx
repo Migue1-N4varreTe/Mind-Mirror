@@ -21,7 +21,7 @@ import Social from "./pages/Social";
 import AITrainer from "./pages/AITrainer";
 import Events from "./pages/Events";
 import Achievements from "./pages/Achievements";
-import MindMirror from "./pages/MindMirror";
+import MindMirrorStandalone from "./pages/MindMirrorStandalone";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,7 +66,7 @@ const AppContent = () => {
           <Route path="/ai-trainer" element={<AITrainer />} />
           <Route path="/events" element={<Events />} />
           <Route path="/achievements" element={<Achievements />} />
-          <Route path="/mindmirror" element={<MindMirror />} />
+          <Route path="/mindmirror" element={<MindMirrorStandalone />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
