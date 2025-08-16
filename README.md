@@ -100,18 +100,21 @@ mind-mirror/
 ### ✅ Completado
 
 - [x] **Sistema de IA Adaptativa**
+
   - [x] Motor de IA refactorizado con múltiples personalidades
   - [x] Análisis de patrones de jugador en tiempo real
   - [x] Sistema de aprendizaje y adaptación
   - [x] Predicciones de movimientos futuros
 
 - [x] **Backend API Completa**
+
   - [x] Endpoints REST para jugadores, partidas y análisis
   - [x] Base de datos PostgreSQL con esquema completo
   - [x] Sistema de movimientos y análisis de IA
   - [x] Analytics y estadísticas avanzadas
 
 - [x] **Frontend Integrado**
+
   - [x] Cliente API con modo offline
   - [x] Servicio de juego mejorado
   - [x] Integración con backend
@@ -126,11 +129,13 @@ mind-mirror/
 ### 🚧 En Desarrollo
 
 - [ ] **Características Avanzadas de IA**
+
   - [ ] Modo Rule Breaker completo
   - [ ] Sistema de emociones de IA
   - [ ] Análisis predictivo avanzado
 
 - [ ] **Funciones Sociales**
+
   - [ ] Multijugador
   - [ ] Torneos
   - [ ] Leaderboards globales
@@ -168,6 +173,7 @@ npm run deploy      # Deploy a Netlify
 ## 🔗 API Endpoints
 
 ### Jugadores
+
 ```
 POST   /api/jugadores          # Crear jugador
 GET    /api/jugadores/:id      # Obtener jugador
@@ -177,6 +183,7 @@ GET    /api/jugadores/:id/analisis     # Análisis del jugador
 ```
 
 ### Partidas
+
 ```
 POST   /api/partidas          # Crear partida
 GET    /api/partidas/:id      # Obtener partida
@@ -186,6 +193,7 @@ GET    /api/partidas/:id/analytics    # Analytics de partida
 ```
 
 ### Sistema
+
 ```
 GET    /api/health            # Estado del sistema
 GET    /api/config            # Configuración del sistema
@@ -209,6 +217,7 @@ npm test -- --grep "API"
 ## 🚀 Despliegue
 
 ### Netlify (Recomendado)
+
 Ver [DEPLOYMENT.md](./DEPLOYMENT.md) para guía completa.
 
 ```bash
@@ -218,6 +227,7 @@ netlify deploy --prod --dir=dist/spa
 ```
 
 ### Variables de Entorno Requeridas
+
 ```bash
 NODE_ENV=production
 SUPABASE_DB_URL=postgresql://...
@@ -234,6 +244,7 @@ SUPABASE_ANON_KEY=...
 5. Abre un Pull Request
 
 ### Guías de Contribución
+
 - Sigue las convenciones de TypeScript existentes
 - Añade tests para nuevas funcionalidades
 - Actualiza documentación cuando sea necesario
@@ -242,6 +253,7 @@ SUPABASE_ANON_KEY=...
 ## 📊 Tecnologías Utilizadas
 
 ### Frontend
+
 - **React 18** - UI Library
 - **TypeScript** - Tipado estático
 - **Vite** - Build tool y dev server
@@ -251,6 +263,7 @@ SUPABASE_ANON_KEY=...
 - **Zustand** - State management
 
 ### Backend
+
 - **Express** - Web framework
 - **TypeScript** - Tipado estático
 - **PostgreSQL** - Base de datos
@@ -258,6 +271,7 @@ SUPABASE_ANON_KEY=...
 - **Serverless HTTP** - Netlify Functions
 
 ### DevOps & Tools
+
 - **Netlify** - Hosting y CI/CD
 - **Vitest** - Testing framework
 - **ESLint** - Linting
@@ -266,22 +280,26 @@ SUPABASE_ANON_KEY=...
 ## 📈 Roadmap
 
 ### V1.0 - Lanzamiento Inicial ✅
+
 - [x] Juego básico funcional
 - [x] IA adaptativa básica
 - [x] Sistema de autenticación
 - [x] Despliegue en producción
 
 ### V1.1 - Mejoras de IA 🚧
+
 - [ ] Personalidades de IA avanzadas
 - [ ] Análisis predictivo mejorado
 - [ ] Sistema de dificultad dinámico
 
 ### V1.2 - Características Sociales
+
 - [ ] Modo multijugador
 - [ ] Sistema de ranking
 - [ ] Compartir estadísticas
 
 ### V2.0 - Expansión del Juego
+
 - [ ] Nuevos modos de juego
 - [ ] Tableros personalizados
 - [ ] Editor de reglas
@@ -291,6 +309,7 @@ SUPABASE_ANON_KEY=...
 Usa [GitHub Issues](https://github.com/tuusuario/mind-mirror/issues) para reportar bugs o sugerir nuevas características.
 
 ### Template de Bug Report
+
 ```
 **Describe el bug**
 Descripción clara del problema.
@@ -333,11 +352,11 @@ Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detal
 
 <div align="center">
 
-**[🎮 Jugar Ahora](https://yourdomain.netlify.app)** • 
-**[📖 Documentación](./docs/)** • 
-**[🐛 Reportar Bug](https://github.com/tuusuario/mind-mirror/issues)** • 
+**[🎮 Jugar Ahora](https://yourdomain.netlify.app)** •
+**[📖 Documentación](./docs/)** •
+**[🐛 Reportar Bug](https://github.com/tuusuario/mind-mirror/issues)** •
 **[💡 Sugerir Feature](https://github.com/tuusuario/mind-mirror/issues)**
 
-*Construido con ❤️ y mucha ☕*
+_Construido con ❤️ y mucha ☕_
 
 </div>

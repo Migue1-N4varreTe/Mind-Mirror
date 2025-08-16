@@ -24,14 +24,14 @@ import type {
   GetGameAnalyticsResponse,
   GetPlayerAnalysisResponse,
   GameConfiguration,
-  API_ENDPOINTS
-} from '@shared/game-api';
+  API_ENDPOINTS,
+} from "@shared/game-api";
 
 class APIClient {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_URL || '/api';
+    this.baseURL = import.meta.env.VITE_API_URL || "/api";
   }
 
   // ===================================================================
@@ -39,13 +39,13 @@ class APIClient {
   // ===================================================================
   private async request<T = any>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config: RequestInit = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -53,10 +53,13 @@ class APIClient {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorData.message ||
+            `HTTP ${response.status}: ${response.statusText}`,
+        );
       }
 
       return await response.json();
@@ -70,9 +73,11 @@ class APIClient {
   // MÉTODOS PARA JUGADORES
   // ===================================================================
 
-  public async createPlayer(data: CreatePlayerRequest): Promise<CreatePlayerResponse> {
+  public async createPlayer(
+    data: CreatePlayerRequest,
+  ): Promise<CreatePlayerResponse> {
     return this.request<CreatePlayerResponse>(API_ENDPOINTS.PLAYERS, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
@@ -80,30 +85,39 @@ class APIClient {
   public async getPlayer(id: string): Promise<Player | null> {
     try {
       const response = await this.request<{ player: Player; success: boolean }>(
-        API_ENDPOINTS.PLAYER_BY_ID(id)
+        API_ENDPOINTS.PLAYER_BY_ID(id),
       );
       return response.player;
     } catch (error) {
-      console.error('Error getting player:', error);
+      console.error("Error getting player:", error);
       return null;
     }
   }
 
-  public async updatePlayer(id: string, data: UpdatePlayerRequest): Promise<UpdatePlayerResponse> {
+  public async updatePlayer(
+    id: string,
+    data: UpdatePlayerRequest,
+  ): Promise<UpdatePlayerResponse> {
     return this.request<UpdatePlayerResponse>(API_ENDPOINTS.PLAYER_BY_ID(id), {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
-  public async deletePlayer(id: string): Promise<{ success: boolean; message: string }> {
+  public async deletePlayer(
+    id: string,
+  ): Promise<{ success: boolean; message: string }> {
     return this.request(API_ENDPOINTS.PLAYER_BY_ID(id), {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 
-  public async getPlayerAnalysis(id: string): Promise<GetPlayerAnalysisResponse> {
-    return this.request<GetPlayerAnalysisResponse>(API_ENDPOINTS.PLAYER_ANALYSIS(id));
+  public async getPlayerAnalysis(
+    id: string,
+  ): Promise<GetPlayerAnalysisResponse> {
+    return this.request<GetPlayerAnalysisResponse>(
+      API_ENDPOINTS.PLAYER_ANALYSIS(id),
+    );
   }
 
   public async getPlayerHistory(
@@ -113,14 +127,17 @@ class APIClient {
       offset?: number;
       modo_juego?: string;
       terminadas_solamente?: boolean;
-    } = {}
+    } = {},
   ): Promise<GetPlayerHistoryResponse> {
     const params = new URLSearchParams();
-    if (options.limit) params.append('limit', options.limit.toString());
-    if (options.offset) params.append('offset', options.offset.toString());
-    if (options.modo_juego) params.append('modo_juego', options.modo_juego);
+    if (options.limit) params.append("limit", options.limit.toString());
+    if (options.offset) params.append("offset", options.offset.toString());
+    if (options.modo_juego) params.append("modo_juego", options.modo_juego);
     if (options.terminadas_solamente !== undefined) {
-      params.append('terminadas_solamente', options.terminadas_solamente.toString());
+      params.append(
+        "terminadas_solamente",
+        options.terminadas_solamente.toString(),
+      );
     }
 
     const endpoint = `${API_ENDPOINTS.PLAYER_HISTORY(id)}?${params.toString()}`;
@@ -131,9 +148,11 @@ class APIClient {
     return this.request(`${API_ENDPOINTS.PLAYER_BY_ID(id)}/estadisticas`);
   }
 
-  public async resetPlayerProgress(id: string): Promise<{ success: boolean; message: string }> {
+  public async resetPlayerProgress(
+    id: string,
+  ): Promise<{ success: boolean; message: string }> {
     return this.request(`${API_ENDPOINTS.PLAYER_BY_ID(id)}/reset`, {
-      method: 'POST',
+      method: "POST",
     });
   }
 
@@ -141,9 +160,11 @@ class APIClient {
   // MÉTODOS PARA PARTIDAS
   // ===================================================================
 
-  public async createGame(data: CreateGameRequest): Promise<CreateGameResponse> {
+  public async createGame(
+    data: CreateGameRequest,
+  ): Promise<CreateGameResponse> {
     return this.request<CreateGameResponse>(API_ENDPOINTS.GAMES, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
@@ -151,48 +172,64 @@ class APIClient {
   public async getGame(id: string): Promise<Game | null> {
     try {
       const response = await this.request<{ game: Game; success: boolean }>(
-        API_ENDPOINTS.GAME_BY_ID(id)
+        API_ENDPOINTS.GAME_BY_ID(id),
       );
       return response.game;
     } catch (error) {
-      console.error('Error getting game:', error);
+      console.error("Error getting game:", error);
       return null;
     }
   }
 
-  public async makeMove(gameId: string, data: MakeMoveRequest): Promise<MakeMoveResponse> {
+  public async makeMove(
+    gameId: string,
+    data: MakeMoveRequest,
+  ): Promise<MakeMoveResponse> {
     return this.request<MakeMoveResponse>(API_ENDPOINTS.GAME_MOVE(gameId), {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
 
-  public async endGame(gameId: string, data: EndGameRequest = {}): Promise<EndGameResponse> {
+  public async endGame(
+    gameId: string,
+    data: EndGameRequest = {},
+  ): Promise<EndGameResponse> {
     return this.request<EndGameResponse>(API_ENDPOINTS.GAME_END(gameId), {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
 
-  public async getGameAnalytics(gameId: string): Promise<GetGameAnalyticsResponse> {
-    return this.request<GetGameAnalyticsResponse>(API_ENDPOINTS.GAME_ANALYTICS(gameId));
+  public async getGameAnalytics(
+    gameId: string,
+  ): Promise<GetGameAnalyticsResponse> {
+    return this.request<GetGameAnalyticsResponse>(
+      API_ENDPOINTS.GAME_ANALYTICS(gameId),
+    );
   }
 
-  public async getGameMoves(gameId: string): Promise<{ moves: Move[]; success: boolean }> {
+  public async getGameMoves(
+    gameId: string,
+  ): Promise<{ moves: Move[]; success: boolean }> {
     return this.request(`${API_ENDPOINTS.GAME_BY_ID(gameId)}/movimientos`);
   }
 
-  public async getGameEvents(gameId: string): Promise<{ events: any[]; success: boolean }> {
+  public async getGameEvents(
+    gameId: string,
+  ): Promise<{ events: any[]; success: boolean }> {
     return this.request(`${API_ENDPOINTS.GAME_BY_ID(gameId)}/eventos`);
   }
 
-  public async listGames(options: {
-    jugador_id?: string;
-    modo_juego?: string;
-    terminada?: boolean;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<{
+  public async listGames(
+    options: {
+      jugador_id?: string;
+      modo_juego?: string;
+      terminada?: boolean;
+      limit?: number;
+      offset?: number;
+    } = {},
+  ): Promise<{
     games: Game[];
     total: number;
     page: number;
@@ -200,25 +237,31 @@ class APIClient {
     success: boolean;
   }> {
     const params = new URLSearchParams();
-    if (options.jugador_id) params.append('jugador_id', options.jugador_id);
-    if (options.modo_juego) params.append('modo_juego', options.modo_juego);
-    if (options.terminada !== undefined) params.append('terminada', options.terminada.toString());
-    if (options.limit) params.append('limit', options.limit.toString());
-    if (options.offset) params.append('offset', options.offset.toString());
+    if (options.jugador_id) params.append("jugador_id", options.jugador_id);
+    if (options.modo_juego) params.append("modo_juego", options.modo_juego);
+    if (options.terminada !== undefined)
+      params.append("terminada", options.terminada.toString());
+    if (options.limit) params.append("limit", options.limit.toString());
+    if (options.offset) params.append("offset", options.offset.toString());
 
     const endpoint = `${API_ENDPOINTS.GAMES}?${params.toString()}`;
     return this.request(endpoint);
   }
 
-  public async deleteGame(gameId: string): Promise<{ success: boolean; message: string }> {
+  public async deleteGame(
+    gameId: string,
+  ): Promise<{ success: boolean; message: string }> {
     return this.request(API_ENDPOINTS.GAME_BY_ID(gameId), {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 
-  public async pauseGame(gameId: string, pausar: boolean = true): Promise<{ success: boolean; message: string }> {
+  public async pauseGame(
+    gameId: string,
+    pausar: boolean = true,
+  ): Promise<{ success: boolean; message: string }> {
     return this.request(`${API_ENDPOINTS.GAME_BY_ID(gameId)}/pausa`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ pausar }),
     });
   }
@@ -244,21 +287,23 @@ class APIClient {
 
   public async resetAI(): Promise<{ success: boolean; message: string }> {
     return this.request(API_ENDPOINTS.RESET_AI, {
-      method: 'POST',
+      method: "POST",
     });
   }
 
-  public async getGameStatistics(options: {
-    desde?: string;
-    hasta?: string;
-  } = {}): Promise<{
+  public async getGameStatistics(
+    options: {
+      desde?: string;
+      hasta?: string;
+    } = {},
+  ): Promise<{
     general: any;
     por_modo: any[];
     success: boolean;
   }> {
     const params = new URLSearchParams();
-    if (options.desde) params.append('desde', options.desde);
-    if (options.hasta) params.append('hasta', options.hasta);
+    if (options.desde) params.append("desde", options.desde);
+    if (options.hasta) params.append("hasta", options.hasta);
 
     const endpoint = `/api/estadisticas/partidas?${params.toString()}`;
     return this.request(endpoint);
@@ -269,11 +314,11 @@ class APIClient {
   // ===================================================================
 
   public async ping(): Promise<{ message: string }> {
-    return this.request('/api/ping');
+    return this.request("/api/ping");
   }
 
   public async demo(): Promise<any> {
-    return this.request('/api/demo');
+    return this.request("/api/demo");
   }
 
   // Método para verificar conexión con la API
@@ -282,7 +327,7 @@ class APIClient {
       await this.healthCheck();
       return true;
     } catch (error) {
-      console.error('API connection failed:', error);
+      console.error("API connection failed:", error);
       return false;
     }
   }
@@ -290,12 +335,12 @@ class APIClient {
   // Método para manejar errores de conexión de forma elegante
   public async safeRequest<T>(
     requestFn: () => Promise<T>,
-    fallback?: T
+    fallback?: T,
   ): Promise<T | null> {
     try {
       return await requestFn();
     } catch (error) {
-      console.error('Safe request failed:', error);
+      console.error("Safe request failed:", error);
       return fallback || null;
     }
   }
@@ -336,9 +381,9 @@ export const useAPIConnection = () => {
     isConnected,
     isChecking,
     checkConnection,
-    retry: checkConnection
+    retry: checkConnection,
   };
 };
 
 // Necesario para los hooks
-import { useState } from 'react';
+import { useState } from "react";

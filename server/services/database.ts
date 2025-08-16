@@ -6,7 +6,7 @@
  * ===================================================================
  */
 
-import { Pool, QueryResult } from 'pg';
+import { Pool, QueryResult } from "pg";
 
 export class DatabaseService {
   private pool: Pool | null = null;
@@ -20,25 +20,28 @@ export class DatabaseService {
     try {
       // Configuración para PostgreSQL/Supabase
       this.pool = new Pool({
-        connectionString: process.env.DATABASE_URL || process.env.SUPABASE_DB_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+        connectionString:
+          process.env.DATABASE_URL || process.env.SUPABASE_DB_URL,
+        ssl:
+          process.env.NODE_ENV === "production"
+            ? { rejectUnauthorized: false }
+            : false,
         max: 20,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 2000,
       });
 
-      this.pool.on('connect', () => {
+      this.pool.on("connect", () => {
         this.isConnected = true;
-        console.log('✅ Database connection established');
+        console.log("✅ Database connection established");
       });
 
-      this.pool.on('error', (err) => {
+      this.pool.on("error", (err) => {
         this.isConnected = false;
-        console.error('❌ Database connection error:', err);
+        console.error("❌ Database connection error:", err);
       });
-
     } catch (error) {
-      console.error('❌ Failed to initialize database connection:', error);
+      console.error("❌ Failed to initialize database connection:", error);
     }
   }
 
@@ -46,29 +49,38 @@ export class DatabaseService {
   // MÉTODOS GENÉRICOS DE CONSULTA
   // ===================================================================
 
-  public async query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
+  public async query<T = any>(
+    text: string,
+    params?: any[],
+  ): Promise<QueryResult<T>> {
     if (!this.pool) {
-      throw new Error('Database pool not initialized');
+      throw new Error("Database pool not initialized");
     }
 
     try {
       const start = Date.now();
       const result = await this.pool.query<T>(text, params);
       const duration = Date.now() - start;
-      
+
       // Log solo en desarrollo
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🔍 Query executed in ${duration}ms:`, text.slice(0, 50) + '...');
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          `🔍 Query executed in ${duration}ms:`,
+          text.slice(0, 50) + "...",
+        );
       }
-      
+
       return result;
     } catch (error) {
-      console.error('❌ Database query error:', error);
+      console.error("❌ Database query error:", error);
       throw error;
     }
   }
 
-  public async queryOne<T = any>(text: string, params?: any[]): Promise<T | null> {
+  public async queryOne<T = any>(
+    text: string,
+    params?: any[],
+  ): Promise<T | null> {
     const result = await this.query<T>(text, params);
     return result.rows[0] || null;
   }
@@ -82,22 +94,28 @@ export class DatabaseService {
   // TRANSACCIONES
   // ===================================================================
 
-  public async transaction<T>(callback: (query: (text: string, params?: any[]) => Promise<QueryResult>) => Promise<T>): Promise<T> {
+  public async transaction<T>(
+    callback: (
+      query: (text: string, params?: any[]) => Promise<QueryResult>,
+    ) => Promise<T>,
+  ): Promise<T> {
     if (!this.pool) {
-      throw new Error('Database pool not initialized');
+      throw new Error("Database pool not initialized");
     }
 
     const client = await this.pool.connect();
-    
+
     try {
-      await client.query('BEGIN');
-      
-      const result = await callback((text: string, params?: any[]) => client.query(text, params));
-      
-      await client.query('COMMIT');
+      await client.query("BEGIN");
+
+      const result = await callback((text: string, params?: any[]) =>
+        client.query(text, params),
+      );
+
+      await client.query("COMMIT");
       return result;
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
@@ -120,13 +138,13 @@ export class DatabaseService {
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
-    
+
     return this.queryOne(query, [
       data.nombre,
       data.email || null,
-      data.estilo || 'balanced',
+      data.estilo || "balanced",
       JSON.stringify(data.perfil_ia || {}),
-      JSON.stringify(data.configuracion || {})
+      JSON.stringify(data.configuracion || {}),
     ]);
   }
 
@@ -144,13 +162,16 @@ export class DatabaseService {
     return this.queryOne(query, [email]);
   }
 
-  public async updatePlayer(id: string, data: {
-    nombre?: string;
-    email?: string;
-    estilo?: string;
-    perfil_ia?: any;
-    configuracion?: any;
-  }): Promise<any> {
+  public async updatePlayer(
+    id: string,
+    data: {
+      nombre?: string;
+      email?: string;
+      estilo?: string;
+      perfil_ia?: any;
+      configuracion?: any;
+    },
+  ): Promise<any> {
     const fields: string[] = [];
     const values: any[] = [];
     let paramCount = 1;
@@ -177,7 +198,7 @@ export class DatabaseService {
     }
 
     if (fields.length === 0) {
-      throw new Error('No fields to update');
+      throw new Error("No fields to update");
     }
 
     fields.push(`actualizado_en = NOW()`);
@@ -185,7 +206,7 @@ export class DatabaseService {
 
     const query = `
       UPDATE jugadores 
-      SET ${fields.join(', ')}
+      SET ${fields.join(", ")}
       WHERE id = $${paramCount} AND activo = true
       RETURNING *
     `;
@@ -209,13 +230,13 @@ export class DatabaseService {
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
-    
+
     return this.queryOne(query, [
       data.jugador_id,
       JSON.stringify(data.estado),
       JSON.stringify(data.configuracion),
-      data.modo_juego || 'classic',
-      data.fase_juego || 'learning'
+      data.modo_juego || "classic",
+      data.fase_juego || "learning",
     ]);
   }
 
@@ -226,16 +247,19 @@ export class DatabaseService {
     return this.queryOne(query, [id]);
   }
 
-  public async updateGame(id: string, data: {
-    estado?: any;
-    puntuacion?: any;
-    turno_actual?: number;
-    fase_juego?: string;
-    resultado?: string;
-    terminada?: boolean;
-    duracion?: number;
-    metadatos?: any;
-  }): Promise<any> {
+  public async updateGame(
+    id: string,
+    data: {
+      estado?: any;
+      puntuacion?: any;
+      turno_actual?: number;
+      fase_juego?: string;
+      resultado?: string;
+      terminada?: boolean;
+      duracion?: number;
+      metadatos?: any;
+    },
+  ): Promise<any> {
     const fields: string[] = [];
     const values: any[] = [];
     let paramCount = 1;
@@ -261,7 +285,10 @@ export class DatabaseService {
       values.push(data.resultado);
     }
     if (data.terminada !== undefined) {
-      fields.push(`terminada = $${paramCount++}`, `terminado_en = ${data.terminada ? 'NOW()' : 'NULL'}`);
+      fields.push(
+        `terminada = $${paramCount++}`,
+        `terminado_en = ${data.terminada ? "NOW()" : "NULL"}`,
+      );
       values.push(data.terminada);
     }
     if (data.duracion !== undefined) {
@@ -274,14 +301,14 @@ export class DatabaseService {
     }
 
     if (fields.length === 0) {
-      throw new Error('No fields to update');
+      throw new Error("No fields to update");
     }
 
     values.push(id);
 
     const query = `
       UPDATE partidas 
-      SET ${fields.join(', ')}
+      SET ${fields.join(", ")}
       WHERE id = $${paramCount}
       RETURNING *
     `;
@@ -289,15 +316,23 @@ export class DatabaseService {
     return this.queryOne(query, values);
   }
 
-  public async getPlayerGames(playerId: string, options: {
-    limit?: number;
-    offset?: number;
-    terminadas_solamente?: boolean;
-    modo_juego?: string;
-  } = {}): Promise<{ games: any[], total: number }> {
-    const { limit = 10, offset = 0, terminadas_solamente, modo_juego } = options;
-    
-    let whereClause = 'WHERE jugador_id = $1';
+  public async getPlayerGames(
+    playerId: string,
+    options: {
+      limit?: number;
+      offset?: number;
+      terminadas_solamente?: boolean;
+      modo_juego?: string;
+    } = {},
+  ): Promise<{ games: any[]; total: number }> {
+    const {
+      limit = 10,
+      offset = 0,
+      terminadas_solamente,
+      modo_juego,
+    } = options;
+
+    let whereClause = "WHERE jugador_id = $1";
     const params: any[] = [playerId];
     let paramCount = 2;
 
@@ -313,8 +348,11 @@ export class DatabaseService {
 
     // Contar total
     const countQuery = `SELECT COUNT(*) as total FROM partidas ${whereClause}`;
-    const totalResult = await this.queryOne<{ total: string }>(countQuery, params);
-    const total = parseInt(totalResult?.total || '0');
+    const totalResult = await this.queryOne<{ total: string }>(
+      countQuery,
+      params,
+    );
+    const total = parseInt(totalResult?.total || "0");
 
     // Obtener partidas
     const gamesQuery = `
@@ -323,7 +361,7 @@ export class DatabaseService {
       ORDER BY creado_en DESC
       LIMIT $${paramCount++} OFFSET $${paramCount++}
     `;
-    
+
     params.push(limit, offset);
     const games = await this.queryMany(gamesQuery, params);
 
@@ -337,7 +375,7 @@ export class DatabaseService {
   public async createMove(data: {
     partida_id: string;
     turno: number;
-    jugador: 'human' | 'ai';
+    jugador: "human" | "ai";
     posicion: [number, number];
     tiempo_reaccion?: number;
     resultado: string;
@@ -353,7 +391,7 @@ export class DatabaseService {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
-    
+
     return this.queryOne(query, [
       data.partida_id,
       data.turno,
@@ -363,7 +401,7 @@ export class DatabaseService {
       data.resultado,
       JSON.stringify(data.contexto || {}),
       data.puntuacion_obtenida || 0,
-      JSON.stringify(data.efectos || [])
+      JSON.stringify(data.efectos || []),
     ]);
   }
 
@@ -401,7 +439,7 @@ export class DatabaseService {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
     `;
-    
+
     return this.queryOne(query, [
       data.partida_id,
       data.turno,
@@ -412,7 +450,7 @@ export class DatabaseService {
       JSON.stringify(data.prediccion_jugador || {}),
       data.personalidad_usada,
       JSON.stringify(data.datos_aprendizaje || {}),
-      data.tiempo_procesamiento
+      data.tiempo_procesamiento,
     ]);
   }
 
@@ -420,28 +458,34 @@ export class DatabaseService {
   // MÉTODOS DE UTILIDAD
   // ===================================================================
 
-  public async healthCheck(): Promise<{ healthy: boolean; timestamp: string; dbVersion?: string }> {
+  public async healthCheck(): Promise<{
+    healthy: boolean;
+    timestamp: string;
+    dbVersion?: string;
+  }> {
     try {
-      const result = await this.queryOne('SELECT version() as version, NOW() as timestamp');
+      const result = await this.queryOne(
+        "SELECT version() as version, NOW() as timestamp",
+      );
       return {
         healthy: true,
         timestamp: result?.timestamp || new Date().toISOString(),
-        dbVersion: result?.version
+        dbVersion: result?.version,
       };
     } catch (error) {
       return {
         healthy: false,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
 
   public async getSystemConfig(key?: string): Promise<any> {
     if (key) {
-      const query = 'SELECT * FROM configuracion_sistema WHERE clave = $1';
+      const query = "SELECT * FROM configuracion_sistema WHERE clave = $1";
       return this.queryOne(query, [key]);
     } else {
-      const query = 'SELECT * FROM configuracion_sistema ORDER BY clave';
+      const query = "SELECT * FROM configuracion_sistema ORDER BY clave";
       return this.queryMany(query);
     }
   }
@@ -455,7 +499,7 @@ export class DatabaseService {
       await this.pool.end();
       this.pool = null;
       this.isConnected = false;
-      console.log('🔐 Database connection closed');
+      console.log("🔐 Database connection closed");
     }
   }
 }

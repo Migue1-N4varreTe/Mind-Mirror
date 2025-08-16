@@ -13,7 +13,7 @@ import {
   getPlayerHistory,
   getPlayerStats,
   deletePlayer,
-  resetPlayerProgress
+  resetPlayerProgress,
 } from "./routes/players";
 
 import {
@@ -27,7 +27,7 @@ import {
   listGames,
   deleteGame,
   toggleGamePause,
-  getGameStatistics
+  getGameStatistics,
 } from "./routes/games";
 
 export function createServer() {
@@ -35,13 +35,13 @@ export function createServer() {
 
   // Middleware
   app.use(cors());
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
   // Request logging middleware (development only)
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     app.use((req, res, next) => {
-      console.log(`${req.method} ${req.path}`, req.body ? '(with body)' : '');
+      console.log(`${req.method} ${req.path}`, req.body ? "(with body)" : "");
       next();
     });
   }
@@ -55,14 +55,14 @@ export function createServer() {
         timestamp: new Date().toISOString(),
         database: dbHealth.healthy ? "connected" : "disconnected",
         version: dbHealth.dbVersion,
-        uptime: process.uptime()
+        uptime: process.uptime(),
       });
     } catch (error) {
       res.status(503).json({
         status: "error",
         timestamp: new Date().toISOString(),
         database: "error",
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
@@ -115,12 +115,12 @@ export function createServer() {
       res.json({
         config,
         success: true,
-        message: "Configuración obtenida exitosamente"
+        message: "Configuración obtenida exitosamente",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Error al obtener configuración"
+        message: "Error al obtener configuración",
       });
     }
   });
@@ -133,19 +133,19 @@ export function createServer() {
       if (!config) {
         return res.status(404).json({
           success: false,
-          message: "Configuración no encontrada"
+          message: "Configuración no encontrada",
         });
       }
 
       res.json({
         config,
         success: true,
-        message: "Configuración obtenida exitosamente"
+        message: "Configuración obtenida exitosamente",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Error al obtener configuración"
+        message: "Error al obtener configuración",
       });
     }
   });
@@ -156,17 +156,19 @@ export function createServer() {
   app.post("/api/ia/reset", async (_req, res) => {
     try {
       // Reset AI learning data
-      await db.query('DELETE FROM sesiones_aprendizaje');
-      await db.query('DELETE FROM analisis_ia WHERE creado_en < NOW() - INTERVAL \'1 day\'');
+      await db.query("DELETE FROM sesiones_aprendizaje");
+      await db.query(
+        "DELETE FROM analisis_ia WHERE creado_en < NOW() - INTERVAL '1 day'",
+      );
 
       res.json({
         success: true,
-        message: "Datos de aprendizaje de IA reseteados exitosamente"
+        message: "Datos de aprendizaje de IA reseteados exitosamente",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Error al resetear IA"
+        message: "Error al resetear IA",
       });
     }
   });
@@ -174,25 +176,32 @@ export function createServer() {
   // ===================================================================
   // ERROR HANDLING MIDDLEWARE
   // ===================================================================
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('Unhandled error:', err);
+  app.use(
+    (
+      err: any,
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction,
+    ) => {
+      console.error("Unhandled error:", err);
 
-    if (res.headersSent) {
-      return next(err);
-    }
+      if (res.headersSent) {
+        return next(err);
+      }
 
-    res.status(err.status || 500).json({
-      success: false,
-      message: err.message || 'Error interno del servidor',
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-    });
-  });
+      res.status(err.status || 500).json({
+        success: false,
+        message: err.message || "Error interno del servidor",
+        ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+      });
+    },
+  );
 
   // 404 handler
   app.use((req, res) => {
     res.status(404).json({
       success: false,
-      message: `Endpoint no encontrado: ${req.method} ${req.path}`
+      message: `Endpoint no encontrado: ${req.method} ${req.path}`,
     });
   });
 

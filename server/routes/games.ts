@@ -18,7 +18,7 @@ import type {
   EndGameRequest,
   EndGameResponse,
   GetGameAnalyticsResponse,
-  GAME_CONFIG_DEFAULTS
+  GAME_CONFIG_DEFAULTS,
 } from "@shared/game-api";
 
 // ===================================================================
@@ -31,7 +31,7 @@ export const createGame: RequestHandler = async (req, res) => {
     if (!jugador_id) {
       return res.status(400).json({
         success: false,
-        message: "ID de jugador requerido"
+        message: "ID de jugador requerido",
       });
     }
 
@@ -40,26 +40,30 @@ export const createGame: RequestHandler = async (req, res) => {
     if (!player) {
       return res.status(404).json({
         success: false,
-        message: "Jugador no encontrado"
+        message: "Jugador no encontrado",
       });
     }
 
     // Usar configuración por defecto si no se proporciona
     const gameConfig = {
       ...GAME_CONFIG_DEFAULTS,
-      ...configuracion
+      ...configuracion,
     };
 
     // Verificar que no hay partidas activas
-    const activeGames = await db.queryMany(`
+    const activeGames = await db.queryMany(
+      `
       SELECT id FROM partidas 
       WHERE jugador_id = $1 AND terminada = false
-    `, [jugador_id]);
+    `,
+      [jugador_id],
+    );
 
     if (activeGames.length > 0) {
       return res.status(409).json({
         success: false,
-        message: "Ya tienes una partida activa. Termina la partida actual antes de iniciar una nueva."
+        message:
+          "Ya tienes una partida activa. Termina la partida actual antes de iniciar una nueva.",
       });
     }
 
@@ -68,7 +72,7 @@ export const createGame: RequestHandler = async (req, res) => {
     const response: CreateGameResponse = {
       game,
       success: true,
-      message: "Partida creada exitosamente"
+      message: "Partida creada exitosamente",
     };
 
     res.status(201).json(response);
@@ -76,7 +80,7 @@ export const createGame: RequestHandler = async (req, res) => {
     console.error("Error creating game:", error);
     res.status(500).json({
       success: false,
-      message: `Error al crear partida: ${error}`
+      message: `Error al crear partida: ${error}`,
     });
   }
 };
@@ -91,7 +95,7 @@ export const getGame: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de partida requerido"
+        message: "ID de partida requerido",
       });
     }
 
@@ -100,7 +104,7 @@ export const getGame: RequestHandler = async (req, res) => {
     const response: GetGameResponse = {
       game,
       success: true,
-      message: game ? "Partida encontrada" : "Partida no encontrada"
+      message: game ? "Partida encontrada" : "Partida no encontrada",
     };
 
     if (!game) {
@@ -112,7 +116,7 @@ export const getGame: RequestHandler = async (req, res) => {
     console.error("Error getting game:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -128,22 +132,31 @@ export const makeMove: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de partida requerido"
+        message: "ID de partida requerido",
       });
     }
 
-    if (!moveRequest.posicion || !Array.isArray(moveRequest.posicion) || moveRequest.posicion.length !== 2) {
+    if (
+      !moveRequest.posicion ||
+      !Array.isArray(moveRequest.posicion) ||
+      moveRequest.posicion.length !== 2
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Posición del movimiento requerida en formato [fila, columna]"
+        message: "Posición del movimiento requerida en formato [fila, columna]",
       });
     }
 
     const [row, col] = moveRequest.posicion;
-    if (typeof row !== 'number' || typeof col !== 'number' || row < 0 || col < 0) {
+    if (
+      typeof row !== "number" ||
+      typeof col !== "number" ||
+      row < 0 ||
+      col < 0
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Posición inválida"
+        message: "Posición inválida",
       });
     }
 
@@ -158,9 +171,9 @@ export const makeMove: RequestHandler = async (req, res) => {
       gameEnded: result.gameEnded,
       winner: result.winner,
       success: true,
-      message: result.gameEnded 
-        ? `Juego terminado. Ganador: ${result.winner}` 
-        : "Movimiento realizado exitosamente"
+      message: result.gameEnded
+        ? `Juego terminado. Ganador: ${result.winner}`
+        : "Movimiento realizado exitosamente",
     };
 
     res.json(response);
@@ -168,7 +181,7 @@ export const makeMove: RequestHandler = async (req, res) => {
     console.error("Error making move:", error);
     res.status(400).json({
       success: false,
-      message: `Error al realizar movimiento: ${error}`
+      message: `Error al realizar movimiento: ${error}`,
     });
   }
 };
@@ -184,7 +197,7 @@ export const endGame: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de partida requerido"
+        message: "ID de partida requerido",
       });
     }
 
@@ -195,7 +208,7 @@ export const endGame: RequestHandler = async (req, res) => {
       analytics: result.analytics,
       achievements: result.achievements,
       success: true,
-      message: "Partida terminada exitosamente"
+      message: "Partida terminada exitosamente",
     };
 
     res.json(response);
@@ -203,7 +216,7 @@ export const endGame: RequestHandler = async (req, res) => {
     console.error("Error ending game:", error);
     res.status(400).json({
       success: false,
-      message: `Error al terminar partida: ${error}`
+      message: `Error al terminar partida: ${error}`,
     });
   }
 };
@@ -218,7 +231,7 @@ export const getGameAnalytics: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de partida requerido"
+        message: "ID de partida requerido",
       });
     }
 
@@ -227,7 +240,7 @@ export const getGameAnalytics: RequestHandler = async (req, res) => {
     const response: GetGameAnalyticsResponse = {
       analytics,
       success: true,
-      message: "Análisis generado exitosamente"
+      message: "Análisis generado exitosamente",
     };
 
     res.json(response);
@@ -235,7 +248,7 @@ export const getGameAnalytics: RequestHandler = async (req, res) => {
     console.error("Error getting game analytics:", error);
     res.status(500).json({
       success: false,
-      message: `Error al generar análisis: ${error}`
+      message: `Error al generar análisis: ${error}`,
     });
   }
 };
@@ -250,7 +263,7 @@ export const getGameMoves: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de partida requerido"
+        message: "ID de partida requerido",
       });
     }
 
@@ -259,13 +272,13 @@ export const getGameMoves: RequestHandler = async (req, res) => {
     res.json({
       moves,
       success: true,
-      message: `${moves.length} movimientos encontrados`
+      message: `${moves.length} movimientos encontrados`,
     });
   } catch (error) {
     console.error("Error getting game moves:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -280,26 +293,29 @@ export const getGameEvents: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de partida requerido"
+        message: "ID de partida requerido",
       });
     }
 
-    const events = await db.queryMany(`
+    const events = await db.queryMany(
+      `
       SELECT * FROM eventos_juego 
       WHERE partida_id = $1 
       ORDER BY timestamp_evento ASC
-    `, [id]);
+    `,
+      [id],
+    );
 
     res.json({
       events,
       success: true,
-      message: `${events.length} eventos encontrados`
+      message: `${events.length} eventos encontrados`,
     });
   } catch (error) {
     console.error("Error getting game events:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -313,14 +329,14 @@ export const listGames: RequestHandler = async (req, res) => {
       jugador_id,
       modo_juego,
       terminada,
-      limit = '10',
-      offset = '0'
+      limit = "10",
+      offset = "0",
     } = req.query;
 
     const limitNum = Math.min(parseInt(limit as string) || 10, 50);
     const offsetNum = parseInt(offset as string) || 0;
 
-    let whereClause = 'WHERE 1=1';
+    let whereClause = "WHERE 1=1";
     const params: any[] = [];
     let paramCount = 1;
 
@@ -336,13 +352,16 @@ export const listGames: RequestHandler = async (req, res) => {
 
     if (terminada !== undefined) {
       whereClause += ` AND terminada = $${paramCount++}`;
-      params.push(terminada === 'true');
+      params.push(terminada === "true");
     }
 
     // Contar total
     const countQuery = `SELECT COUNT(*) as total FROM partidas ${whereClause}`;
-    const totalResult = await db.queryOne<{ total: string }>(countQuery, params);
-    const total = parseInt(totalResult?.total || '0');
+    const totalResult = await db.queryOne<{ total: string }>(
+      countQuery,
+      params,
+    );
+    const total = parseInt(totalResult?.total || "0");
 
     // Obtener partidas
     const gamesQuery = `
@@ -353,7 +372,7 @@ export const listGames: RequestHandler = async (req, res) => {
       ORDER BY p.creado_en DESC
       LIMIT $${paramCount++} OFFSET $${paramCount++}
     `;
-    
+
     params.push(limitNum, offsetNum);
     const games = await db.queryMany(gamesQuery, params);
 
@@ -366,13 +385,13 @@ export const listGames: RequestHandler = async (req, res) => {
       page: currentPage,
       totalPages,
       success: true,
-      message: `${games.length} partidas encontradas`
+      message: `${games.length} partidas encontradas`,
     });
   } catch (error) {
     console.error("Error listing games:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -387,7 +406,7 @@ export const deleteGame: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de partida requerido"
+        message: "ID de partida requerido",
       });
     }
 
@@ -396,22 +415,22 @@ export const deleteGame: RequestHandler = async (req, res) => {
     if (!game) {
       return res.status(404).json({
         success: false,
-        message: "Partida no encontrada"
+        message: "Partida no encontrada",
       });
     }
 
     // Eliminar en cascada (movimientos, análisis, eventos)
-    await db.query('DELETE FROM partidas WHERE id = $1', [id]);
+    await db.query("DELETE FROM partidas WHERE id = $1", [id]);
 
     res.json({
       success: true,
-      message: "Partida eliminada exitosamente"
+      message: "Partida eliminada exitosamente",
     });
   } catch (error) {
     console.error("Error deleting game:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -427,7 +446,7 @@ export const toggleGamePause: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de partida requerido"
+        message: "ID de partida requerido",
       });
     }
 
@@ -435,14 +454,14 @@ export const toggleGamePause: RequestHandler = async (req, res) => {
     if (!game) {
       return res.status(404).json({
         success: false,
-        message: "Partida no encontrada"
+        message: "Partida no encontrada",
       });
     }
 
     if (game.terminada) {
       return res.status(400).json({
         success: false,
-        message: "No se puede pausar una partida terminada"
+        message: "No se puede pausar una partida terminada",
       });
     }
 
@@ -451,20 +470,20 @@ export const toggleGamePause: RequestHandler = async (req, res) => {
       ...game.metadatos,
       pausada: pausar,
       tiempo_pausa: pausar ? new Date().toISOString() : null,
-      tiempo_total_pausado: game.metadatos.tiempo_total_pausado || 0
+      tiempo_total_pausado: game.metadatos.tiempo_total_pausado || 0,
     };
 
     await db.updateGame(id, { metadatos });
 
     res.json({
       success: true,
-      message: pausar ? "Partida pausada" : "Partida reanudada"
+      message: pausar ? "Partida pausada" : "Partida reanudada",
     });
   } catch (error) {
     console.error("Error toggling game pause:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -476,7 +495,7 @@ export const getGameStatistics: RequestHandler = async (req, res) => {
   try {
     const { desde, hasta } = req.query;
 
-    let dateFilter = '';
+    let dateFilter = "";
     const params: any[] = [];
     let paramCount = 1;
 
@@ -526,13 +545,13 @@ export const getGameStatistics: RequestHandler = async (req, res) => {
       general: stats,
       por_modo: modeStats,
       success: true,
-      message: "Estadísticas generadas exitosamente"
+      message: "Estadísticas generadas exitosamente",
     });
   } catch (error) {
     console.error("Error getting game statistics:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };

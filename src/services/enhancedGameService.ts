@@ -6,7 +6,7 @@
  * ===================================================================
  */
 
-import { apiClient } from './apiClient';
+import { apiClient } from "./apiClient";
 import type {
   Player,
   Game,
@@ -15,8 +15,8 @@ import type {
   GameState,
   GameAnalytics,
   Achievement,
-  GAME_CONFIG_DEFAULTS
-} from '@shared/game-api';
+  GAME_CONFIG_DEFAULTS,
+} from "@shared/game-api";
 
 export interface GameSession {
   id: string;
@@ -30,7 +30,8 @@ export interface GameSession {
 
 export class EnhancedGameService {
   private currentSession: GameSession | null = null;
-  private connectionStatus: 'connected' | 'disconnected' | 'error' = 'disconnected';
+  private connectionStatus: "connected" | "disconnected" | "error" =
+    "disconnected";
 
   constructor() {
     this.checkConnection();
@@ -43,16 +44,16 @@ export class EnhancedGameService {
   private async checkConnection(): Promise<void> {
     try {
       const isConnected = await apiClient.checkConnection();
-      this.connectionStatus = isConnected ? 'connected' : 'disconnected';
-      
+      this.connectionStatus = isConnected ? "connected" : "disconnected";
+
       if (!isConnected) {
-        console.warn('🔌 API connection failed, using offline mode');
+        console.warn("🔌 API connection failed, using offline mode");
       } else {
-        console.log('✅ API connection established');
+        console.log("✅ API connection established");
       }
     } catch (error) {
-      this.connectionStatus = 'error';
-      console.error('❌ API connection error:', error);
+      this.connectionStatus = "error";
+      console.error("❌ API connection error:", error);
     }
   }
 
@@ -62,7 +63,7 @@ export class EnhancedGameService {
 
   public async reconnect(): Promise<boolean> {
     await this.checkConnection();
-    return this.connectionStatus === 'connected';
+    return this.connectionStatus === "connected";
   }
 
   // ===================================================================
@@ -76,7 +77,7 @@ export class EnhancedGameService {
   }): Promise<Player> {
     try {
       // Si tenemos conexión, intentar crear/obtener desde API
-      if (this.connectionStatus === 'connected') {
+      if (this.connectionStatus === "connected") {
         // Primero intentar obtener por email si está disponible
         if (playerData.email) {
           const existingPlayer = await this.findPlayerByEmail(playerData.email);
@@ -89,7 +90,7 @@ export class EnhancedGameService {
         const response = await apiClient.createPlayer({
           nombre: playerData.nombre,
           email: playerData.email,
-          estilo: 'balanced'
+          estilo: "balanced",
         });
 
         return response.player;
@@ -98,7 +99,7 @@ export class EnhancedGameService {
         return this.createOfflinePlayer(playerData);
       }
     } catch (error) {
-      console.error('Error creating/getting player:', error);
+      console.error("Error creating/getting player:", error);
       // Fallback a modo offline
       return this.createOfflinePlayer(playerData);
     }
@@ -124,9 +125,9 @@ export class EnhancedGameService {
       id,
       nombre: playerData.nombre,
       email: playerData.email,
-      estilo: 'balanced',
+      estilo: "balanced",
       perfil_ia: {
-        style: 'balanced',
+        style: "balanced",
         patterns: {
           favoritePositions: [],
           avgReactionTime: 2000,
@@ -152,8 +153,8 @@ export class EnhancedGameService {
       },
       configuracion: {
         dificultad_preferida: 0.5,
-        modo_favorito: 'classic',
-        personalidad_ia: 'adaptive',
+        modo_favorito: "classic",
+        personalidad_ia: "adaptive",
         mostrar_heatmap: false,
         mostrar_predicciones: false,
         modo_mentor: false,
@@ -165,18 +166,24 @@ export class EnhancedGameService {
     };
   }
 
-  public async updatePlayerConfig(playerId: string, config: any): Promise<boolean> {
+  public async updatePlayerConfig(
+    playerId: string,
+    config: any,
+  ): Promise<boolean> {
     try {
-      if (this.connectionStatus === 'connected') {
+      if (this.connectionStatus === "connected") {
         await apiClient.updatePlayer(playerId, { configuracion: config });
         return true;
       } else {
         // Guardar en localStorage para modo offline
-        localStorage.setItem(`player_config_${playerId}`, JSON.stringify(config));
+        localStorage.setItem(
+          `player_config_${playerId}`,
+          JSON.stringify(config),
+        );
         return true;
       }
     } catch (error) {
-      console.error('Error updating player config:', error);
+      console.error("Error updating player config:", error);
       return false;
     }
   }
@@ -187,12 +194,12 @@ export class EnhancedGameService {
 
   public async startNewGame(
     player: Player,
-    configuration: GameConfiguration = GAME_CONFIG_DEFAULTS
+    configuration: GameConfiguration = GAME_CONFIG_DEFAULTS,
   ): Promise<GameSession> {
     try {
       let game: Game;
 
-      if (this.connectionStatus === 'connected') {
+      if (this.connectionStatus === "connected") {
         // Crear partida en el backend
         const response = await apiClient.createGame({
           jugador_id: player.id,
@@ -218,12 +225,15 @@ export class EnhancedGameService {
       this.currentSession = session;
       return session;
     } catch (error) {
-      console.error('Error starting new game:', error);
+      console.error("Error starting new game:", error);
       throw new Error(`Failed to start game: ${error}`);
     }
   }
 
-  private createOfflineGame(playerId: string, configuration: GameConfiguration): Game {
+  private createOfflineGame(
+    playerId: string,
+    configuration: GameConfiguration,
+  ): Game {
     const id = `offline_game_${Date.now()}`;
     const now = new Date().toISOString();
 
@@ -233,13 +243,13 @@ export class EnhancedGameService {
       estado: {
         board: this.createInitialBoard(configuration.boardSize),
         specialCells: [],
-        currentPlayer: 'player',
-        gamePhase: 'learning',
+        currentPlayer: "player",
+        gamePhase: "learning",
       },
       configuracion: configuration,
       puntuacion: { jugador: 0, ia: 0 },
       turno_actual: 1,
-      fase_juego: 'learning',
+      fase_juego: "learning",
       modo_juego: configuration.mode,
       terminada: false,
       creado_en: now,
@@ -252,7 +262,7 @@ export class EnhancedGameService {
     for (let i = 0; i < size; i++) {
       const row = [];
       for (let j = 0; j < size; j++) {
-        row.push({ type: 'empty' });
+        row.push({ type: "empty" });
       }
       board.push(row);
     }
@@ -262,7 +272,7 @@ export class EnhancedGameService {
   public async makeMove(
     position: [number, number],
     reactionTime?: number,
-    context?: any
+    context?: any,
   ): Promise<{
     success: boolean;
     move?: Move;
@@ -273,11 +283,11 @@ export class EnhancedGameService {
     error?: string;
   }> {
     if (!this.currentSession) {
-      return { success: false, error: 'No hay sesión activa' };
+      return { success: false, error: "No hay sesión activa" };
     }
 
     try {
-      if (this.connectionStatus === 'connected') {
+      if (this.connectionStatus === "connected") {
         // Procesar movimiento en el backend
         const response = await apiClient.makeMove(this.currentSession.game.id, {
           posicion: position,
@@ -312,15 +322,18 @@ export class EnhancedGameService {
         return this.processOfflineMove(position, reactionTime, context);
       }
     } catch (error) {
-      console.error('Error making move:', error);
-      return { success: false, error: `Error al realizar movimiento: ${error}` };
+      console.error("Error making move:", error);
+      return {
+        success: false,
+        error: `Error al realizar movimiento: ${error}`,
+      };
     }
   }
 
   private processOfflineMove(
     position: [number, number],
     reactionTime?: number,
-    context?: any
+    context?: any,
   ): {
     success: boolean;
     move?: Move;
@@ -331,20 +344,22 @@ export class EnhancedGameService {
     error?: string;
   } {
     if (!this.currentSession) {
-      return { success: false, error: 'No hay sesión activa' };
+      return { success: false, error: "No hay sesión activa" };
     }
 
     try {
       const [row, col] = position;
       const game = this.currentSession.game;
-      
+
       // Validar movimiento
       if (
-        row < 0 || row >= game.estado.board.length ||
-        col < 0 || col >= game.estado.board[0].length ||
-        game.estado.board[row][col].type !== 'empty'
+        row < 0 ||
+        row >= game.estado.board.length ||
+        col < 0 ||
+        col >= game.estado.board[0].length ||
+        game.estado.board[row][col].type !== "empty"
       ) {
-        return { success: false, error: 'Movimiento inválido' };
+        return { success: false, error: "Movimiento inválido" };
       }
 
       // Crear movimiento del jugador
@@ -352,10 +367,10 @@ export class EnhancedGameService {
         id: `offline_move_${Date.now()}`,
         partida_id: game.id,
         turno: game.turno_actual,
-        jugador: 'human',
+        jugador: "human",
         posicion: position,
         tiempo_reaccion: reactionTime,
-        resultado: 'success',
+        resultado: "success",
         contexto: context || {},
         puntuacion_obtenida: 10,
         efectos: [],
@@ -363,24 +378,24 @@ export class EnhancedGameService {
       };
 
       // Aplicar movimiento al tablero
-      game.estado.board[row][col] = { type: 'player' };
-      
+      game.estado.board[row][col] = { type: "player" };
+
       // Generar movimiento de IA simple
       const aiPosition = this.generateSimpleAIMove(game.estado);
       let aiMove: Move | undefined;
 
       if (aiPosition) {
         const [aiRow, aiCol] = aiPosition;
-        game.estado.board[aiRow][aiCol] = { type: 'ai' };
+        game.estado.board[aiRow][aiCol] = { type: "ai" };
 
         aiMove = {
           id: `offline_ai_move_${Date.now()}`,
           partida_id: game.id,
           turno: game.turno_actual,
-          jugador: 'ai',
+          jugador: "ai",
           posicion: aiPosition,
-          resultado: 'success',
-          contexto: { strategy: 'random' },
+          resultado: "success",
+          contexto: { strategy: "random" },
           puntuacion_obtenida: 10,
           efectos: [],
           creado_en: new Date().toISOString(),
@@ -422,17 +437,17 @@ export class EnhancedGameService {
         winner,
       };
     } catch (error) {
-      console.error('Error processing offline move:', error);
+      console.error("Error processing offline move:", error);
       return { success: false, error: `Error en movimiento offline: ${error}` };
     }
   }
 
   private generateSimpleAIMove(gameState: GameState): [number, number] | null {
     const emptyPositions: [number, number][] = [];
-    
+
     for (let i = 0; i < gameState.board.length; i++) {
       for (let j = 0; j < gameState.board[i].length; j++) {
-        if (gameState.board[i][j].type === 'empty') {
+        if (gameState.board[i][j].type === "empty") {
           emptyPositions.push([i, j]);
         }
       }
@@ -449,7 +464,7 @@ export class EnhancedGameService {
     // Verificar si el tablero está lleno
     for (let i = 0; i < gameState.board.length; i++) {
       for (let j = 0; j < gameState.board[i].length; j++) {
-        if (gameState.board[i][j].type === 'empty') {
+        if (gameState.board[i][j].type === "empty") {
           return false;
         }
       }
@@ -458,23 +473,26 @@ export class EnhancedGameService {
   }
 
   private determineWinner(score: { jugador: number; ia: number }): string {
-    if (score.jugador > score.ia) return 'jugador';
-    if (score.ia > score.jugador) return 'ia';
-    return 'empate';
+    if (score.jugador > score.ia) return "jugador";
+    if (score.ia > score.jugador) return "ia";
+    return "empate";
   }
 
-  public async endGame(resultado?: string, razon?: string): Promise<{
+  public async endGame(
+    resultado?: string,
+    razon?: string,
+  ): Promise<{
     success: boolean;
     analytics?: GameAnalytics;
     achievements?: Achievement[];
     error?: string;
   }> {
     if (!this.currentSession) {
-      return { success: false, error: 'No hay sesión activa' };
+      return { success: false, error: "No hay sesión activa" };
     }
 
     try {
-      if (this.connectionStatus === 'connected') {
+      if (this.connectionStatus === "connected") {
         const response = await apiClient.endGame(this.currentSession.game.id, {
           resultado,
           razon,
@@ -494,7 +512,7 @@ export class EnhancedGameService {
         const game = this.currentSession.game;
         game.terminada = true;
         game.terminado_en = new Date().toISOString();
-        
+
         if (resultado) {
           game.resultado = resultado;
         }
@@ -511,19 +529,19 @@ export class EnhancedGameService {
         };
       }
     } catch (error) {
-      console.error('Error ending game:', error);
+      console.error("Error ending game:", error);
       return { success: false, error: `Error al terminar partida: ${error}` };
     }
   }
 
   private generateOfflineAnalytics(): GameAnalytics {
     if (!this.currentSession) {
-      throw new Error('No session available for analytics');
+      throw new Error("No session available for analytics");
     }
 
     const game = this.currentSession.game;
     const moves = this.currentSession.moves;
-    const playerMoves = moves.filter(m => m.jugador === 'human');
+    const playerMoves = moves.filter((m) => m.jugador === "human");
 
     return {
       sessionSummary: {
@@ -535,23 +553,25 @@ export class EnhancedGameService {
         adaptabilityScore: 0.7,
       },
       playerPerformance: {
-        averageReactionTime: playerMoves.reduce((sum, m) => sum + (m.tiempo_reaccion || 2000), 0) / Math.max(playerMoves.length, 1),
+        averageReactionTime:
+          playerMoves.reduce((sum, m) => sum + (m.tiempo_reaccion || 2000), 0) /
+          Math.max(playerMoves.length, 1),
         decisionAccuracy: 0.75,
         patternConsistency: 0.6,
         pressureHandling: 0.7,
-        learningIndicators: ['Partida offline completada'],
+        learningIndicators: ["Partida offline completada"],
       },
       aiPerformance: {
-        strategiesUsed: ['random'],
+        strategiesUsed: ["random"],
         adaptationsMade: 0,
         predictionAccuracy: 0.5,
         challengeLevel: game.configuracion?.difficulty || 0.5,
       },
       insights: {
         keyMoments: [],
-        improvementAreas: ['Conectar a internet para análisis completo'],
-        strengthsShown: ['Jugabilidad offline'],
-        nextRecommendations: ['Sincronizar datos cuando esté online'],
+        improvementAreas: ["Conectar a internet para análisis completo"],
+        strengthsShown: ["Jugabilidad offline"],
+        nextRecommendations: ["Sincronizar datos cuando esté online"],
       },
     };
   }
@@ -564,9 +584,12 @@ export class EnhancedGameService {
     return this.currentSession;
   }
 
-  public async getPlayerHistory(playerId: string, limit: number = 10): Promise<Game[]> {
+  public async getPlayerHistory(
+    playerId: string,
+    limit: number = 10,
+  ): Promise<Game[]> {
     try {
-      if (this.connectionStatus === 'connected') {
+      if (this.connectionStatus === "connected") {
         const response = await apiClient.getPlayerHistory(playerId, { limit });
         return response.games;
       } else {
@@ -575,21 +598,21 @@ export class EnhancedGameService {
         return offlineHistory ? JSON.parse(offlineHistory) : [];
       }
     } catch (error) {
-      console.error('Error getting player history:', error);
+      console.error("Error getting player history:", error);
       return [];
     }
   }
 
   public async getGameAnalytics(gameId: string): Promise<GameAnalytics | null> {
     try {
-      if (this.connectionStatus === 'connected') {
+      if (this.connectionStatus === "connected") {
         const response = await apiClient.getGameAnalytics(gameId);
         return response.analytics;
       } else {
         return null;
       }
     } catch (error) {
-      console.error('Error getting game analytics:', error);
+      console.error("Error getting game analytics:", error);
       return null;
     }
   }
@@ -599,24 +622,27 @@ export class EnhancedGameService {
   // ===================================================================
 
   public async syncOfflineData(): Promise<boolean> {
-    if (this.connectionStatus !== 'connected') {
+    if (this.connectionStatus !== "connected") {
       return false;
     }
 
     try {
       // TODO: Implementar sincronización de datos offline
-      console.log('🔄 Sincronizando datos offline...');
+      console.log("🔄 Sincronizando datos offline...");
       return true;
     } catch (error) {
-      console.error('Error syncing offline data:', error);
+      console.error("Error syncing offline data:", error);
       return false;
     }
   }
 
   public hasOfflineData(): boolean {
     // Verificar si hay datos offline pendientes de sincronización
-    const keys = Object.keys(localStorage).filter(key => 
-      key.startsWith('offline_') || key.startsWith('game_history_') || key.startsWith('player_config_')
+    const keys = Object.keys(localStorage).filter(
+      (key) =>
+        key.startsWith("offline_") ||
+        key.startsWith("game_history_") ||
+        key.startsWith("player_config_"),
     );
     return keys.length > 0;
   }

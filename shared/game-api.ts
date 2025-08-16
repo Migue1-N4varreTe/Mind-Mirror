@@ -45,7 +45,7 @@ export interface Move {
   id: string;
   partida_id: string;
   turno: number;
-  jugador: 'human' | 'ai';
+  jugador: "human" | "ai";
   posicion: [number, number];
   tiempo_reaccion?: number;
   resultado: MoveResult;
@@ -74,12 +74,30 @@ export interface AIAnalysis {
 // TIPOS ESPECÍFICOS
 // ===================================================================
 
-export type PlayerStyle = 'aggressive' | 'defensive' | 'creative' | 'predictable' | 'risky' | 'balanced';
-export type GamePhase = 'learning' | 'mirror' | 'evolution' | 'mastery';
-export type GameMode = 'classic' | 'mirror' | 'shadow' | 'rulebreaker' | 'infinite' | 'tutorial';
-export type GameResult = 'jugador' | 'ia' | 'empate';
-export type MoveResult = 'success' | 'blocked' | 'combo' | 'special';
-export type AIPersonality = 'mirror' | 'shadow' | 'adaptive' | 'chameleon' | 'hunter' | 'sage';
+export type PlayerStyle =
+  | "aggressive"
+  | "defensive"
+  | "creative"
+  | "predictable"
+  | "risky"
+  | "balanced";
+export type GamePhase = "learning" | "mirror" | "evolution" | "mastery";
+export type GameMode =
+  | "classic"
+  | "mirror"
+  | "shadow"
+  | "rulebreaker"
+  | "infinite"
+  | "tutorial";
+export type GameResult = "jugador" | "ia" | "empate";
+export type MoveResult = "success" | "blocked" | "combo" | "special";
+export type AIPersonality =
+  | "mirror"
+  | "shadow"
+  | "adaptive"
+  | "chameleon"
+  | "hunter"
+  | "sage";
 
 export interface PlayerProfile {
   style: PlayerStyle;
@@ -120,12 +138,12 @@ export interface PlayerConfig {
 export interface GameState {
   board: CellState[][];
   specialCells: SpecialCell[];
-  currentPlayer: 'player' | 'ai';
+  currentPlayer: "player" | "ai";
   gamePhase: GamePhase;
 }
 
 export interface CellState {
-  type: 'empty' | 'player' | 'ai' | 'special';
+  type: "empty" | "player" | "ai" | "special";
   value?: number;
   effects?: string[];
 }
@@ -375,28 +393,28 @@ export interface APIResponse<T = any> {
 
 export const API_ENDPOINTS = {
   // Jugadores
-  PLAYERS: '/api/jugadores',
+  PLAYERS: "/api/jugadores",
   PLAYER_BY_ID: (id: string) => `/api/jugadores/${id}`,
   PLAYER_ANALYSIS: (id: string) => `/api/jugadores/${id}/analisis`,
   PLAYER_HISTORY: (id: string) => `/api/jugadores/${id}/historial`,
-  
+
   // Partidas
-  GAMES: '/api/partidas',
+  GAMES: "/api/partidas",
   GAME_BY_ID: (id: string) => `/api/partidas/${id}`,
   GAME_MOVE: (id: string) => `/api/partidas/${id}/turno`,
   GAME_END: (id: string) => `/api/partidas/${id}/terminar`,
   GAME_ANALYTICS: (id: string) => `/api/partidas/${id}/analytics`,
-  
+
   // Sistema
-  HEALTH: '/api/health',
-  CONFIG: '/api/config',
-  RESET_AI: '/api/ia/reset',
+  HEALTH: "/api/health",
+  CONFIG: "/api/config",
+  RESET_AI: "/api/ia/reset",
 } as const;
 
 export const GAME_CONFIG_DEFAULTS: GameConfiguration = {
-  mode: 'classic',
+  mode: "classic",
   difficulty: 0.5,
-  aiPersonality: 'adaptive',
+  aiPersonality: "adaptive",
   boardSize: 8,
   timeLimit: 30,
   specialCellFrequency: 0.1,
@@ -407,8 +425,8 @@ export const GAME_CONFIG_DEFAULTS: GameConfiguration = {
 
 export const PLAYER_CONFIG_DEFAULTS: PlayerConfig = {
   dificultad_preferida: 0.5,
-  modo_favorito: 'classic',
-  personalidad_ia: 'adaptive',
+  modo_favorito: "classic",
+  personalidad_ia: "adaptive",
   mostrar_heatmap: false,
   mostrar_predicciones: false,
   modo_mentor: false,

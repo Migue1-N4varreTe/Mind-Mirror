@@ -15,7 +15,7 @@ import type {
   UpdatePlayerRequest,
   UpdatePlayerResponse,
   GetPlayerAnalysisResponse,
-  PLAYER_CONFIG_DEFAULTS
+  PLAYER_CONFIG_DEFAULTS,
 } from "@shared/game-api";
 
 // ===================================================================
@@ -23,12 +23,16 @@ import type {
 // ===================================================================
 export const createPlayer: RequestHandler = async (req, res) => {
   try {
-    const { nombre, email, estilo = 'balanced' }: CreatePlayerRequest = req.body;
+    const {
+      nombre,
+      email,
+      estilo = "balanced",
+    }: CreatePlayerRequest = req.body;
 
     if (!nombre || nombre.trim().length === 0) {
       return res.status(400).json({
         success: false,
-        message: "El nombre es requerido"
+        message: "El nombre es requerido",
       });
     }
 
@@ -38,7 +42,7 @@ export const createPlayer: RequestHandler = async (req, res) => {
       if (existingPlayer) {
         return res.status(409).json({
           success: false,
-          message: "Ya existe un jugador con este email"
+          message: "Ya existe un jugador con este email",
         });
       }
     }
@@ -68,13 +72,13 @@ export const createPlayer: RequestHandler = async (req, res) => {
       email: email?.trim(),
       estilo,
       perfil_ia: initialProfile,
-      configuracion: PLAYER_CONFIG_DEFAULTS
+      configuracion: PLAYER_CONFIG_DEFAULTS,
     });
 
     const response: CreatePlayerResponse = {
       player,
       success: true,
-      message: "Jugador creado exitosamente"
+      message: "Jugador creado exitosamente",
     };
 
     res.status(201).json(response);
@@ -82,7 +86,7 @@ export const createPlayer: RequestHandler = async (req, res) => {
     console.error("Error creating player:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -97,7 +101,7 @@ export const getPlayer: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de jugador requerido"
+        message: "ID de jugador requerido",
       });
     }
 
@@ -106,7 +110,7 @@ export const getPlayer: RequestHandler = async (req, res) => {
     const response: GetPlayerResponse = {
       player,
       success: true,
-      message: player ? "Jugador encontrado" : "Jugador no encontrado"
+      message: player ? "Jugador encontrado" : "Jugador no encontrado",
     };
 
     if (!player) {
@@ -118,7 +122,7 @@ export const getPlayer: RequestHandler = async (req, res) => {
     console.error("Error getting player:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -134,7 +138,7 @@ export const updatePlayer: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de jugador requerido"
+        message: "ID de jugador requerido",
       });
     }
 
@@ -143,7 +147,7 @@ export const updatePlayer: RequestHandler = async (req, res) => {
     if (!existingPlayer) {
       return res.status(404).json({
         success: false,
-        message: "Jugador no encontrado"
+        message: "Jugador no encontrado",
       });
     }
 
@@ -154,7 +158,7 @@ export const updatePlayer: RequestHandler = async (req, res) => {
       if (!updateData.nombre.trim()) {
         return res.status(400).json({
           success: false,
-          message: "El nombre no puede estar vacío"
+          message: "El nombre no puede estar vacío",
         });
       }
       dataToUpdate.nombre = updateData.nombre.trim();
@@ -166,7 +170,7 @@ export const updatePlayer: RequestHandler = async (req, res) => {
         if (emailExists) {
           return res.status(409).json({
             success: false,
-            message: "Ya existe un jugador con este email"
+            message: "Ya existe un jugador con este email",
           });
         }
       }
@@ -181,7 +185,7 @@ export const updatePlayer: RequestHandler = async (req, res) => {
       // Merge con configuración existente
       dataToUpdate.configuracion = {
         ...existingPlayer.configuracion,
-        ...updateData.configuracion
+        ...updateData.configuracion,
       };
     }
 
@@ -190,7 +194,7 @@ export const updatePlayer: RequestHandler = async (req, res) => {
     const response: UpdatePlayerResponse = {
       player: updatedPlayer,
       success: true,
-      message: "Jugador actualizado exitosamente"
+      message: "Jugador actualizado exitosamente",
     };
 
     res.json(response);
@@ -198,7 +202,7 @@ export const updatePlayer: RequestHandler = async (req, res) => {
     console.error("Error updating player:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -213,31 +217,34 @@ export const getPlayerAnalysis: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de jugador requerido"
+        message: "ID de jugador requerido",
       });
     }
 
     // Obtener perfil completo usando la función de la DB
     const fullProfile = await db.queryOne(
-      'SELECT obtener_perfil_jugador($1) as perfil',
-      [id]
+      "SELECT obtener_perfil_jugador($1) as perfil",
+      [id],
     );
 
     if (!fullProfile?.perfil) {
       return res.status(404).json({
         success: false,
-        message: "Jugador no encontrado"
+        message: "Jugador no encontrado",
       });
     }
 
     const profileData = fullProfile.perfil;
 
     // Obtener logros del jugador
-    const achievements = await db.queryMany(`
+    const achievements = await db.queryMany(
+      `
       SELECT * FROM logros 
       WHERE jugador_id = $1 
       ORDER BY desbloqueado_en DESC
-    `, [id]);
+    `,
+      [id],
+    );
 
     const response: GetPlayerAnalysisResponse = {
       profile: profileData.jugador?.perfil_ia || {},
@@ -245,7 +252,7 @@ export const getPlayerAnalysis: RequestHandler = async (req, res) => {
       learningSession: profileData.aprendizaje_ia || {},
       achievements: achievements,
       success: true,
-      message: "Análisis obtenido exitosamente"
+      message: "Análisis obtenido exitosamente",
     };
 
     res.json(response);
@@ -253,7 +260,7 @@ export const getPlayerAnalysis: RequestHandler = async (req, res) => {
     console.error("Error getting player analysis:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -265,28 +272,28 @@ export const getPlayerHistory: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      limit = '10',
-      offset = '0',
+      limit = "10",
+      offset = "0",
       modo_juego,
-      terminadas_solamente = 'true'
+      terminadas_solamente = "true",
     } = req.query;
 
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de jugador requerido"
+        message: "ID de jugador requerido",
       });
     }
 
     const limitNum = parseInt(limit as string) || 10;
     const offsetNum = parseInt(offset as string) || 0;
-    const terminadas = terminadas_solamente === 'true';
+    const terminadas = terminadas_solamente === "true";
 
     const { games, total } = await db.getPlayerGames(id, {
       limit: Math.min(limitNum, 50), // Máximo 50 por página
       offset: offsetNum,
       modo_juego: modo_juego as string,
-      terminadas_solamente: terminadas
+      terminadas_solamente: terminadas,
     });
 
     const totalPages = Math.ceil(total / limitNum);
@@ -298,13 +305,13 @@ export const getPlayerHistory: RequestHandler = async (req, res) => {
       page: currentPage,
       totalPages,
       success: true,
-      message: `${games.length} partidas encontradas`
+      message: `${games.length} partidas encontradas`,
     });
   } catch (error) {
     console.error("Error getting player history:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -319,7 +326,7 @@ export const getPlayerStats: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de jugador requerido"
+        message: "ID de jugador requerido",
       });
     }
 
@@ -327,7 +334,7 @@ export const getPlayerStats: RequestHandler = async (req, res) => {
     if (!player) {
       return res.status(404).json({
         success: false,
-        message: "Jugador no encontrado"
+        message: "Jugador no encontrado",
       });
     }
 
@@ -349,16 +356,20 @@ export const getPlayerStats: RequestHandler = async (req, res) => {
     const statsResponse = {
       basic: player.estadisticas,
       recent: {
-        total_partidas_30d: parseInt(recentStats?.total_recientes || '0'),
-        partidas_ganadas_30d: parseInt(recentStats?.ganadas_recientes || '0'),
-        puntuacion_promedio_30d: Math.round(parseFloat(recentStats?.puntuacion_promedio_reciente || '0')),
-        duracion_promedio_30d: Math.round(parseFloat(recentStats?.duracion_promedio || '0')),
-        racha_actual: 0 // TODO: calcular racha actual
+        total_partidas_30d: parseInt(recentStats?.total_recientes || "0"),
+        partidas_ganadas_30d: parseInt(recentStats?.ganadas_recientes || "0"),
+        puntuacion_promedio_30d: Math.round(
+          parseFloat(recentStats?.puntuacion_promedio_reciente || "0"),
+        ),
+        duracion_promedio_30d: Math.round(
+          parseFloat(recentStats?.duracion_promedio || "0"),
+        ),
+        racha_actual: 0, // TODO: calcular racha actual
       },
       profile: player.perfil_ia,
       config: player.configuracion,
       success: true,
-      message: "Estadísticas obtenidas exitosamente"
+      message: "Estadísticas obtenidas exitosamente",
     };
 
     res.json(statsResponse);
@@ -366,7 +377,7 @@ export const getPlayerStats: RequestHandler = async (req, res) => {
     console.error("Error getting player stats:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -381,7 +392,7 @@ export const deletePlayer: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de jugador requerido"
+        message: "ID de jugador requerido",
       });
     }
 
@@ -389,7 +400,7 @@ export const deletePlayer: RequestHandler = async (req, res) => {
     if (!player) {
       return res.status(404).json({
         success: false,
-        message: "Jugador no encontrado"
+        message: "Jugador no encontrado",
       });
     }
 
@@ -398,13 +409,13 @@ export const deletePlayer: RequestHandler = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Jugador eliminado exitosamente"
+      message: "Jugador eliminado exitosamente",
     });
   } catch (error) {
     console.error("Error deleting player:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };
@@ -419,7 +430,7 @@ export const resetPlayerProgress: RequestHandler = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "ID de jugador requerido"
+        message: "ID de jugador requerido",
       });
     }
 
@@ -427,13 +438,13 @@ export const resetPlayerProgress: RequestHandler = async (req, res) => {
     if (!player) {
       return res.status(404).json({
         success: false,
-        message: "Jugador no encontrado"
+        message: "Jugador no encontrado",
       });
     }
 
     // Resetear estadísticas y perfil de IA
     const resetProfile = {
-      style: 'balanced',
+      style: "balanced",
       patterns: {
         favoritePositions: [],
         avgReactionTime: 2000,
@@ -456,30 +467,29 @@ export const resetPlayerProgress: RequestHandler = async (req, res) => {
       partidas_ganadas: 0,
       puntuacion_promedio: 0,
       tiempo_reaccion_promedio: 0,
-      nivel_habilidad: 1
+      nivel_habilidad: 1,
     };
 
     await db.updatePlayer(id, {
       perfil_ia: resetProfile,
       estadisticas: resetStats,
-      estilo: 'balanced'
+      estilo: "balanced",
     });
 
     // También eliminar sesiones de aprendizaje
-    await db.query(
-      'DELETE FROM sesiones_aprendizaje WHERE jugador_id = $1',
-      [id]
-    );
+    await db.query("DELETE FROM sesiones_aprendizaje WHERE jugador_id = $1", [
+      id,
+    ]);
 
     res.json({
       success: true,
-      message: "Progreso del jugador reseteado exitosamente"
+      message: "Progreso del jugador reseteado exitosamente",
     });
   } catch (error) {
     console.error("Error resetting player progress:", error);
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "Error interno del servidor",
     });
   }
 };

@@ -17,35 +17,56 @@ import {
   Play,
   User,
   Wifi,
-  WifiOff
+  WifiOff,
 } from "lucide-react";
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../config/firebase';
-import { useGameStore } from '../store/gameStore';
-import EnhancedGameBoard from '../components/game/EnhancedGameBoard';
-import GameEndModal from '@/components/GameEndModal';
-import AuthModal from '../components/auth/AuthModal';
-import { enhancedGameService, type GameSession } from '../services/enhancedGameService';
-import { useAPIConnection } from '../services/apiClient';
-import { AchievementSystem, type Achievement, type GameEndData } from '@/lib/achievementSystem';
-import type { Player, GameConfiguration, GAME_CONFIG_DEFAULTS } from '@shared/game-api';
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../config/firebase";
+import { useGameStore } from "../store/gameStore";
+import EnhancedGameBoard from "../components/game/EnhancedGameBoard";
+import GameEndModal from "@/components/GameEndModal";
+import AuthModal from "../components/auth/AuthModal";
+import {
+  enhancedGameService,
+  type GameSession,
+} from "../services/enhancedGameService";
+import { useAPIConnection } from "../services/apiClient";
+import {
+  AchievementSystem,
+  type Achievement,
+  type GameEndData,
+} from "@/lib/achievementSystem";
+import type {
+  Player,
+  GameConfiguration,
+  GAME_CONFIG_DEFAULTS,
+} from "@shared/game-api";
 
 export default function Game() {
   const [user, loading] = useAuthState(auth);
-  const { showHeatmap, showPredictions, mentorMode, toggleHeatmap, togglePredictions, toggleMentorMode } = useGameStore();
+  const {
+    showHeatmap,
+    showPredictions,
+    mentorMode,
+    toggleHeatmap,
+    togglePredictions,
+    toggleMentorMode,
+  } = useGameStore();
   const { isConnected, isChecking, checkConnection } = useAPIConnection();
 
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('play');
+  const [activeTab, setActiveTab] = useState("play");
   const [gameEndData, setGameEndData] = useState<GameEndData | null>(null);
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
   const [showGameEndModal, setShowGameEndModal] = useState(false);
   const [achievementSystem] = useState(new AchievementSystem());
 
   // New state for enhanced game management
-  const [currentSession, setCurrentSession] = useState<GameSession | null>(null);
+  const [currentSession, setCurrentSession] = useState<GameSession | null>(
+    null,
+  );
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
-  const [gameConfiguration, setGameConfiguration] = useState<GameConfiguration>(GAME_CONFIG_DEFAULTS);
+  const [gameConfiguration, setGameConfiguration] =
+    useState<GameConfiguration>(GAME_CONFIG_DEFAULTS);
   const [isStartingGame, setIsStartingGame] = useState(false);
 
   // Check connection status on mount
@@ -68,13 +89,13 @@ export default function Game() {
 
     try {
       const player = await enhancedGameService.createOrGetPlayer({
-        nombre: user.displayName || 'Jugador',
+        nombre: user.displayName || "Jugador",
         email: user.email || undefined,
-        userId: user.uid
+        userId: user.uid,
       });
       setCurrentPlayer(player);
     } catch (error) {
-      console.error('Error initializing player:', error);
+      console.error("Error initializing player:", error);
     }
   };
 
@@ -91,11 +112,14 @@ export default function Game() {
 
     setIsStartingGame(true);
     try {
-      const session = await enhancedGameService.startNewGame(currentPlayer, gameConfiguration);
+      const session = await enhancedGameService.startNewGame(
+        currentPlayer,
+        gameConfiguration,
+      );
       setCurrentSession(session);
-      setActiveTab('play');
+      setActiveTab("play");
     } catch (error) {
-      console.error('Error starting game:', error);
+      console.error("Error starting game:", error);
       // TODO: Show error message to user
     } finally {
       setIsStartingGame(false);
@@ -105,19 +129,22 @@ export default function Game() {
   const handleGameEnd = async (gameData: any) => {
     try {
       // End game through enhanced service
-      const result = await enhancedGameService.endGame(gameData.winner, gameData.reason);
+      const result = await enhancedGameService.endGame(
+        gameData.winner,
+        gameData.reason,
+      );
 
       if (result.success) {
         setGameEndData({
           ...gameData,
-          analytics: result.analytics
+          analytics: result.analytics,
         });
         setNewAchievements(result.achievements || []);
         setCurrentSession(null);
         setShowGameEndModal(true);
       }
     } catch (error) {
-      console.error('Error ending game:', error);
+      console.error("Error ending game:", error);
       // Fallback to local handling
       const achievements = achievementSystem.checkAchievements(gameData);
       setGameEndData(gameData);
@@ -159,15 +186,30 @@ export default function Game() {
             {/* Connection Status */}
             <Badge
               variant="outline"
-              className={isConnected ? "text-neon-green border-neon-green" : "text-orange-400 border-orange-400"}
+              className={
+                isConnected
+                  ? "text-neon-green border-neon-green"
+                  : "text-orange-400 border-orange-400"
+              }
             >
-              {isConnected ? <Wifi className="w-3 h-3 mr-1" /> : <WifiOff className="w-3 h-3 mr-1" />}
-              {isChecking ? 'Conectando...' : isConnected ? 'Online' : 'Offline'}
+              {isConnected ? (
+                <Wifi className="w-3 h-3 mr-1" />
+              ) : (
+                <WifiOff className="w-3 h-3 mr-1" />
+              )}
+              {isChecking
+                ? "Conectando..."
+                : isConnected
+                  ? "Online"
+                  : "Offline"}
             </Badge>
 
             {user ? (
-              <Badge variant="outline" className="text-neon-cyan border-neon-cyan">
-                {user.displayName || 'Jugador'}
+              <Badge
+                variant="outline"
+                className="text-neon-cyan border-neon-cyan"
+              >
+                {user.displayName || "Jugador"}
               </Badge>
             ) : (
               <Button
@@ -182,7 +224,11 @@ export default function Game() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="play">Jugar</TabsTrigger>
             <TabsTrigger value="modes">Modos</TabsTrigger>
@@ -205,14 +251,17 @@ export default function Game() {
                   transition={{ duration: 0.5 }}
                 >
                   <Brain className="w-24 h-24 mx-auto text-neon-cyan mb-6 animate-pulse" />
-                  <h2 className="text-2xl font-bold mb-4">¿Listo para el Desafío?</h2>
+                  <h2 className="text-2xl font-bold mb-4">
+                    ¿Listo para el Desafío?
+                  </h2>
                   <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                     Enfréntate a una IA que aprende de cada movimiento que haces
                   </p>
                   {!isConnected && (
                     <div className="bg-orange-400/10 border border-orange-400/20 rounded-lg p-4 mb-6 max-w-md mx-auto">
                       <p className="text-orange-400 text-sm">
-                        Modo offline: Las partidas se guardarán localmente y se sincronizarán cuando te conectes
+                        Modo offline: Las partidas se guardarán localmente y se
+                        sincronizarán cuando te conectes
                       </p>
                     </div>
                   )}
@@ -223,7 +272,7 @@ export default function Game() {
                     className="bg-neon-cyan text-background hover:bg-neon-cyan/90 glow"
                   >
                     <Play className="w-5 h-5 mr-2" />
-                    {isStartingGame ? 'Iniciando...' : 'Iniciar Partida'}
+                    {isStartingGame ? "Iniciando..." : "Iniciar Partida"}
                   </Button>
                 </motion.div>
               </div>
@@ -302,7 +351,7 @@ export default function Game() {
                       variant={showHeatmap ? "default" : "outline"}
                       onClick={toggleHeatmap}
                     >
-                      {showHeatmap ? 'Activado' : 'Desactivado'}
+                      {showHeatmap ? "Activado" : "Desactivado"}
                     </Button>
                   </div>
                 </CardContent>
@@ -323,7 +372,7 @@ export default function Game() {
                       variant={showPredictions ? "default" : "outline"}
                       onClick={togglePredictions}
                     >
-                      {showPredictions ? 'Activado' : 'Desactivado'}
+                      {showPredictions ? "Activado" : "Desactivado"}
                     </Button>
                   </div>
                 </CardContent>
@@ -344,7 +393,7 @@ export default function Game() {
                       variant={mentorMode ? "default" : "outline"}
                       onClick={toggleMentorMode}
                     >
-                      {mentorMode ? 'Activado' : 'Desactivado'}
+                      {mentorMode ? "Activado" : "Desactivado"}
                     </Button>
                   </div>
                 </CardContent>
@@ -390,9 +439,9 @@ export default function Game() {
       )}
 
       {/* Auth Modal */}
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
       />
     </div>
   );
