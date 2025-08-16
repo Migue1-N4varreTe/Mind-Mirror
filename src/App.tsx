@@ -12,7 +12,7 @@ import { auth } from './config/firebase';
 import { getUserProfile } from './services/authService';
 import { useGameStore } from './store/gameStore';
 import Header from './components/layout/Header';
-import Index from "./pages/Index";
+import IndexSimple from "./pages/IndexSimple";
 import Game from "./pages/Game";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
@@ -57,7 +57,7 @@ const AppContent = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<IndexSimple />} />
           <Route path="/game" element={<Game />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />
