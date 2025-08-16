@@ -1,369 +1,362 @@
-# Mind Mirror - Juego Web Interactivo
+# 🧠 Mind Mirror - Juego de IA Adaptativa
 
-Una aplicación web de juego estratégico donde una IA aprende de tus patrones de juego y evoluciona para desafiarte de maneras únicas.
+Mind Mirror es un juego innovador donde una IA aprende de tu estilo de juego en tiempo real, adaptándose continuamente para ofrecerte desafíos personalizados.
 
-## 🚀 Características Principales
+## 🎮 Características Principales
 
-### 🎮 Motor de Juego Avanzado
-- **IA Multi-Personalidad**: 5 tipos diferentes de IA (Camaleón, Psicólogo, Vengativo, Empático, Evolucionado)
-- **Fases de Evolución**: Aprendizaje → Espejo → Evolución
-- **Celdas Especiales**: 18 tipos diferentes con efectos únicos
-- **Sistema de Combos**: Detección automática de patrones y multiplicadores
+- **IA Adaptativa**: Motor de IA que aprende y se adapta a tu estilo de juego
+- **Múltiples Personalidades de IA**: Mirror, Shadow, Hunter, Sage, Chameleon
+- **Análisis en Tiempo Real**: Heatmaps, predicciones y análisis de patrones
+- **Sistema de Progreso**: Logros, estadísticas y perfiles de jugador
+- **Modo Offline**: Juega sin conexión, sincroniza cuando te conectes
+- **Arquitectura Full-Stack**: Frontend React + Backend Express + PostgreSQL
 
-### 🧠 Análisis Inteligente
-- **Heatmaps de Decisiones**: Visualización en tiempo real de patrones de juego
-- **Predictor de Movimientos**: IA predice tus próximos movimientos
-- **Análisis Emocional**: Detección del estado emocional del jugador
-- **Temas Dinámicos**: 6 temas que cambian según tu estado emocional
+## 🏗️ Arquitectura
 
-### 🏆 Sistema de Progresión
-- **Sistema de Logros**: 25+ logros con diferentes raridades
-- **Niveles y XP**: Progresión basada en rendimiento
-- **Títulos Desbloqueables**: Títulos especiales por logros específicos
-- **Estadísticas Detalladas**: Tracking completo de rendimiento
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    MIND MIRROR ARCHITECTURE                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────┐ │
+│  │    Frontend     │    │    Backend      │    │Database │ │
+│  │   React + TS    │◄──►│  Express + TS   │◄──►│PostgreSQL│ │
+│  │                 │    │                 │    │Supabase │ │
+│  │ • Game UI       │    │ • REST API      │    │         │ │
+│  │ • AI Feedback   │    │ • Game Logic    │    │ • Games │ │
+│  │ • Analytics     │    │ • AI Engine     │    │ • Players│ │
+│  │ • Offline Mode  │    │ • Analytics     │    │ • AI Data│ │
+│  └─────────────────┘    └─────────────────┘    └─────────┘ │
+│           │                       │                        │
+│  ┌───────────────��─┐    ┌─────────────────┐               │
+│  │   Deployment    │    │   AI Services   │               │
+│  │                 │    │                 │               │
+│  │ • Netlify SPA   │    │ • Pattern Analyzer              │
+│  │ • Serverless    │    │ • Decision Engine               │
+│  │ • Auto Deploy   │    │ • Learning Module               │
+│  │ • Edge Cache    │    │ • Personality System            │
+│  └─────────────────┘    └─────────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### 🌐 Funcionalidades Sociales
-- **Rankings Globales**: Compite con jugadores de todo el mundo
-- **Sistema de Amigos**: Conecta y desafía a otros jugadores
-- **Eventos Temporales**: Eventos especiales con recompensas únicas
-- **Torneos**: Competencias organizadas con premios
+## 🚀 Inicio Rápido
 
-## 🛠️ Stack Tecnológico
+### Desarrollo Local
 
-### Frontend
-- **React 18** con TypeScript
-- **Tailwind CSS** para estilos
-- **Framer Motion** para animaciones
-- **Zustand** para manejo de estado
-- **React Router 6** para navegación
-
-### Backend & Autenticación
-- **Firebase Authentication** (Email + Google)
-- **Firestore** para base de datos
-- **Firebase Analytics** para métricas
-
-### Herramientas de Desarrollo
-- **Vite** como bundler
-- **Vitest** para testing
-- **ESLint + Prettier** para calidad de código
-
-## 📦 Instalación y Configuración
-
-### 1. Clonar el Repositorio
 ```bash
-git clone <repository-url>
+# 1. Clonar repositorio
+git clone https://github.com/tuusuario/mind-mirror.git
 cd mind-mirror
+
+# 2. Instalar dependencias
 npm install
-```
 
-### 2. Configurar Firebase
-
-1. Crear un proyecto en [Firebase Console](https://console.firebase.google.com/)
-2. Habilitar Authentication (Email/Password y Google)
-3. Crear una base de datos Firestore
-4. Copiar las credenciales de configuración
-
-### 3. Variables de Entorno
-
-Copiar `.env.example` a `.env` y completar con tus credenciales de Firebase:
-
-```bash
+# 3. Configurar variables de entorno
 cp .env.example .env
-```
+# Editar .env con tus configuraciones
 
-Editar `.env`:
-```env
-VITE_FIREBASE_API_KEY=tu_api_key
-VITE_FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=tu_project_id
-VITE_FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
-VITE_FIREBASE_APP_ID=tu_app_id
-VITE_FIREBASE_MEASUREMENT_ID=tu_measurement_id
-```
-
-### 4. Configurar Firestore
-
-Crear las siguientes colecciones en Firestore:
-
-#### Colección `users`
-```javascript
-{
-  uid: string,
-  email: string,
-  displayName: string,
-  level: number,
-  xp: number,
-  totalGames: number,
-  gamesWon: number,
-  createdAt: timestamp,
-  lastLogin: timestamp,
-  preferences: {
-    theme: string,
-    difficulty: string,
-    soundEnabled: boolean,
-    visualEffects: boolean
-  },
-  stats: {
-    totalScore: number,
-    averageReactionTime: number,
-    bestReactionTime: number,
-    combosAchieved: number,
-    specialCellsActivated: number,
-    aiPhaseReached: string,
-    preferredQuadrants: array,
-    playtime: number,
-    winStreak: number,
-    bestWinStreak: number
-  },
-  achievements: array,
-  unlockedPersonalities: array,
-  customAIs: array
-}
-```
-
-#### Colección `gameSessions`
-```javascript
-{
-  userId: string,
-  gameData: object,
-  timestamp: timestamp,
-  duration: number,
-  aiPersonality: string,
-  difficulty: number,
-  achievements: array,
-  patterns: array
-}
-```
-
-#### Colección `customAIs`
-```javascript
-{
-  userId: string,
-  name: string,
-  description: string,
-  personality: object,
-  behaviors: object,
-  specialAbilities: array,
-  isPublic: boolean,
-  createdAt: timestamp,
-  downloads: number,
-  rating: number
-}
-```
-
-### 5. Reglas de Seguridad de Firestore
-
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Users can read/write their own data
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Game sessions - users can read/write their own
-    match /gameSessions/{sessionId} {
-      allow read, write: if request.auth != null && 
-        (request.auth.uid == resource.data.userId || request.auth.uid == request.resource.data.userId);
-    }
-    
-    // Custom AIs - users can read/write their own, read public ones
-    match /customAIs/{aiId} {
-      allow read: if request.auth != null && 
-        (request.auth.uid == resource.data.userId || resource.data.isPublic == true);
-      allow write: if request.auth != null && request.auth.uid == resource.data.userId;
-    }
-    
-    // Public leaderboard - read only
-    match /leaderboard/{entry} {
-      allow read: if request.auth != null;
-    }
-  }
-}
-```
-
-## 🚀 Desarrollo
-
-### Comandos Disponibles
-
-```bash
-# Desarrollo
+# 4. Iniciar en modo desarrollo
 npm run dev
-
-# Build para producción
-npm run build
-
-# Preview del build
-npm run preview
-
-# Tests
-npm run test
-
-# Linting
-npm run lint
-
-# Formateo de código
-npm run format
 ```
 
-### Estructura del Proyecto
-
-```
-src/
-├── components/           # Componentes React reutilizables
-│   ├── auth/            # Componentes de autenticación
-│   ├── game/            # Componentes específicos del juego
-│   ├── layout/          # Componentes de layout
-│   └── ui/              # Componentes de UI base
-├── config/              # Configuraciones (Firebase, etc.)
-├── hooks/               # Custom React hooks
-├── lib/                 # Lógica de negocio y utilidades
-│   ├── achievementSystem.ts
-│   ├── gameEngine.ts
-│   ├── hexagonalGeometry.ts
-│   ├── heatmapSystem.ts
-│   ├── dynamicThemes.ts
-│   ├── particleStories.ts
-│   ├── infiniteMode.ts
-│   └── specialCells.ts
-├── pages/               # Páginas de la aplicación
-├── services/            # Servicios (Firebase, APIs)
-├── store/               # Estado global (Zustand)
-└── types/               # Definiciones de tipos TypeScript
-```
-
-## 🌐 Despliegue en Netlify
-
-### 1. Preparar para Despliegue
+### Con Base de Datos (Supabase)
 
 ```bash
-npm run build
+# 1. Crear proyecto en Supabase
+# 2. Ejecutar db/schema.sql en SQL Editor
+# 3. Configurar .env con URL de Supabase
+# 4. Ejecutar db/seeds.sql (opcional)
+
+# 5. Verificar conexión
+npm run dev
+# Ir a http://localhost:8080/api/health
 ```
 
-### 2. Configurar Netlify
+## 📁 Estructura del Proyecto
 
-Crear `netlify.toml` en la raíz del proyecto:
-
-```toml
-[build]
-  command = "npm run build"
-  publish = "dist"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-[build.environment]
-  NODE_VERSION = "18"
 ```
-
-### 3. Variables de Entorno en Netlify
-
-En el panel de Netlify, agregar las variables de entorno:
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
-- `VITE_FIREBASE_MEASUREMENT_ID`
-
-### 4. Desplegar
-
-1. Conectar repositorio a Netlify
-2. Configurar build settings:
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-3. Agregar variables de entorno
-4. Deploy!
+mind-mirror/
+├── client/                 # Frontend React (legacy)
+├── src/                   # Frontend React actualizado
+│   ├── components/        # Componentes UI
+│   ├── pages/            # Páginas/rutas
+│   ├── services/         # Servicios API
+│   ├── store/            # Estado global
+│   └── core/             # Lógica del juego
+├── server/               # Backend Express
+│   ├── routes/           # Endpoints API
+│   ├── services/         # Servicios de backend
+│   └── index.ts          # Servidor principal
+├── shared/               # Tipos compartidos
+├── db/                   # Scripts de base de datos
+│   ├── schema.sql        # Esquema PostgreSQL
+│   └── seeds.sql         # Datos de prueba
+├── netlify/              # Configuración Netlify
+└── docs/                 # Documentación
+```
 
 ## 🎯 Funcionalidades Implementadas
 
-### ✅ Core del Juego
-- [x] Tablero 8x8 interactivo
-- [x] Sistema de turnos jugador vs IA
-- [x] 18 tipos de celdas especiales
-- [x] Sistema de combos y multiplicadores
-- [x] 5 personalidades de IA diferentes
-- [x] 3 fases de evolución de IA
+### ✅ Completado
 
-### ✅ Análisis y Visualización
-- [x] Heatmaps de decisiones
-- [x] Predictor de movimientos
-- [x] Análisis de patrones de juego
-- [x] Temas dinámicos adaptativos
-- [x] Sistema de partículas narrativas
+- [x] **Sistema de IA Adaptativa**
 
-### ✅ Progresión y Social
-- [x] Sistema de logros (25+ logros)
-- [x] Niveles y experiencia
-- [x] Rankings globales
-- [x] Perfil de usuario completo
-- [x] Estadísticas detalladas
+  - [x] Motor de IA refactorizado con múltiples personalidades
+  - [x] Análisis de patrones de jugador en tiempo real
+  - [x] Sistema de aprendizaje y adaptación
+  - [x] Predicciones de movimientos futuros
 
-### ✅ Autenticación y Persistencia
-- [x] Login con email y Google
-- [x] Guardado automático de progresos
-- [x] Sincronización en la nube
-- [x] Perfil de usuario personalizable
+- [x] **Backend API Completa**
 
-### 🔄 En Desarrollo
-- [ ] Modo hexagonal completo
-- [ ] Modo infinito
-- [ ] Multijugador en tiempo real
-- [ ] Torneos automatizados
-- [ ] IA personalizada por usuario
+  - [x] Endpoints REST para jugadores, partidas y análisis
+  - [x] Base de datos PostgreSQL con esquema completo
+  - [x] Sistema de movimientos y análisis de IA
+  - [x] Analytics y estadísticas avanzadas
 
-## 🎮 Cómo Jugar
+- [x] **Frontend Integrado**
 
-1. **Registro**: Crea una cuenta o inicia sesión con Google
-2. **Tutorial**: Completa el tutorial interactivo
-3. **Juego**: Haz clic en celdas vacías para colocar tus fichas
-4. **Estrategia**: Observa cómo la IA aprende de tus movimientos
-5. **Evolución**: Adapta tu estrategia mientras la IA evoluciona
-6. **Logros**: Desbloquea logros y sube de nivel
+  - [x] Cliente API con modo offline
+  - [x] Servicio de juego mejorado
+  - [x] Integración con backend
+  - [x] Manejo de conexión/desconexión
 
-## 🤝 Contribuir
+- [x] **Despliegue en Producción**
+  - [x] Configuración para Netlify
+  - [x] Funciones serverless
+  - [x] Integración con Supabase
+  - [x] Variables de entorno configuradas
+
+### 🚧 En Desarrollo
+
+- [ ] **Características Avanzadas de IA**
+
+  - [ ] Modo Rule Breaker completo
+  - [ ] Sistema de emociones de IA
+  - [ ] Análisis predictivo avanzado
+
+- [ ] **Funciones Sociales**
+
+  - [ ] Multijugador
+  - [ ] Torneos
+  - [ ] Leaderboards globales
+
+- [ ] **Análisis Avanzado**
+  - [ ] Dashboard de estadísticas
+  - [ ] Exportación de datos
+  - [ ] Comparación de estilos de juego
+
+## 🔧 Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run dev          # Servidor de desarrollo full-stack
+npm run build        # Build para producción
+npm run preview      # Preview del build
+
+# Testing
+npm test            # Ejecutar tests
+npm run test:watch  # Tests en modo watch
+
+# Base de datos
+npm run db:reset    # Reset base de datos (desarrollo)
+npm run db:seed     # Cargar datos de prueba
+
+# Calidad de código
+npm run lint        # Linting
+npm run format      # Formatear código
+npm run typecheck   # Verificar tipos TypeScript
+
+# Despliegue
+npm run deploy      # Deploy a Netlify
+```
+
+## 🔗 API Endpoints
+
+### Jugadores
+
+```
+POST   /api/jugadores          # Crear jugador
+GET    /api/jugadores/:id      # Obtener jugador
+PUT    /api/jugadores/:id      # Actualizar jugador
+GET    /api/jugadores/:id/historial    # Historial de partidas
+GET    /api/jugadores/:id/analisis     # Análisis del jugador
+```
+
+### Partidas
+
+```
+POST   /api/partidas          # Crear partida
+GET    /api/partidas/:id      # Obtener partida
+POST   /api/partidas/:id/turno        # Realizar movimiento
+POST   /api/partidas/:id/terminar     # Terminar partida
+GET    /api/partidas/:id/analytics    # Analytics de partida
+```
+
+### Sistema
+
+```
+GET    /api/health            # Estado del sistema
+GET    /api/config            # Configuración del sistema
+POST   /api/ia/reset          # Reset datos de IA
+```
+
+## 🧪 Testing
+
+```bash
+# Ejecutar todos los tests
+npm test
+
+# Tests con coverage
+npm run test:coverage
+
+# Tests específicos
+npm test -- --grep "GameEngine"
+npm test -- --grep "API"
+```
+
+## 🚀 Despliegue
+
+### Netlify (Recomendado)
+
+Ver [DEPLOYMENT.md](./DEPLOYMENT.md) para guía completa.
+
+```bash
+# Deploy rápido
+npm run build
+netlify deploy --prod --dir=dist/spa
+```
+
+### Variables de Entorno Requeridas
+
+```bash
+NODE_ENV=production
+SUPABASE_DB_URL=postgresql://...
+SUPABASE_URL=https://...
+SUPABASE_ANON_KEY=...
+```
+
+## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+2. Crea tu rama feature (`git checkout -b feature/AmazingFeature`)
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
+5. Abre un Pull Request
+
+### Guías de Contribución
+
+- Sigue las convenciones de TypeScript existentes
+- Añade tests para nuevas funcionalidades
+- Actualiza documentación cuando sea necesario
+- Mantén commits atómicos y descriptivos
+
+## 📊 Tecnologías Utilizadas
+
+### Frontend
+
+- **React 18** - UI Library
+- **TypeScript** - Tipado estático
+- **Vite** - Build tool y dev server
+- **TailwindCSS** - Styling
+- **Radix UI** - Componentes base
+- **Framer Motion** - Animaciones
+- **Zustand** - State management
+
+### Backend
+
+- **Express** - Web framework
+- **TypeScript** - Tipado estático
+- **PostgreSQL** - Base de datos
+- **Supabase** - BaaS platform
+- **Serverless HTTP** - Netlify Functions
+
+### DevOps & Tools
+
+- **Netlify** - Hosting y CI/CD
+- **Vitest** - Testing framework
+- **ESLint** - Linting
+- **Prettier** - Code formatting
+
+## 📈 Roadmap
+
+### V1.0 - Lanzamiento Inicial ✅
+
+- [x] Juego básico funcional
+- [x] IA adaptativa básica
+- [x] Sistema de autenticación
+- [x] Despliegue en producción
+
+### V1.1 - Mejoras de IA 🚧
+
+- [ ] Personalidades de IA avanzadas
+- [ ] Análisis predictivo mejorado
+- [ ] Sistema de dificultad dinámico
+
+### V1.2 - Características Sociales
+
+- [ ] Modo multijugador
+- [ ] Sistema de ranking
+- [ ] Compartir estadísticas
+
+### V2.0 - Expansión del Juego
+
+- [ ] Nuevos modos de juego
+- [ ] Tableros personalizados
+- [ ] Editor de reglas
+
+## 🐛 Reportar Issues
+
+Usa [GitHub Issues](https://github.com/tuusuario/mind-mirror/issues) para reportar bugs o sugerir nuevas características.
+
+### Template de Bug Report
+
+```
+**Describe el bug**
+Descripción clara del problema.
+
+**Pasos para reproducir**
+1. Ve a '...'
+2. Haz click en '....'
+3. Observa el error
+
+**Comportamiento esperado**
+¿Qué esperabas que pasara?
+
+**Screenshots**
+Si aplica, añade screenshots.
+
+**Información del entorno**
+- OS: [e.g. macOS, Windows]
+- Browser: [e.g. Chrome, Firefox]
+- Version: [e.g. 22]
+```
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
+Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detalles.
 
-## 🆘 Soporte
+## 👥 Equipo
 
-Si encuentras algún problema o tienes preguntas:
+- **Desarrollador Principal** - [Tu Nombre](https://github.com/tuusuario)
+- **Diseño de IA** - Sistema de IA adaptativa
+- **Arquitectura** - Full-stack TypeScript
 
-1. Revisa la documentación
-2. Busca en los issues existentes
-3. Crea un nuevo issue con detalles del problema
-4. Incluye logs de consola y pasos para reproducir
+## 🙏 Agradecimientos
 
-## 🎯 Roadmap
-
-### Versión 1.1
-- [ ] Modo hexagonal completo
-- [ ] Sistema de clanes
-- [ ] Chat en tiempo real
-
-### Versión 1.2
-- [ ] Modo infinito
-- [ ] IA personalizada
-- [ ] Replay de partidas
-
-### Versión 2.0
-- [ ] Multijugador
-- [ ] Torneos automatizados
-- [ ] Modo VR/AR
+- [Radix UI](https://www.radix-ui.com/) por los componentes base
+- [Supabase](https://supabase.com/) por la plataforma de backend
+- [Netlify](https://netlify.com/) por el hosting
+- Comunidad open source por las herramientas increíbles
 
 ---
 
-**Desarrollado con ❤️ para la comunidad gaming**
+<div align="center">
+
+**[🎮 Jugar Ahora](https://yourdomain.netlify.app)** •
+**[📖 Documentación](./docs/)** •
+**[🐛 Reportar Bug](https://github.com/tuusuario/mind-mirror/issues)** •
+**[💡 Sugerir Feature](https://github.com/tuusuario/mind-mirror/issues)**
+
+_Construido con ❤️ y mucha ☕_
+
+</div>
