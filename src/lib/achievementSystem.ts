@@ -1,527 +1,527 @@
-// Enhanced Achievement System for Mind Mirror
+// Sistema de logros para Mind Mirror y el juego principal
 
 export interface Achievement {
   id: string;
   name: string;
   description: string;
   icon: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary' | 'mythic';
-  category: 'gameplay' | 'strategy' | 'speed' | 'endurance' | 'master' | 'secret' | 'seasonal';
-  condition: (gameData: GameEndData) => boolean;
-  progress?: (gameData: GameEndData) => number;
-  maxProgress?: number;
+  category: "reflection" | "progress" | "discovery" | "mastery" | "social";
+  difficulty: "bronze" | "silver" | "gold" | "platinum" | "diamond";
   points: number;
   unlocked: boolean;
-  unlockedDate?: string;
+  unlockedAt?: Date;
+  progress: number;
+  maxProgress: number;
   secret: boolean;
-  title?: string;
-  reward?: AchievementReward;
+  requirements: AchievementRequirement[];
 }
 
-export interface AchievementReward {
-  type: 'title' | 'avatar' | 'theme' | 'ability' | 'xp' | 'cosmetic';
-  value: string | number;
-  description: string;
+export interface AchievementRequirement {
+  type: "stat" | "action" | "count" | "streak" | "time";
+  stat?: string;
+  value: number;
+  comparison: "gte" | "lte" | "eq";
 }
 
-export interface GameEndData {
-  winner: 'player' | 'ai' | 'tie';
-  playerScore: number;
-  aiScore: number;
-  totalMoves: number;
-  gameDuration: number; // seconds
-  phase: 'learning' | 'mirror' | 'evolution';
-  combosUsed: number;
-  specialCellsActivated: number;
-  averageReactionTime: number;
-  fastestMove: number;
-  slowestMove: number;
-  difficultyLevel: number;
-  aiPersonality: string;
-  boardFull: boolean;
-  perfectGame: boolean; // won without losing a cell
-  comboChain: number; // max consecutive combos
-  timeBonus: number;
-  dominationRatio: number; // player cells / total cells
+export interface PlayerStats {
+  totalReflections: number;
+  totalGameSessions: number;
+  totalScore: number;
+  currentStreak: number;
+  longestStreak: number;
+  perfectGames: number;
+  achievementsUnlocked: number;
+  hoursPlayed: number;
+  levelsCompleted: number;
+  specialCellsFound: number;
+  mindMirrorSessions: number;
+  emotionsExplored: number;
+  actionsCompleted: number;
+  questionsAnswered: number;
+  dailySummariesViewed: number;
+  [key: string]: number;
 }
+
+export const ACHIEVEMENTS: Record<string, Achievement> = {
+  FIRST_REFLECTION: {
+    id: "FIRST_REFLECTION",
+    name: "Primera Reflexión",
+    description: "Completa tu primera sesión de reflexión en Mind Mirror",
+    icon: "🪞",
+    category: "reflection",
+    difficulty: "bronze",
+    points: 10,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 1,
+    secret: false,
+    requirements: [
+      { type: "count", stat: "totalReflections", value: 1, comparison: "gte" },
+    ],
+  },
+  REFLECTION_MASTER: {
+    id: "REFLECTION_MASTER",
+    name: "Maestro de la Reflexión",
+    description: "Completa 100 sesiones de reflexión",
+    icon: "🧘‍♀️",
+    category: "reflection",
+    difficulty: "gold",
+    points: 100,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 100,
+    secret: false,
+    requirements: [
+      {
+        type: "count",
+        stat: "totalReflections",
+        value: 100,
+        comparison: "gte",
+      },
+    ],
+  },
+  EMOTIONAL_EXPLORER: {
+    id: "EMOTIONAL_EXPLORER",
+    name: "Explorador Emocional",
+    description: "Explora 10 emociones diferentes en tus reflexiones",
+    icon: "❤️‍🔥",
+    category: "discovery",
+    difficulty: "silver",
+    points: 50,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 10,
+    secret: false,
+    requirements: [
+      { type: "count", stat: "emotionsExplored", value: 10, comparison: "gte" },
+    ],
+  },
+  DAILY_STREAK_7: {
+    id: "DAILY_STREAK_7",
+    name: "Semana Reflexiva",
+    description: "Mantén una racha de 7 días consecutivos de reflexión",
+    icon: "🔥",
+    category: "progress",
+    difficulty: "silver",
+    points: 75,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 7,
+    secret: false,
+    requirements: [
+      { type: "streak", stat: "currentStreak", value: 7, comparison: "gte" },
+    ],
+  },
+  MINDFUL_MONTH: {
+    id: "MINDFUL_MONTH",
+    name: "Mes Consciente",
+    description: "Mantén una racha de 30 días consecutivos",
+    icon: "🌟",
+    category: "progress",
+    difficulty: "platinum",
+    points: 250,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 30,
+    secret: false,
+    requirements: [
+      { type: "streak", stat: "currentStreak", value: 30, comparison: "gte" },
+    ],
+  },
+  ACTION_HERO: {
+    id: "ACTION_HERO",
+    name: "Héroe de Acción",
+    description: "Completa 50 acciones sugeridas por Mind Mirror",
+    icon: "⚡",
+    category: "progress",
+    difficulty: "gold",
+    points: 125,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 50,
+    secret: false,
+    requirements: [
+      { type: "count", stat: "actionsCompleted", value: 50, comparison: "gte" },
+    ],
+  },
+  QUESTION_SEEKER: {
+    id: "QUESTION_SEEKER",
+    name: "Buscador de Preguntas",
+    description: "Genera 200 preguntas introspectivas",
+    icon: "❓",
+    category: "discovery",
+    difficulty: "gold",
+    points: 100,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 200,
+    secret: false,
+    requirements: [
+      {
+        type: "count",
+        stat: "questionsAnswered",
+        value: 200,
+        comparison: "gte",
+      },
+    ],
+  },
+  GAME_PERFECTIONIST: {
+    id: "GAME_PERFECTIONIST",
+    name: "Perfeccionista",
+    description: "Completa 10 juegos con precisión perfecta (100%)",
+    icon: "🎯",
+    category: "mastery",
+    difficulty: "platinum",
+    points: 200,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 10,
+    secret: false,
+    requirements: [
+      { type: "count", stat: "perfectGames", value: 10, comparison: "gte" },
+    ],
+  },
+  SPECIAL_HUNTER: {
+    id: "SPECIAL_HUNTER",
+    name: "Cazador de Especiales",
+    description: "Encuentra 100 celdas especiales",
+    icon: "💎",
+    category: "discovery",
+    difficulty: "gold",
+    points: 150,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 100,
+    secret: false,
+    requirements: [
+      {
+        type: "count",
+        stat: "specialCellsFound",
+        value: 100,
+        comparison: "gte",
+      },
+    ],
+  },
+  WISDOM_SEEKER: {
+    id: "WISDOM_SEEKER",
+    name: "Buscador de Sabiduría",
+    description: "Completa 365 días de reflexión diaria",
+    icon: "🦉",
+    category: "mastery",
+    difficulty: "diamond",
+    points: 500,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 365,
+    secret: false,
+    requirements: [
+      {
+        type: "count",
+        stat: "totalReflections",
+        value: 365,
+        comparison: "gte",
+      },
+    ],
+  },
+  SECRET_PHILOSOPHER: {
+    id: "SECRET_PHILOSOPHER",
+    name: "Filósofo Secreto",
+    description: "Descubre el poder de la reflexión profunda",
+    icon: "🔮",
+    category: "mastery",
+    difficulty: "diamond",
+    points: 1000,
+    unlocked: false,
+    progress: 0,
+    maxProgress: 1,
+    secret: true,
+    requirements: [
+      {
+        type: "count",
+        stat: "totalReflections",
+        value: 1000,
+        comparison: "gte",
+      },
+      { type: "count", stat: "emotionsExplored", value: 50, comparison: "gte" },
+      { type: "streak", stat: "longestStreak", value: 100, comparison: "gte" },
+    ],
+  },
+};
 
 export class AchievementSystem {
-  private achievements: Achievement[] = [];
-  private unlockedAchievements: Set<string> = new Set();
+  private achievements: Map<string, Achievement> = new Map();
+  private playerStats: PlayerStats;
+  private onAchievementUnlocked?: (achievement: Achievement) => void;
 
-  constructor() {
+  constructor(onAchievementUnlocked?: (achievement: Achievement) => void) {
+    this.playerStats = this.getDefaultStats();
+    this.onAchievementUnlocked = onAchievementUnlocked;
     this.initializeAchievements();
-    this.loadProgress();
   }
 
-  private initializeAchievements() {
-    this.achievements = [
-      // Básicos - Gameplay
-      {
-        id: 'first-victory',
-        name: 'Primera Victoria',
-        description: 'Gana tu primera partida contra la IA',
-        icon: '🏆',
-        rarity: 'common',
-        category: 'gameplay',
-        condition: (data) => data.winner === 'player',
-        points: 100,
-        unlocked: false,
-        secret: false,
-        title: 'Novato Victorioso',
-        reward: { type: 'xp', value: 500, description: 'Bonificación de experiencia' }
-      },
-      {
-        id: 'perfect-game',
-        name: 'Juego Perfecto',
-        description: 'Gana sin que la IA capture ninguna celda',
-        icon: '💎',
-        rarity: 'epic',
-        category: 'master',
-        condition: (data) => data.winner === 'player' && data.perfectGame,
-        points: 1000,
-        unlocked: false,
-        secret: false,
-        title: 'Perfeccionista',
-        reward: { type: 'avatar', value: '💎', description: 'Avatar Diamante' }
-      },
-      {
-        id: 'board-domination',
-        name: 'Dominación Total',
-        description: 'Controla el 90% del tablero al final de la partida',
-        icon: '👑',
-        rarity: 'legendary',
-        category: 'master',
-        condition: (data) => data.dominationRatio >= 0.9 && data.winner === 'player',
-        points: 2000,
-        unlocked: false,
-        secret: false,
-        title: 'Emperador del Tablero',
-        reward: { type: 'theme', value: 'golden-crown', description: 'Tema Corona Dorada' }
-      },
-
-      // Velocidad
-      {
-        id: 'lightning-fast',
-        name: 'Rayo Veloz',
-        description: 'Completa un movimiento en menos de 0.5 segundos',
-        icon: '⚡',
-        rarity: 'rare',
-        category: 'speed',
-        condition: (data) => data.fastestMove < 500,
-        points: 300,
-        unlocked: false,
-        secret: false,
-        title: 'Manos de Rayo'
-      },
-      {
-        id: 'speed-demon',
-        name: 'Demonio de Velocidad',
-        description: 'Mantén un promedio de reacción bajo 1 segundo en toda la partida',
-        icon: '🔥',
-        rarity: 'epic',
-        category: 'speed',
-        condition: (data) => data.averageReactionTime < 1000 && data.totalMoves >= 20,
-        points: 800,
-        unlocked: false,
-        secret: false,
-        title: 'Velocista Cuántico'
-      },
-
-      // Estrategia
-      {
-        id: 'combo-master',
-        name: 'Maestro de Combos',
-        description: 'Realiza 5 combos en una sola partida',
-        icon: '🌟',
-        rarity: 'rare',
-        category: 'strategy',
-        condition: (data) => data.combosUsed >= 5,
-        points: 400,
-        unlocked: false,
-        secret: false,
-        title: 'Estratega Combo'
-      },
-      {
-        id: 'combo-chain',
-        name: 'Cadena Imparable',
-        description: 'Encadena 3 combos consecutivos',
-        icon: '⛓️',
-        rarity: 'epic',
-        category: 'strategy',
-        condition: (data) => data.comboChain >= 3,
-        points: 750,
-        unlocked: false,
-        secret: false,
-        title: 'Encadenador'
-      },
-
-      // Resistencia
-      {
-        id: 'marathon-player',
-        name: 'Jugador Maratón',
-        description: 'Juega una partida de más de 15 minutos',
-        icon: '🏃‍♂️',
-        rarity: 'rare',
-        category: 'endurance',
-        condition: (data) => data.gameDuration > 900, // 15 minutos
-        points: 350,
-        unlocked: false,
-        secret: false,
-        title: 'Resistente Mental'
-      },
-      {
-        id: 'epic-battle',
-        name: 'Batalla Épica',
-        description: 'Completa una partida con más de 100 movimientos',
-        icon: '⚔️',
-        rarity: 'epic',
-        category: 'endurance',
-        condition: (data) => data.totalMoves > 100,
-        points: 600,
-        unlocked: false,
-        secret: false,
-        title: 'Guerrero Épico'
-      },
-
-      // IA Evolution
-      {
-        id: 'ai-evolution',
-        name: 'Evolución Completa',
-        description: 'Llega a la fase Evolución de la IA',
-        icon: '🧬',
-        rarity: 'common',
-        category: 'gameplay',
-        condition: (data) => data.phase === 'evolution',
-        points: 200,
-        unlocked: false,
-        secret: false,
-        title: 'Evolucionista'
-      },
-      {
-        id: 'ai-master',
-        name: 'Maestro de IA',
-        description: 'Vence a la IA en fase Evolución con dificultad alta',
-        icon: '🤖',
-        rarity: 'legendary',
-        category: 'master',
-        condition: (data) => data.winner === 'player' && data.phase === 'evolution' && data.difficultyLevel > 0.8,
-        points: 1500,
-        unlocked: false,
-        secret: false,
-        title: 'Domador de IA',
-        reward: { type: 'ability', value: 'ai-insight', description: 'Capacidad de ver pensamientos de IA' }
-      },
-
-      // Celdas Especiales
-      {
-        id: 'special-master',
-        name: 'Maestro Especial',
-        description: 'Activa 10 celdas especiales en una partida',
-        icon: '✨',
-        rarity: 'rare',
-        category: 'strategy',
-        condition: (data) => data.specialCellsActivated >= 10,
-        points: 500,
-        unlocked: false,
-        secret: false,
-        title: 'Alquimista Cuántico'
-      },
-
-      // Secretos
-      {
-        id: 'tie-master',
-        name: 'Equilibrio Perfecto',
-        description: 'Empata una partida con el tablero completamente lleno',
-        icon: '⚖️',
-        rarity: 'legendary',
-        category: 'secret',
-        condition: (data) => data.winner === 'tie' && data.boardFull,
-        points: 1200,
-        unlocked: false,
-        secret: true,
-        title: 'Maestro del Equilibrio'
-      },
-      {
-        id: 'quantum-master',
-        name: 'Paradoja Cuántica',
-        description: 'Gana una partida en exactamente 42 movimientos',
-        icon: '⚛️',
-        rarity: 'mythic',
-        category: 'secret',
-        condition: (data) => data.winner === 'player' && data.totalMoves === 42,
-        points: 4200,
-        unlocked: false,
-        secret: true,
-        title: 'Señor de la Paradoja',
-        reward: { type: 'cosmetic', value: 'quantum-effects', description: 'Efectos cuánticos únicos' }
-      },
-
-      // Tiempo
-      {
-        id: 'speed-victory',
-        name: 'Victoria Relámpago',
-        description: 'Gana una partida en menos de 5 minutos',
-        icon: '💨',
-        rarity: 'epic',
-        category: 'speed',
-        condition: (data) => data.winner === 'player' && data.gameDuration < 300,
-        points: 700,
-        unlocked: false,
-        secret: false,
-        title: 'Velocista'
-      },
-
-      // Puntuación
-      {
-        id: 'high-scorer',
-        name: 'Gran Puntuador',
-        description: 'Consigue más de 50 puntos en una partida',
-        icon: '🎯',
-        rarity: 'rare',
-        category: 'gameplay',
-        condition: (data) => data.playerScore >= 50,
-        points: 350,
-        unlocked: false,
-        secret: false,
-        title: 'Anotador Élite'
-      },
-      {
-        id: 'score-crusher',
-        name: 'Destructor de Puntuaciones',
-        description: 'Consigue más de 100 puntos en una partida',
-        icon: '💥',
-        rarity: 'legendary',
-        category: 'master',
-        condition: (data) => data.playerScore >= 100,
-        points: 1000,
-        unlocked: false,
-        secret: false,
-        title: 'Destructor Cuántico'
-      },
-
-      // Personalidades de IA
-      {
-        id: 'chameleon-hunter',
-        name: 'Cazador de Camaleones',
-        description: 'Vence a la IA Camaleón 5 veces',
-        icon: '🦎',
-        rarity: 'rare',
-        category: 'strategy',
-        condition: (data) => false, // Se trackea por separado
-        progress: (data) => data.aiPersonality === 'chameleon' && data.winner === 'player' ? 1 : 0,
-        maxProgress: 5,
-        points: 400,
-        unlocked: false,
-        secret: false,
-        title: 'Domador de Camaleones'
-      },
-      {
-        id: 'all-personalities',
-        name: 'Psicólogo Maestro',
-        description: 'Vence a todas las personalidades de IA',
-        icon: '🧠',
-        rarity: 'legendary',
-        category: 'master',
-        condition: (data) => false, // Se trackea por separado
-        points: 1500,
-        unlocked: false,
-        secret: false,
-        title: 'Maestro Psicólogo'
-      },
-
-      // Logros de serie
-      {
-        id: 'winning-streak-5',
-        name: 'Racha Ganadora',
-        description: 'Gana 5 partidas consecutivas',
-        icon: '🔥',
-        rarity: 'epic',
-        category: 'master',
-        condition: (data) => false, // Se trackea por separado
-        points: 800,
-        unlocked: false,
-        secret: false,
-        title: 'Imparable'
-      },
-      {
-        id: 'winning-streak-10',
-        name: 'Leyenda Viviente',
-        description: 'Gana 10 partidas consecutivas',
-        icon: '👑',
-        rarity: 'mythic',
-        category: 'master',
-        condition: (data) => false, // Se trackea por separado
-        points: 2500,
-        unlocked: false,
-        secret: false,
-        title: 'Leyenda Cuántica',
-        reward: { type: 'theme', value: 'legendary-gold', description: 'Tema Dorado Legendario' }
-      }
-    ];
+  private getDefaultStats(): PlayerStats {
+    return {
+      totalReflections: 0,
+      totalGameSessions: 0,
+      totalScore: 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      perfectGames: 0,
+      achievementsUnlocked: 0,
+      hoursPlayed: 0,
+      levelsCompleted: 0,
+      specialCellsFound: 0,
+      mindMirrorSessions: 0,
+      emotionsExplored: 0,
+      actionsCompleted: 0,
+      questionsAnswered: 0,
+      dailySummariesViewed: 0,
+    };
   }
 
-  checkAchievements(gameData: GameEndData): Achievement[] {
-    const newlyUnlocked: Achievement[] = [];
-
-    this.achievements.forEach(achievement => {
-      if (!achievement.unlocked && !achievement.secret && achievement.condition(gameData)) {
-        achievement.unlocked = true;
-        achievement.unlockedDate = new Date().toISOString();
-        this.unlockedAchievements.add(achievement.id);
-        newlyUnlocked.push(achievement);
-      }
+  private initializeAchievements(): void {
+    Object.values(ACHIEVEMENTS).forEach((achievement) => {
+      this.achievements.set(achievement.id, { ...achievement });
     });
-
-    // Check secret achievements
-    this.achievements.filter(a => a.secret).forEach(achievement => {
-      if (!achievement.unlocked && achievement.condition(gameData)) {
-        achievement.unlocked = true;
-        achievement.unlockedDate = new Date().toISOString();
-        this.unlockedAchievements.add(achievement.id);
-        newlyUnlocked.push(achievement);
-      }
-    });
-
-    this.saveProgress();
-    return newlyUnlocked;
   }
 
-  updateProgress(achievementId: string, increment: number = 1) {
-    const achievement = this.achievements.find(a => a.id === achievementId);
-    if (achievement && achievement.maxProgress) {
-      const currentProgress = this.getProgress(achievementId);
-      const newProgress = Math.min(currentProgress + increment, achievement.maxProgress);
-      localStorage.setItem(`achievement-progress-${achievementId}`, newProgress.toString());
-      
-      if (newProgress >= achievement.maxProgress && !achievement.unlocked) {
-        achievement.unlocked = true;
-        achievement.unlockedDate = new Date().toISOString();
-        this.unlockedAchievements.add(achievement.id);
-        this.saveProgress();
-        return achievement;
-      }
+  updateStat(
+    statName: keyof PlayerStats,
+    value: number,
+    increment: boolean = true,
+  ): void {
+    if (increment) {
+      this.playerStats[statName] += value;
+    } else {
+      this.playerStats[statName] = value;
     }
-    return null;
+
+    this.checkAchievements();
   }
 
-  getProgress(achievementId: string): number {
-    const stored = localStorage.getItem(`achievement-progress-${achievementId}`);
-    return stored ? parseInt(stored) : 0;
+  incrementStat(statName: keyof PlayerStats, amount: number = 1): void {
+    this.updateStat(statName, amount, true);
   }
 
-  private saveProgress() {
-    const unlockedList = Array.from(this.unlockedAchievements);
-    localStorage.setItem('mindmirror-achievements', JSON.stringify(unlockedList));
-    
-    // Save individual achievement data
-    this.achievements.forEach(achievement => {
-      if (achievement.unlocked) {
-        localStorage.setItem(`achievement-${achievement.id}`, JSON.stringify({
-          unlocked: true,
-          unlockedDate: achievement.unlockedDate
-        }));
+  setStat(statName: keyof PlayerStats, value: number): void {
+    this.updateStat(statName, value, false);
+  }
+
+  private checkAchievements(): void {
+    this.achievements.forEach((achievement) => {
+      if (achievement.unlocked) return;
+
+      const meetsAllRequirements = achievement.requirements.every((req) =>
+        this.checkRequirement(req),
+      );
+
+      if (meetsAllRequirements) {
+        this.unlockAchievement(achievement.id);
+      } else {
+        // Actualizar progreso
+        this.updateAchievementProgress(achievement);
       }
     });
   }
 
-  private loadProgress() {
-    const stored = localStorage.getItem('mindmirror-achievements');
-    if (stored) {
-      const unlockedList = JSON.parse(stored);
-      this.unlockedAchievements = new Set(unlockedList);
-      
-      // Load individual achievement data
-      this.achievements.forEach(achievement => {
-        const achData = localStorage.getItem(`achievement-${achievement.id}`);
-        if (achData) {
-          const data = JSON.parse(achData);
-          achievement.unlocked = data.unlocked;
-          achievement.unlockedDate = data.unlockedDate;
-        }
+  private checkRequirement(requirement: AchievementRequirement): boolean {
+    const statValue = requirement.stat
+      ? this.playerStats[requirement.stat] || 0
+      : 0;
+
+    switch (requirement.comparison) {
+      case "gte":
+        return statValue >= requirement.value;
+      case "lte":
+        return statValue <= requirement.value;
+      case "eq":
+        return statValue === requirement.value;
+      default:
+        return false;
+    }
+  }
+
+  private updateAchievementProgress(achievement: Achievement): void {
+    if (achievement.requirements.length === 1) {
+      const req = achievement.requirements[0];
+      const statValue = req.stat ? this.playerStats[req.stat] || 0 : 0;
+      achievement.progress = Math.min(statValue, achievement.maxProgress);
+    } else {
+      // Para logros con múltiples requisitos, calcular progreso promedio
+      const progressValues = achievement.requirements.map((req) => {
+        const statValue = req.stat ? this.playerStats[req.stat] || 0 : 0;
+        return Math.min(statValue / req.value, 1);
       });
+
+      const avgProgress =
+        progressValues.reduce((sum, p) => sum + p, 0) / progressValues.length;
+      achievement.progress = Math.floor(avgProgress * achievement.maxProgress);
     }
+  }
+
+  unlockAchievement(achievementId: string): boolean {
+    const achievement = this.achievements.get(achievementId);
+    if (!achievement || achievement.unlocked) return false;
+
+    achievement.unlocked = true;
+    achievement.unlockedAt = new Date();
+    achievement.progress = achievement.maxProgress;
+    this.playerStats.achievementsUnlocked++;
+
+    if (this.onAchievementUnlocked) {
+      this.onAchievementUnlocked(achievement);
+    }
+
+    return true;
+  }
+
+  getAchievement(id: string): Achievement | null {
+    return this.achievements.get(id) || null;
   }
 
   getAllAchievements(): Achievement[] {
-    return this.achievements.map(achievement => ({
-      ...achievement,
-      progress: achievement.maxProgress ? this.getProgress(achievement.id) : undefined
-    }));
+    return Array.from(this.achievements.values());
   }
 
   getUnlockedAchievements(): Achievement[] {
-    return this.achievements.filter(a => a.unlocked);
+    return this.getAllAchievements().filter((a) => a.unlocked);
+  }
+
+  getLockedAchievements(): Achievement[] {
+    return this.getAllAchievements().filter((a) => !a.unlocked && !a.secret);
   }
 
   getSecretAchievements(): Achievement[] {
-    return this.achievements.filter(a => a.secret && a.unlocked);
+    return this.getAllAchievements().filter((a) => a.secret);
+  }
+
+  getAchievementsByCategory(category: Achievement["category"]): Achievement[] {
+    return this.getAllAchievements().filter((a) => a.category === category);
+  }
+
+  getAchievementsByDifficulty(
+    difficulty: Achievement["difficulty"],
+  ): Achievement[] {
+    return this.getAllAchievements().filter((a) => a.difficulty === difficulty);
   }
 
   getTotalPoints(): number {
-    return this.achievements
-      .filter(a => a.unlocked)
-      .reduce((total, a) => total + a.points, 0);
+    return this.getUnlockedAchievements().reduce(
+      (total, achievement) => total + achievement.points,
+      0,
+    );
   }
 
   getCompletionPercentage(): number {
-    const visibleAchievements = this.achievements.filter(a => !a.secret);
-    const unlockedVisible = visibleAchievements.filter(a => a.unlocked);
-    return (unlockedVisible.length / visibleAchievements.length) * 100;
+    const totalAchievements = this.getAllAchievements().length;
+    const unlockedAchievements = this.getUnlockedAchievements().length;
+    return totalAchievements > 0
+      ? (unlockedAchievements / totalAchievements) * 100
+      : 0;
+  }
+
+  getPlayerStats(): PlayerStats {
+    return { ...this.playerStats };
+  }
+
+  getRecentAchievements(limit: number = 5): Achievement[] {
+    return this.getUnlockedAchievements()
+      .filter((a) => a.unlockedAt)
+      .sort((a, b) => b.unlockedAt!.getTime() - a.unlockedAt!.getTime())
+      .slice(0, limit);
+  }
+
+  exportProgress(): string {
+    const data = {
+      achievements: Array.from(this.achievements.entries()),
+      stats: this.playerStats,
+      exportDate: new Date().toISOString(),
+    };
+    return JSON.stringify(data);
+  }
+
+  importProgress(dataJson: string): boolean {
+    try {
+      const data = JSON.parse(dataJson);
+
+      // Validar estructura básica
+      if (!data.achievements || !data.stats) {
+        throw new Error("Invalid data structure");
+      }
+
+      // Importar logros
+      this.achievements.clear();
+      data.achievements.forEach(([id, achievement]: [string, Achievement]) => {
+        if (
+          achievement.unlockedAt &&
+          typeof achievement.unlockedAt === "string"
+        ) {
+          achievement.unlockedAt = new Date(achievement.unlockedAt);
+        }
+        this.achievements.set(id, achievement);
+      });
+
+      // Importar estadísticas
+      this.playerStats = { ...this.getDefaultStats(), ...data.stats };
+
+      return true;
+    } catch (error) {
+      console.error("Failed to import achievement progress:", error);
+      return false;
+    }
+  }
+
+  reset(): void {
+    this.playerStats = this.getDefaultStats();
+    this.initializeAchievements();
+  }
+
+  // Métodos de conveniencia para eventos comunes
+  onReflectionCompleted(): void {
+    this.incrementStat("totalReflections");
+    this.incrementStat("mindMirrorSessions");
+  }
+
+  onGameCompleted(score: number, perfect: boolean = false): void {
+    this.incrementStat("totalGameSessions");
+    this.incrementStat("totalScore", score);
+    this.incrementStat("levelsCompleted");
+
+    if (perfect) {
+      this.incrementStat("perfectGames");
+    }
+  }
+
+  onSpecialCellFound(): void {
+    this.incrementStat("specialCellsFound");
+  }
+
+  onEmotionExplored(): void {
+    this.incrementStat("emotionsExplored");
+  }
+
+  onActionCompleted(): void {
+    this.incrementStat("actionsCompleted");
+  }
+
+  onQuestionAnswered(): void {
+    this.incrementStat("questionsAnswered");
+  }
+
+  onDailySummaryViewed(): void {
+    this.incrementStat("dailySummariesViewed");
+  }
+
+  updateStreak(currentStreak: number): void {
+    this.setStat("currentStreak", currentStreak);
+    if (currentStreak > this.playerStats.longestStreak) {
+      this.setStat("longestStreak", currentStreak);
+    }
+  }
+
+  addPlayTime(minutes: number): void {
+    this.incrementStat("hoursPlayed", minutes / 60);
   }
 }
 
-// Helper functions for game end logic
-export function calculateGameEndData(gameState: any, startTime: number, reactionTimes: number[]): GameEndData {
-  const endTime = Date.now();
-  const gameDuration = (endTime - startTime) / 1000; // seconds
-  
-  // Count filled cells
-  const filledCells = gameState.board.flat().filter((cell: any) => cell.type !== 'empty');
-  const playerCells = filledCells.filter((cell: any) => cell.owner === 'player').length;
-  const aiCells = filledCells.filter((cell: any) => cell.owner === 'ai').length;
-  const totalCells = gameState.board.length * gameState.board[0].length;
-  const boardFull = filledCells.length >= totalCells - 1; // Allow for special cells
-  
-  // Determine winner
-  let winner: 'player' | 'ai' | 'tie';
-  if (playerCells > aiCells) {
-    winner = 'player';
-  } else if (aiCells > playerCells) {
-    winner = 'ai';
-  } else {
-    winner = 'tie';
-  }
-  
-  // Calculate stats
-  const averageReactionTime = reactionTimes.length > 0 
-    ? reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length 
-    : 0;
-  
-  const fastestMove = reactionTimes.length > 0 ? Math.min(...reactionTimes) : 0;
-  const slowestMove = reactionTimes.length > 0 ? Math.max(...reactionTimes) : 0;
-  
-  const dominationRatio = totalCells > 0 ? playerCells / totalCells : 0;
-  const perfectGame = winner === 'player' && aiCells === 0;
-  
-  return {
-    winner,
-    playerScore: gameState.score.player,
-    aiScore: gameState.score.ai,
-    totalMoves: gameState.moves,
-    gameDuration,
-    phase: gameState.phase,
-    combosUsed: gameState.comboCount,
-    specialCellsActivated: 0, // Esto se trackearía durante el juego
-    averageReactionTime,
-    fastestMove,
-    slowestMove,
-    difficultyLevel: gameState.difficulty,
-    aiPersonality: gameState.aiPersonality,
-    boardFull,
-    perfectGame,
-    comboChain: 0, // Esto se trackearía durante el juego
-    timeBonus: 0,
-    dominationRatio
-  };
-}
+export default AchievementSystem;

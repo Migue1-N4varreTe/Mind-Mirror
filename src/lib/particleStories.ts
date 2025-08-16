@@ -1,642 +1,629 @@
-export interface StoryEvent {
-  type:
-    | "move"
-    | "combo"
-    | "special"
-    | "emotion"
-    | "ai_personality"
-    | "victory"
-    | "defeat"
-    | "milestone";
-  timestamp: number;
-  position?: [number, number];
-  player: "human" | "ai";
-  data: any;
-  narrative: string;
-  intensity: number; // 0-1
-  color: string;
-  particleType:
-    | "explosion"
-    | "stream"
-    | "spiral"
-    | "nova"
-    | "ripple"
-    | "text"
-    | "glow";
-}
+// Motor de historias con partículas para efectos visuales narrativos
 
 export interface ParticleStory {
   id: string;
-  title: string;
-  events: StoryEvent[];
-  theme: string;
+  name: string;
+  narrative: string;
+  particles: ParticleConfig[];
   duration: number;
-  climax?: StoryEvent;
-  resolution?: string;
+  trigger: "emotion" | "achievement" | "reflection" | "manual";
 }
 
+export interface ParticleConfig {
+  type: "star" | "sparkle" | "glow" | "neural" | "quantum" | "flower" | "wave";
+  color: string;
+  size: number;
+  speed: number;
+  lifespan: number;
+  behavior: "float" | "spiral" | "burst" | "flow" | "dance";
+  count: number;
+}
+
+export const PARTICLE_STORIES: Record<string, ParticleStory> = {
+  REFLECTION_BLOOM: {
+    id: "REFLECTION_BLOOM",
+    name: "Florecimiento Reflexivo",
+    narrative:
+      "Tus pensamientos brotan como flores de luz, expandiéndose en el cosmos de tu mente.",
+    particles: [
+      {
+        type: "flower",
+        color: "#FFB6C1",
+        size: 8,
+        speed: 2,
+        lifespan: 3000,
+        behavior: "float",
+        count: 12,
+      },
+      {
+        type: "sparkle",
+        color: "#DDA0DD",
+        size: 4,
+        speed: 1,
+        lifespan: 2000,
+        behavior: "spiral",
+        count: 20,
+      },
+    ],
+    duration: 8000,
+    trigger: "reflection",
+  },
+  WISDOM_CONSTELLATION: {
+    id: "WISDOM_CONSTELLATION",
+    name: "Constelación de Sabiduría",
+    narrative:
+      "Las estrellas de tu sabiduría se alinean, formando patrones de conocimiento ancestral.",
+    particles: [
+      {
+        type: "star",
+        color: "#FFD700",
+        size: 6,
+        speed: 0.5,
+        lifespan: 5000,
+        behavior: "float",
+        count: 15,
+      },
+      {
+        type: "neural",
+        color: "#00CED1",
+        size: 3,
+        speed: 1.5,
+        lifespan: 4000,
+        behavior: "flow",
+        count: 30,
+      },
+    ],
+    duration: 10000,
+    trigger: "achievement",
+  },
+  EMOTIONAL_AURORA: {
+    id: "EMOTIONAL_AURORA",
+    name: "Aurora Emocional",
+    narrative:
+      "Tus emociones danzan como una aurora boreal en el cielo de tu consciencia.",
+    particles: [
+      {
+        type: "wave",
+        color: "#7B68EE",
+        size: 12,
+        speed: 1,
+        lifespan: 4000,
+        behavior: "dance",
+        count: 8,
+      },
+      {
+        type: "glow",
+        color: "#98FB98",
+        size: 10,
+        speed: 0.8,
+        lifespan: 3500,
+        behavior: "flow",
+        count: 15,
+      },
+    ],
+    duration: 12000,
+    trigger: "emotion",
+  },
+  QUANTUM_JOURNEY: {
+    id: "QUANTUM_JOURNEY",
+    name: "Viaje Cuántico",
+    narrative:
+      "Tus ideas saltan entre dimensiones, explorando realidades infinitas de posibilidad.",
+    particles: [
+      {
+        type: "quantum",
+        color: "#FF1493",
+        size: 5,
+        speed: 3,
+        lifespan: 2500,
+        behavior: "burst",
+        count: 25,
+      },
+      {
+        type: "sparkle",
+        color: "#00FFFF",
+        size: 3,
+        speed: 2,
+        lifespan: 3000,
+        behavior: "spiral",
+        count: 40,
+      },
+    ],
+    duration: 9000,
+    trigger: "manual",
+  },
+  MINDFUL_RAIN: {
+    id: "MINDFUL_RAIN",
+    name: "Lluvia Consciente",
+    narrative:
+      "Gotas de mindfulness caen suavemente, nutriendo el jardín de tu presencia.",
+    particles: [
+      {
+        type: "glow",
+        color: "#87CEEB",
+        size: 4,
+        speed: 1.5,
+        lifespan: 4000,
+        behavior: "float",
+        count: 30,
+      },
+      {
+        type: "star",
+        color: "#B0E0E6",
+        size: 2,
+        speed: 0.8,
+        lifespan: 5000,
+        behavior: "flow",
+        count: 50,
+      },
+    ],
+    duration: 15000,
+    trigger: "reflection",
+  },
+};
+
 export class ParticleStoryEngine {
-  private currentStory: ParticleStory;
-  private activeEffects: Map<string, any> = new Map();
-  private narrativeTemplates: Map<string, string[]> = new Map();
-  private storyArc:
-    | "introduction"
-    | "rising_action"
-    | "climax"
-    | "falling_action"
-    | "resolution" = "introduction";
+  private activeStories: Map<
+    string,
+    { story: ParticleStory; startTime: number }
+  > = new Map();
+  private canvas: HTMLCanvasElement | null = null;
+  private ctx: CanvasRenderingContext2D | null = null;
+  private animationFrame: number | null = null;
+  private particles: Array<{
+    id: string;
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    color: string;
+    type: ParticleConfig["type"];
+    behavior: ParticleConfig["behavior"];
+    lifespan: number;
+    maxLifespan: number;
+    storyId: string;
+  }> = [];
 
-  constructor() {
-    this.initializeNarrativeTemplates();
-    this.currentStory = this.createNewStory();
+  constructor(canvasElement?: HTMLCanvasElement) {
+    if (canvasElement) {
+      this.setCanvas(canvasElement);
+    }
   }
 
-  private initializeNarrativeTemplates(): void {
-    // Human move narratives
-    this.narrativeTemplates.set("human_move_confident", [
-      "Con determinación férrea, el jugador marca su territorio",
-      "Un movimiento calculado demuestra la experiencia humana",
-      "La estrategia se despliega con precisión quirúrgica",
-      "El instinto humano encuentra el punto perfecto",
-    ]);
-
-    this.narrativeTemplates.set("human_move_hesitant", [
-      "Tras una pausa contemplativa, la decisión emerge",
-      "La incertidumbre se transforma en acción",
-      "Un movimiento cauteloso revela la profundidad del análisis",
-      "La paciencia humana encuentra su recompensa",
-    ]);
-
-    this.narrativeTemplates.set("human_move_rushed", [
-      "¡Velocidad! El instinto supera al análisis",
-      "Una decisión impulsiva cambia el tablero",
-      "La presión del tiempo forja la estrategia",
-      "En la rapidez, la intuición encuentra su voz",
-    ]);
-
-    // AI move narratives
-    this.narrativeTemplates.set("ai_move_calculated", [
-      "Los algoritmos convergen en una solución elegante",
-      "La mente artificial despliega su red de posibilidades",
-      "Miles de cálculos cristalizan en un solo movimiento",
-      "La lógica fría encuentra la belleza en la estrategia",
-    ]);
-
-    this.narrativeTemplates.set("ai_move_adaptive", [
-      "Aprendiendo, evolucionando, la IA se transforma",
-      "Los patrones humanos alimentan la sabiduría artificial",
-      "En la adaptación, la máquina trasciende su programación",
-      "El espejo neural refleja y supera",
-    ]);
-
-    this.narrativeTemplates.set("ai_personality_change", [
-      "¡Una metamorfosis digital sacude el tablero!",
-      "La IA revela una nueva faceta de su personalidad",
-      "Como un camaleón digital, la estrategia se transforma",
-      "El alma artificial muda de piel",
-    ]);
-
-    // Combo narratives
-    this.narrativeTemplates.set("combo_achievement", [
-      "¡Explosión de genialidad! Los elementos se alinean",
-      "La sinfonía estratégica alcanza su crescendo",
-      "Como fuegos artificiales, los combos iluminan el tablero",
-      "El dominio táctico se manifiesta en todo su esplendor",
-    ]);
-
-    // Emotional narratives
-    this.narrativeTemplates.set("frustration_rising", [
-      "Las sombras de la frustración se extienden",
-      "La presión mental se intensifica como una tormenta",
-      "Los errores se acumulan como nubes oscuras",
-      "En la dificultad, el carácter se revela",
-    ]);
-
-    this.narrativeTemplates.set("confidence_surge", [
-      "¡Una ola de confianza inunda el campo de batalla!",
-      "El poder fluye como río dorado",
-      "La maestría se eleva hacia las alturas",
-      "En la seguridad, nace la audacia",
-    ]);
-
-    // Victory/Defeat narratives
-    this.narrativeTemplates.set("victory_human", [
-      "¡Triunfo! La creatividad humana prevalece",
-      "La intuición conquista la lógica fría",
-      "El corazón humano supera al algoritmo",
-      "Victoria forjada en ingenio y determinación",
-    ]);
-
-    this.narrativeTemplates.set("victory_ai", [
-      "La evolución artificial alcanza su cúspide",
-      "Los circuitos digitales cantan victoria",
-      "La perfección calculada encuentra su recompensa",
-      "El futuro abraza el presente",
-    ]);
+  setCanvas(canvas: HTMLCanvasElement): void {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.setupCanvas();
   }
 
-  private createNewStory(): ParticleStory {
-    return {
-      id: `story_${Date.now()}`,
-      title: "La Danza de las Mentes",
-      events: [],
-      theme: "epic_battle",
-      duration: 0,
-      climax: undefined,
-      resolution: undefined,
-    };
-  }
+  private setupCanvas(): void {
+    if (!this.canvas) return;
 
-  addGameEvent(eventData: {
-    type: StoryEvent["type"];
-    position?: [number, number];
-    player: "human" | "ai";
-    data: any;
-    intensity?: number;
-  }): StoryEvent {
-    const narrative = this.generateNarrative(eventData);
-    const { color, particleType } = this.getVisualStyle(eventData);
-
-    const event: StoryEvent = {
-      type: eventData.type,
-      timestamp: Date.now(),
-      position: eventData.position,
-      player: eventData.player,
-      data: eventData.data,
-      narrative,
-      intensity: eventData.intensity || 0.5,
-      color,
-      particleType,
+    const resizeCanvas = () => {
+      if (!this.canvas) return;
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight;
     };
 
-    this.currentStory.events.push(event);
-    this.updateStoryArc();
-    this.createParticleEffect(event);
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
-    return event;
+    this.startAnimation();
   }
 
-  private generateNarrative(eventData: any): string {
-    let templateKey = "";
+  playStory(storyId: string, customNarrative?: string): void {
+    const story = PARTICLE_STORIES[storyId];
+    if (!story) {
+      console.warn(`Particle story ${storyId} not found`);
+      return;
+    }
 
-    switch (eventData.type) {
-      case "move":
-        if (eventData.player === "human") {
-          const reactionTime = eventData.data.reactionTime || 2000;
-          const confidence = eventData.data.confidence || 0.5;
+    // Si hay una narrativa personalizada, usar esa
+    const storyToPlay = customNarrative
+      ? { ...story, narrative: customNarrative }
+      : story;
 
-          if (reactionTime < 1000 && confidence > 0.7) {
-            templateKey = "human_move_confident";
-          } else if (reactionTime > 3000) {
-            templateKey = "human_move_hesitant";
-          } else {
-            templateKey = "human_move_rushed";
-          }
-        } else {
-          const aiPersonality = eventData.data.personality || "calculated";
-          if (aiPersonality === "evolved" || aiPersonality === "chameleon") {
-            templateKey = "ai_move_adaptive";
-          } else {
-            templateKey = "ai_move_calculated";
-          }
+    this.activeStories.set(storyId, {
+      story: storyToPlay,
+      startTime: Date.now(),
+    });
+
+    this.spawnParticlesForStory(storyToPlay);
+    this.displayNarrative(storyToPlay.narrative);
+  }
+
+  playStoryByTrigger(
+    trigger: ParticleStory["trigger"],
+    emotion?: string,
+  ): void {
+    const availableStories = Object.values(PARTICLE_STORIES).filter(
+      (story) => story.trigger === trigger,
+    );
+
+    if (availableStories.length === 0) return;
+
+    // Si es un trigger emocional, intentar encontrar una historia que coincida
+    let selectedStory =
+      availableStories[Math.floor(Math.random() * availableStories.length)];
+
+    if (trigger === "emotion" && emotion) {
+      const emotionStory = this.getStoryForEmotion(emotion);
+      if (emotionStory) selectedStory = emotionStory;
+    }
+
+    this.playStory(selectedStory.id);
+  }
+
+  private getStoryForEmotion(emotion: string): ParticleStory | null {
+    const emotionMap: Record<string, string> = {
+      alegría: "REFLECTION_BLOOM",
+      sabiduría: "WISDOM_CONSTELLATION",
+      calma: "MINDFUL_RAIN",
+      creatividad: "QUANTUM_JOURNEY",
+      reflexión: "EMOTIONAL_AURORA",
+    };
+
+    const storyId = emotionMap[emotion.toLowerCase()];
+    return storyId ? PARTICLE_STORIES[storyId] : null;
+  }
+
+  private spawnParticlesForStory(story: ParticleStory): void {
+    if (!this.canvas) return;
+
+    story.particles.forEach((particleConfig) => {
+      for (let i = 0; i < particleConfig.count; i++) {
+        const particle = {
+          id: Math.random().toString(36).substr(2, 9),
+          x: Math.random() * this.canvas!.width,
+          y: Math.random() * this.canvas!.height,
+          vx: (Math.random() - 0.5) * particleConfig.speed,
+          vy: (Math.random() - 0.5) * particleConfig.speed,
+          size: particleConfig.size * (0.8 + Math.random() * 0.4),
+          color: particleConfig.color,
+          type: particleConfig.type,
+          behavior: particleConfig.behavior,
+          lifespan: particleConfig.lifespan,
+          maxLifespan: particleConfig.lifespan,
+          storyId: story.id,
+        };
+
+        this.particles.push(particle);
+      }
+    });
+  }
+
+  private displayNarrative(narrative: string): void {
+    // Crear overlay temporal para mostrar la narrativa
+    const overlay = document.createElement("div");
+    overlay.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-style: italic;
+      text-align: center;
+      max-width: 80%;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      font-family: 'Georgia', serif;
+      font-size: 1.1rem;
+      line-height: 1.4;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    `;
+
+    overlay.textContent = narrative;
+    document.body.appendChild(overlay);
+
+    // Animar entrada
+    requestAnimationFrame(() => {
+      overlay.style.opacity = "1";
+    });
+
+    // Remover después de 5 segundos
+    setTimeout(() => {
+      overlay.style.opacity = "0";
+      setTimeout(() => {
+        if (document.body.contains(overlay)) {
+          document.body.removeChild(overlay);
         }
-        break;
+      }, 500);
+    }, 5000);
+  }
 
-      case "combo":
-        templateKey = "combo_achievement";
-        break;
+  private startAnimation(): void {
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
 
-      case "emotion":
-        const emotion = eventData.data.emotionalState;
-        if (emotion === "frustrated") {
-          templateKey = "frustration_rising";
-        } else if (emotion === "confident") {
-          templateKey = "confidence_surge";
-        }
-        break;
+    const animate = () => {
+      this.updateParticles();
+      this.renderParticles();
+      this.cleanupExpiredStories();
+      this.animationFrame = requestAnimationFrame(animate);
+    };
 
-      case "ai_personality":
-        templateKey = "ai_personality_change";
-        break;
+    animate();
+  }
 
-      case "victory":
-        templateKey =
-          eventData.player === "human" ? "victory_human" : "victory_ai";
+  private updateParticles(): void {
+    const now = Date.now();
+
+    this.particles = this.particles.filter((particle) => {
+      // Actualizar posición basada en comportamiento
+      this.updateParticleBehavior(particle);
+
+      // Reducir lifespan
+      particle.lifespan -= 16; // ~60fps
+
+      // Eliminar partículas muertas
+      return particle.lifespan > 0;
+    });
+  }
+
+  private updateParticleBehavior(particle: any): void {
+    switch (particle.behavior) {
+      case "float":
+        particle.y -= particle.vy;
+        particle.x += Math.sin(Date.now() * 0.001) * 0.5;
+        break;
+      case "spiral":
+        const angle = Date.now() * 0.002;
+        const radius = 2;
+        particle.x += Math.cos(angle) * radius;
+        particle.y += Math.sin(angle) * radius;
+        break;
+      case "burst":
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vx *= 0.99;
+        particle.vy *= 0.99;
+        break;
+      case "flow":
+        particle.x += particle.vx;
+        particle.y += particle.vy * Math.sin(Date.now() * 0.001);
+        break;
+      case "dance":
+        particle.x += Math.sin(Date.now() * 0.003) * particle.vx;
+        particle.y += Math.cos(Date.now() * 0.003) * particle.vy;
         break;
     }
 
-    const templates = this.narrativeTemplates.get(templateKey) || [
-      "Un momento decisivo se despliega...",
-    ];
-    const template = templates[Math.floor(Math.random() * templates.length)];
-
-    return this.personalizeNarrative(template, eventData);
+    // Wrap around screen edges
+    if (this.canvas) {
+      if (particle.x < 0) particle.x = this.canvas.width;
+      if (particle.x > this.canvas.width) particle.x = 0;
+      if (particle.y < 0) particle.y = this.canvas.height;
+      if (particle.y > this.canvas.height) particle.y = 0;
+    }
   }
 
-  private personalizeNarrative(template: string, eventData: any): string {
-    let narrative = template;
+  private renderParticles(): void {
+    if (!this.ctx || !this.canvas) return;
 
-    // Add position context
-    if (eventData.position) {
-      const [row, col] = eventData.position;
-      const zones = [
-        "las fronteras",
-        "el centro",
-        "las esquinas",
-        "los flancos",
-      ];
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      if ((row === 0 || row === 7) && (col === 0 || col === 7)) {
-        narrative += " desde las esquinas estratégicas";
-      } else if (row >= 3 && row <= 4 && col >= 3 && col <= 4) {
-        narrative += " dominando el centro del poder";
-      } else if (row === 0 || row === 7 || col === 0 || col === 7) {
-        narrative += " controlando las fronteras";
+    this.particles.forEach((particle) => {
+      const alpha = particle.lifespan / particle.maxLifespan;
+      this.ctx!.globalAlpha = alpha;
+
+      this.renderParticleByType(particle);
+    });
+
+    this.ctx.globalAlpha = 1;
+  }
+
+  private renderParticleByType(particle: any): void {
+    if (!this.ctx) return;
+
+    this.ctx.fillStyle = particle.color;
+    this.ctx.strokeStyle = particle.color;
+
+    switch (particle.type) {
+      case "star":
+        this.drawStar(particle.x, particle.y, particle.size);
+        break;
+      case "sparkle":
+        this.drawSparkle(particle.x, particle.y, particle.size);
+        break;
+      case "glow":
+        this.drawGlow(particle.x, particle.y, particle.size);
+        break;
+      case "neural":
+        this.drawNeural(particle.x, particle.y, particle.size);
+        break;
+      case "quantum":
+        this.drawQuantum(particle.x, particle.y, particle.size);
+        break;
+      case "flower":
+        this.drawFlower(particle.x, particle.y, particle.size);
+        break;
+      case "wave":
+        this.drawWave(particle.x, particle.y, particle.size);
+        break;
+      default:
+        this.ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
+    }
+  }
+
+  private drawStar(x: number, y: number, size: number): void {
+    if (!this.ctx) return;
+
+    const spikes = 5;
+    const outerRadius = size;
+    const innerRadius = size * 0.5;
+
+    this.ctx.beginPath();
+    for (let i = 0; i < spikes * 2; i++) {
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const angle = (i * Math.PI) / spikes;
+      const dx = Math.cos(angle) * radius;
+      const dy = Math.sin(angle) * radius;
+
+      if (i === 0) {
+        this.ctx.moveTo(x + dx, y + dy);
+      } else {
+        this.ctx.lineTo(x + dx, y + dy);
+      }
+    }
+    this.ctx.closePath();
+    this.ctx.fill();
+  }
+
+  private drawSparkle(x: number, y: number, size: number): void {
+    if (!this.ctx) return;
+
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, size, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // Añadir líneas de brillo
+    this.ctx.lineWidth = 1;
+    this.ctx.beginPath();
+    this.ctx.moveTo(x - size * 1.5, y);
+    this.ctx.lineTo(x + size * 1.5, y);
+    this.ctx.moveTo(x, y - size * 1.5);
+    this.ctx.lineTo(x, y + size * 1.5);
+    this.ctx.stroke();
+  }
+
+  private drawGlow(x: number, y: number, size: number): void {
+    if (!this.ctx) return;
+
+    const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, size);
+    gradient.addColorStop(0, this.ctx.fillStyle as string);
+    gradient.addColorStop(1, "transparent");
+
+    this.ctx.fillStyle = gradient;
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, size, 0, Math.PI * 2);
+    this.ctx.fill();
+  }
+
+  private drawNeural(x: number, y: number, size: number): void {
+    if (!this.ctx) return;
+
+    // Nodo central
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // Conexiones
+    for (let i = 0; i < 4; i++) {
+      const angle = (i * Math.PI) / 2;
+      const endX = x + Math.cos(angle) * size;
+      const endY = y + Math.sin(angle) * size;
+
+      this.ctx.lineWidth = 1;
+      this.ctx.beginPath();
+      this.ctx.moveTo(x, y);
+      this.ctx.lineTo(endX, endY);
+      this.ctx.stroke();
+    }
+  }
+
+  private drawQuantum(x: number, y: number, size: number): void {
+    if (!this.ctx) return;
+
+    // Núcleo
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // Órbitas
+    for (let i = 0; i < 3; i++) {
+      const radius = size * (0.6 + i * 0.3);
+      this.ctx.lineWidth = 1;
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+      this.ctx.stroke();
+    }
+  }
+
+  private drawFlower(x: number, y: number, size: number): void {
+    if (!this.ctx) return;
+
+    const petals = 6;
+    for (let i = 0; i < petals; i++) {
+      const angle = (i * 2 * Math.PI) / petals;
+      const petalX = x + Math.cos(angle) * size * 0.7;
+      const petalY = y + Math.sin(angle) * size * 0.7;
+
+      this.ctx.beginPath();
+      this.ctx.arc(petalX, petalY, size * 0.3, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    // Centro
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, size * 0.2, 0, Math.PI * 2);
+    this.ctx.fill();
+  }
+
+  private drawWave(x: number, y: number, size: number): void {
+    if (!this.ctx) return;
+
+    this.ctx.lineWidth = size / 2;
+    this.ctx.lineCap = "round";
+    this.ctx.beginPath();
+
+    const waveLength = size * 2;
+    const amplitude = size * 0.5;
+
+    for (let i = 0; i <= waveLength; i += 2) {
+      const waveY = y + Math.sin((i / waveLength) * Math.PI * 2) * amplitude;
+      if (i === 0) {
+        this.ctx.moveTo(x - waveLength / 2 + i, waveY);
+      } else {
+        this.ctx.lineTo(x - waveLength / 2 + i, waveY);
       }
     }
 
-    // Add intensity modifiers
-    if (eventData.intensity > 0.8) {
-      narrative = "¡" + narrative + "!";
-    } else if (eventData.intensity < 0.3) {
-      narrative = narrative.toLowerCase();
+    this.ctx.stroke();
+  }
+
+  private cleanupExpiredStories(): void {
+    const now = Date.now();
+
+    this.activeStories.forEach((activeStory, storyId) => {
+      if (now - activeStory.startTime > activeStory.story.duration) {
+        this.activeStories.delete(storyId);
+        // Remover partículas de esta historia
+        this.particles = this.particles.filter((p) => p.storyId !== storyId);
+      }
+    });
+  }
+
+  stopStory(storyId: string): void {
+    this.activeStories.delete(storyId);
+    this.particles = this.particles.filter((p) => p.storyId !== storyId);
+  }
+
+  stopAllStories(): void {
+    this.activeStories.clear();
+    this.particles = [];
+  }
+
+  getActiveStories(): string[] {
+    return Array.from(this.activeStories.keys());
+  }
+
+  getAvailableStories(): ParticleStory[] {
+    return Object.values(PARTICLE_STORIES);
+  }
+
+  destroy(): void {
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
     }
-
-    return narrative;
-  }
-
-  private getVisualStyle(eventData: any): {
-    color: string;
-    particleType: StoryEvent["particleType"];
-  } {
-    let color = "#ffffff";
-    let particleType: StoryEvent["particleType"] = "glow";
-
-    switch (eventData.type) {
-      case "move":
-        color = eventData.player === "human" ? "#00f5ff" : "#ff1744";
-        particleType = "ripple";
-        break;
-
-      case "combo":
-        color = "#ffd700";
-        particleType = "explosion";
-        break;
-
-      case "emotion":
-        const emotion = eventData.data.emotionalState;
-        switch (emotion) {
-          case "frustrated":
-            color = "#ff4444";
-            particleType = "spiral";
-            break;
-          case "confident":
-            color = "#44ff44";
-            particleType = "nova";
-            break;
-          case "excited":
-            color = "#ffaa00";
-            particleType = "stream";
-            break;
-        }
-        break;
-
-      case "ai_personality":
-        color = "#aa44ff";
-        particleType = "nova";
-        break;
-
-      case "special":
-        color = "#ff44aa";
-        particleType = "explosion";
-        break;
-
-      case "victory":
-        color = eventData.player === "human" ? "#00ff88" : "#ff0044";
-        particleType = "nova";
-        break;
-
-      case "milestone":
-        color = "#8844ff";
-        particleType = "text";
-        break;
-    }
-
-    return { color, particleType };
-  }
-
-  private updateStoryArc(): void {
-    const eventCount = this.currentStory.events.length;
-    const lastEvents = this.currentStory.events.slice(-5);
-    const averageIntensity =
-      lastEvents.reduce((sum, e) => sum + e.intensity, 0) / lastEvents.length;
-
-    if (eventCount < 5) {
-      this.storyArc = "introduction";
-    } else if (eventCount < 15 && averageIntensity < 0.7) {
-      this.storyArc = "rising_action";
-    } else if (averageIntensity > 0.8 || this.hasClimax()) {
-      this.storyArc = "climax";
-      this.identifyClimax();
-    } else if (this.storyArc === "climax") {
-      this.storyArc = "falling_action";
-    } else if (eventCount > 30) {
-      this.storyArc = "resolution";
-    }
-  }
-
-  private hasClimax(): boolean {
-    const lastEvents = this.currentStory.events.slice(-3);
-    return lastEvents.some(
-      (e) =>
-        (e.type === "combo" && e.intensity > 0.8) ||
-        e.type === "ai_personality" ||
-        e.type === "victory",
-    );
-  }
-
-  private identifyClimax(): void {
-    if (this.currentStory.climax) return;
-
-    const significantEvents = this.currentStory.events.filter(
-      (e) =>
-        e.intensity > 0.7 ||
-        e.type === "combo" ||
-        e.type === "ai_personality" ||
-        e.type === "victory",
-    );
-
-    if (significantEvents.length > 0) {
-      this.currentStory.climax =
-        significantEvents[significantEvents.length - 1];
-    }
-  }
-
-  private createParticleEffect(event: StoryEvent): void {
-    const effectId = `effect_${Date.now()}_${Math.random()}`;
-
-    const effect = {
-      id: effectId,
-      type: event.particleType,
-      position: event.position || [4, 4],
-      color: event.color,
-      intensity: event.intensity,
-      duration: this.getEffectDuration(event),
-      narrative: event.narrative,
-      timestamp: Date.now(),
-    };
-
-    this.activeEffects.set(effectId, effect);
-
-    // Auto-cleanup after duration
-    setTimeout(() => {
-      this.activeEffects.delete(effectId);
-    }, effect.duration);
-  }
-
-  private getEffectDuration(event: StoryEvent): number {
-    const baseDuration = 2000;
-    const intensityMultiplier = 1 + event.intensity;
-
-    switch (event.type) {
-      case "victory":
-      case "ai_personality":
-        return baseDuration * 3 * intensityMultiplier;
-      case "combo":
-        return baseDuration * 2 * intensityMultiplier;
-      case "emotion":
-        return baseDuration * 1.5 * intensityMultiplier;
-      default:
-        return baseDuration * intensityMultiplier;
-    }
-  }
-
-  getActiveEffects(): any[] {
-    return Array.from(this.activeEffects.values());
-  }
-
-  getCurrentNarrative(): string {
-    const lastEvent =
-      this.currentStory.events[this.currentStory.events.length - 1];
-    if (!lastEvent) return "La historia comienza...";
-
-    const arcContext = this.getArcContext();
-    return `${arcContext} ${lastEvent.narrative}`;
-  }
-
-  private getArcContext(): string {
-    switch (this.storyArc) {
-      case "introduction":
-        return "En los albores del conflicto,";
-      case "rising_action":
-        return "Mientras la tensión se eleva,";
-      case "climax":
-        return "En el momento crucial,";
-      case "falling_action":
-        return "Tras el punto de inflexión,";
-      case "resolution":
-        return "En los ecos finales,";
-      default:
-        return "";
-    }
-  }
-
-  getStoryArc(): typeof this.storyArc {
-    return this.storyArc;
-  }
-
-  getStoryMetrics(): any {
-    const events = this.currentStory.events;
-
-    if (events.length === 0) {
-      return {
-        totalEvents: 0,
-        averageIntensity: 0,
-        dominantPlayer: "none",
-        emotionalRange: 0,
-        climaxReached: false,
-      };
-    }
-
-    const humanEvents = events.filter((e) => e.player === "human").length;
-    const aiEvents = events.filter((e) => e.player === "ai").length;
-    const averageIntensity =
-      events.reduce((sum, e) => sum + e.intensity, 0) / events.length;
-
-    const intensities = events.map((e) => e.intensity);
-    const emotionalRange = Math.max(...intensities) - Math.min(...intensities);
-
-    return {
-      totalEvents: events.length,
-      averageIntensity,
-      dominantPlayer: humanEvents > aiEvents ? "human" : "ai",
-      emotionalRange,
-      climaxReached: !!this.currentStory.climax,
-      storyArc: this.storyArc,
-      narrativeLength: events.reduce((sum, e) => sum + e.narrative.length, 0),
-    };
-  }
-
-  generateChapterSummary(): string {
-    const metrics = this.getStoryMetrics();
-    const events = this.currentStory.events;
-
-    if (events.length === 0) return "La historia aún no ha comenzado...";
-
-    const summaries = [
-      `En ${events.length} movimientos memorables, `,
-      metrics.dominantPlayer === "human"
-        ? "la creatividad humana lideró la danza"
-        : "la inteligencia artificial dominó el tablero",
-      `. Con una intensidad promedio de ${(metrics.averageIntensity * 100).toFixed(0)}%, `,
-      this.currentStory.climax
-        ? `el clímax llegó cuando ${this.currentStory.climax.narrative.toLowerCase()}`
-        : "la historia continúa desarrollándose",
-      `. ${this.getEmotionalSummary()}`,
-    ];
-
-    return summaries.join("");
-  }
-
-  private getEmotionalSummary(): string {
-    const emotionEvents = this.currentStory.events.filter(
-      (e) => e.type === "emotion",
-    );
-
-    if (emotionEvents.length === 0)
-      return "Las emociones permanecieron estables.";
-
-    const emotions = emotionEvents.map((e) => e.data.emotionalState);
-    const emotionCounts = emotions.reduce(
-      (acc, emotion) => {
-        acc[emotion] = (acc[emotion] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-
-    const dominantEmotion = Object.keys(emotionCounts).reduce((a, b) =>
-      emotionCounts[a] > emotionCounts[b] ? a : b,
-    );
-
-    const emotionDescriptions = {
-      frustrated: "La frustración marcó el ritmo",
-      confident: "La confianza iluminó el camino",
-      excited: "La emoción electrificó cada movimiento",
-      calm: "La calma guió las decisiones",
-      focused: "La concentración forjó la estrategia",
-    };
-
-    return (
-      emotionDescriptions[dominantEmotion] ||
-      "Las emociones danzaron en armonía."
-    );
-  }
-
-  exportStory(): ParticleStory {
-    this.currentStory.duration =
-      Date.now() - (this.currentStory.events[0]?.timestamp || Date.now());
-    this.currentStory.resolution = this.generateChapterSummary();
-
-    return { ...this.currentStory };
-  }
-
-  startNewStory(): void {
-    const oldStory = this.exportStory();
-    this.currentStory = this.createNewStory();
-    this.storyArc = "introduction";
-    this.activeEffects.clear();
-
-    // Could save oldStory to history here
-    console.log(
-      "📖 Nueva historia iniciada. Historia anterior:",
-      oldStory.title,
-    );
-  }
-
-  getVisualEffectConfig(effectType: StoryEvent["particleType"]): any {
-    const configs = {
-      explosion: {
-        particleCount: 50,
-        spread: 60,
-        speed: { min: 1, max: 3 },
-        scale: { start: 0.1, end: 1.5 },
-        alpha: { start: 1, end: 0 },
-        duration: 1000,
-      },
-      stream: {
-        particleCount: 30,
-        spread: 15,
-        speed: { min: 2, max: 4 },
-        scale: { start: 0.2, end: 0.8 },
-        alpha: { start: 0.8, end: 0 },
-        duration: 1500,
-      },
-      spiral: {
-        particleCount: 40,
-        spread: 360,
-        speed: { min: 0.5, max: 2 },
-        scale: { start: 0.3, end: 1.2 },
-        alpha: { start: 0.9, end: 0 },
-        duration: 2000,
-        spiral: true,
-      },
-      nova: {
-        particleCount: 60,
-        spread: 360,
-        speed: { min: 1, max: 5 },
-        scale: { start: 0.05, end: 2 },
-        alpha: { start: 1, end: 0 },
-        duration: 2500,
-      },
-      ripple: {
-        particleCount: 20,
-        spread: 360,
-        speed: { min: 1, max: 2 },
-        scale: { start: 1, end: 3 },
-        alpha: { start: 0.6, end: 0 },
-        duration: 1200,
-        ripple: true,
-      },
-      glow: {
-        particleCount: 15,
-        spread: 30,
-        speed: { min: 0.1, max: 0.5 },
-        scale: { start: 0.8, end: 1.5 },
-        alpha: { start: 0.4, end: 0 },
-        duration: 3000,
-      },
-      text: {
-        particleCount: 1,
-        speed: { min: 0, max: 0.2 },
-        scale: { start: 1, end: 1.2 },
-        alpha: { start: 1, end: 0 },
-        duration: 4000,
-        text: true,
-      },
-    };
-
-    return configs[effectType] || configs.glow;
-  }
-
-  // Real-time narrative generation
-  generateLiveCommentary(gameState: any): string {
-    const metrics = this.getStoryMetrics();
-    const lastEvents = this.currentStory.events.slice(-3);
-
-    if (lastEvents.length === 0) return "";
-
-    const recentIntensity =
-      lastEvents.reduce((sum, e) => sum + e.intensity, 0) / lastEvents.length;
-
-    if (recentIntensity > 0.8) {
-      return "¡La intensidad alcanza niveles épicos!";
-    } else if (recentIntensity < 0.3) {
-      return "Un momento de calma estratégica...";
-    } else if (metrics.storyArc === "climax") {
-      return "El destino se decide en estos movimientos...";
-    }
-
-    return "";
+    this.stopAllStories();
   }
 }
+
+export default ParticleStoryEngine;
