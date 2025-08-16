@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface VisualEffectsProps {
   children: React.ReactNode;
@@ -25,7 +25,12 @@ interface CellRippleProps {
   onComplete?: () => void;
 }
 
-export function CellRipple({ x, y, color = "#00ffff", onComplete }: CellRippleProps) {
+export function CellRipple({
+  x,
+  y,
+  color = "#00ffff",
+  onComplete,
+}: CellRippleProps) {
   return (
     <motion.div
       className="absolute rounded-full border-2 pointer-events-none"
@@ -35,15 +40,15 @@ export function CellRipple({ x, y, color = "#00ffff", onComplete }: CellRipplePr
         borderColor: color,
       }}
       initial={{ width: 0, height: 0, opacity: 1 }}
-      animate={{ 
-        width: 40, 
-        height: 40, 
+      animate={{
+        width: 40,
+        height: 40,
         opacity: 0,
-        scale: [1, 1.5, 2]
+        scale: [1, 1.5, 2],
       }}
-      transition={{ 
+      transition={{
         duration: 0.6,
-        ease: "easeOut"
+        ease: "easeOut",
       }}
       onAnimationComplete={onComplete}
     />
@@ -58,7 +63,13 @@ interface FloatingTextProps {
   onComplete?: () => void;
 }
 
-export function FloatingText({ text, x, y, color = "#ffffff", onComplete }: FloatingTextProps) {
+export function FloatingText({
+  text,
+  x,
+  y,
+  color = "#ffffff",
+  onComplete,
+}: FloatingTextProps) {
   return (
     <motion.div
       className="absolute font-bold text-lg pointer-events-none z-10"
@@ -69,14 +80,14 @@ export function FloatingText({ text, x, y, color = "#ffffff", onComplete }: Floa
         textShadow: `0 0 10px ${color}`,
       }}
       initial={{ opacity: 1, y: 0 }}
-      animate={{ 
-        opacity: 0, 
+      animate={{
+        opacity: 0,
         y: -50,
-        scale: [1, 1.2, 1]
+        scale: [1, 1.2, 1],
       }}
-      transition={{ 
+      transition={{
         duration: 1,
-        ease: "easeOut"
+        ease: "easeOut",
       }}
       onAnimationComplete={onComplete}
     >
@@ -94,14 +105,14 @@ export function NeuralNetwork({ nodes = 12, className }: NeuralNetworkProps) {
   const nodePositions = Array.from({ length: nodes }, (_, i) => ({
     x: Math.cos((i * 2 * Math.PI) / nodes) * 40 + 50,
     y: Math.sin((i * 2 * Math.PI) / nodes) * 40 + 50,
-    id: i
+    id: i,
   }));
 
   return (
     <div className={cn("relative w-24 h-24", className)}>
       <svg className="w-full h-full" viewBox="0 0 100 100">
         {/* Conexiones */}
-        {nodePositions.map((node, i) => 
+        {nodePositions.map((node, i) =>
           nodePositions.slice(i + 1).map((otherNode, j) => (
             <motion.line
               key={`${i}-${j}`}
@@ -114,16 +125,16 @@ export function NeuralNetwork({ nodes = 12, className }: NeuralNetworkProps) {
               opacity="0.3"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
-              transition={{ 
+              transition={{
                 duration: 2,
                 delay: Math.random() * 2,
                 repeat: Infinity,
-                repeatType: "reverse"
+                repeatType: "reverse",
               }}
             />
-          ))
+          )),
         )}
-        
+
         {/* Nodos */}
         {nodePositions.map((node) => (
           <motion.circle
@@ -138,7 +149,7 @@ export function NeuralNetwork({ nodes = 12, className }: NeuralNetworkProps) {
               duration: 2,
               delay: node.id * 0.1,
               repeat: Infinity,
-              repeatType: "reverse"
+              repeatType: "reverse",
             }}
           />
         ))}

@@ -15,10 +15,10 @@ interface EmotionResult {
 const emotionIcons: Record<string, string> = {
   alegría: "😊",
   tristeza: "😢",
-  miedo: "😰", 
+  miedo: "😰",
   enojo: "😠",
   calma: "😌",
-  confusión: "😵"
+  confusión: "😵",
 };
 
 export default function EmotionalMap() {
@@ -28,7 +28,7 @@ export default function EmotionalMap() {
 
   const handleAnalyze = async () => {
     if (!input.trim()) return;
-    
+
     setLoading(true);
     try {
       const res = await emotionClassification(input);
@@ -39,7 +39,7 @@ export default function EmotionalMap() {
         setResult({
           emotion: "calma",
           color: "#87CEEB",
-          quote: "Cada emoción es un maestro esperando ser escuchado"
+          quote: "Cada emoción es un maestro esperando ser escuchado",
         });
       }
     } catch (err) {
@@ -66,8 +66,8 @@ export default function EmotionalMap() {
           rows={4}
         />
 
-        <Button 
-          onClick={handleAnalyze} 
+        <Button
+          onClick={handleAnalyze}
           disabled={loading || !input.trim()}
           className="w-full bg-gradient-to-r from-neon-pink to-neon-purple hover:opacity-90 transition-opacity"
         >
@@ -83,9 +83,10 @@ export default function EmotionalMap() {
 
         {result && (
           <div className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col items-center space-y-4 p-6 rounded-xl border border-border/30"
-                 style={{ backgroundColor: `${result.color}15` }}>
-              
+            <div
+              className="flex flex-col items-center space-y-4 p-6 rounded-xl border border-border/30"
+              style={{ backgroundColor: `${result.color}15` }}
+            >
               {/* Círculo emocional */}
               <div className="relative">
                 <div
@@ -93,7 +94,7 @@ export default function EmotionalMap() {
                     "w-24 h-24 rounded-full flex items-center justify-center",
                     "border-4 border-white/30 backdrop-blur-sm",
                     "text-4xl font-bold text-white shadow-lg",
-                    "animate-pulse"
+                    "animate-pulse",
                   )}
                   style={{ backgroundColor: result.color }}
                 >

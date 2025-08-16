@@ -18,7 +18,7 @@ export const explorerQuestions = [
   "Si pudieras conversar con tu yo del pasado, ¿qué le dirías?",
   "¿Qué emoción has estado evitando últimamente?",
   "¿Cuál es la historia que te cuentas sobre quien eres?",
-  "¿Qué te susurra tu intuición en este momento?"
+  "¿Qué te susurra tu intuición en este momento?",
 ];
 
 export const builderQuestions = [
@@ -26,7 +26,7 @@ export const builderQuestions = [
   "¿Cuál es el siguiente paso pequeño hacia tu meta más importante?",
   "¿Qué obstáculo interno necesitas transformar?",
   "¿Cómo quieres que se sienta tu día ideal?",
-  "¿Qué estructura necesita tu vida para florecer?"
+  "¿Qué estructura necesita tu vida para florecer?",
 ];
 
 export const visionaryQuestions = [
@@ -34,5 +34,5 @@ export const visionaryQuestions = [
   "¿Qué arquetipo vive en tu interior esperando ser expresado?",
   "¿Cuál es tu don único para el mundo?",
   "¿Qué mensaje traes desde tu futuro ideal?",
-  "¿Qué símbolo representa tu transformación actual?"
+  "¿Qué símbolo representa tu transformación actual?",
 ];

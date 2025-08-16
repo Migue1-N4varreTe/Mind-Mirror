@@ -6,9 +6,9 @@ export async function callFusion(prompt: string): Promise<string> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.FUSION_API_KEY}`
+      Authorization: `Bearer ${process.env.FUSION_API_KEY}`,
     },
-    body: JSON.stringify({ prompt })
+    body: JSON.stringify({ prompt }),
   });
 
   if (!response.ok) {

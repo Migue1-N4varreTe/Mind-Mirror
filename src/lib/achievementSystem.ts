@@ -5,8 +5,8 @@ export interface Achievement {
   name: string;
   description: string;
   icon: string;
-  category: 'reflection' | 'progress' | 'discovery' | 'mastery' | 'social';
-  difficulty: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
+  category: "reflection" | "progress" | "discovery" | "mastery" | "social";
+  difficulty: "bronze" | "silver" | "gold" | "platinum" | "diamond";
   points: number;
   unlocked: boolean;
   unlockedAt?: Date;
@@ -17,10 +17,10 @@ export interface Achievement {
 }
 
 export interface AchievementRequirement {
-  type: 'stat' | 'action' | 'count' | 'streak' | 'time';
+  type: "stat" | "action" | "count" | "streak" | "time";
   stat?: string;
   value: number;
-  comparison: 'gte' | 'lte' | 'eq';
+  comparison: "gte" | "lte" | "eq";
 }
 
 export interface PlayerStats {
@@ -44,183 +44,208 @@ export interface PlayerStats {
 
 export const ACHIEVEMENTS: Record<string, Achievement> = {
   FIRST_REFLECTION: {
-    id: 'FIRST_REFLECTION',
-    name: 'Primera Reflexión',
-    description: 'Completa tu primera sesión de reflexión en Mind Mirror',
-    icon: '🪞',
-    category: 'reflection',
-    difficulty: 'bronze',
+    id: "FIRST_REFLECTION",
+    name: "Primera Reflexión",
+    description: "Completa tu primera sesión de reflexión en Mind Mirror",
+    icon: "🪞",
+    category: "reflection",
+    difficulty: "bronze",
     points: 10,
     unlocked: false,
     progress: 0,
     maxProgress: 1,
     secret: false,
     requirements: [
-      { type: 'count', stat: 'totalReflections', value: 1, comparison: 'gte' }
-    ]
+      { type: "count", stat: "totalReflections", value: 1, comparison: "gte" },
+    ],
   },
   REFLECTION_MASTER: {
-    id: 'REFLECTION_MASTER',
-    name: 'Maestro de la Reflexión',
-    description: 'Completa 100 sesiones de reflexión',
-    icon: '🧘‍♀️',
-    category: 'reflection', 
-    difficulty: 'gold',
+    id: "REFLECTION_MASTER",
+    name: "Maestro de la Reflexión",
+    description: "Completa 100 sesiones de reflexión",
+    icon: "🧘‍♀️",
+    category: "reflection",
+    difficulty: "gold",
     points: 100,
     unlocked: false,
     progress: 0,
     maxProgress: 100,
     secret: false,
     requirements: [
-      { type: 'count', stat: 'totalReflections', value: 100, comparison: 'gte' }
-    ]
+      {
+        type: "count",
+        stat: "totalReflections",
+        value: 100,
+        comparison: "gte",
+      },
+    ],
   },
   EMOTIONAL_EXPLORER: {
-    id: 'EMOTIONAL_EXPLORER',
-    name: 'Explorador Emocional',
-    description: 'Explora 10 emociones diferentes en tus reflexiones',
-    icon: '❤️‍🔥',
-    category: 'discovery',
-    difficulty: 'silver',
+    id: "EMOTIONAL_EXPLORER",
+    name: "Explorador Emocional",
+    description: "Explora 10 emociones diferentes en tus reflexiones",
+    icon: "❤️‍🔥",
+    category: "discovery",
+    difficulty: "silver",
     points: 50,
     unlocked: false,
     progress: 0,
     maxProgress: 10,
     secret: false,
     requirements: [
-      { type: 'count', stat: 'emotionsExplored', value: 10, comparison: 'gte' }
-    ]
+      { type: "count", stat: "emotionsExplored", value: 10, comparison: "gte" },
+    ],
   },
   DAILY_STREAK_7: {
-    id: 'DAILY_STREAK_7',
-    name: 'Semana Reflexiva',
-    description: 'Mantén una racha de 7 días consecutivos de reflexión',
-    icon: '🔥',
-    category: 'progress',
-    difficulty: 'silver',
+    id: "DAILY_STREAK_7",
+    name: "Semana Reflexiva",
+    description: "Mantén una racha de 7 días consecutivos de reflexión",
+    icon: "🔥",
+    category: "progress",
+    difficulty: "silver",
     points: 75,
     unlocked: false,
     progress: 0,
     maxProgress: 7,
     secret: false,
     requirements: [
-      { type: 'streak', stat: 'currentStreak', value: 7, comparison: 'gte' }
-    ]
+      { type: "streak", stat: "currentStreak", value: 7, comparison: "gte" },
+    ],
   },
   MINDFUL_MONTH: {
-    id: 'MINDFUL_MONTH',
-    name: 'Mes Consciente',
-    description: 'Mantén una racha de 30 días consecutivos',
-    icon: '🌟',
-    category: 'progress',
-    difficulty: 'platinum',
+    id: "MINDFUL_MONTH",
+    name: "Mes Consciente",
+    description: "Mantén una racha de 30 días consecutivos",
+    icon: "🌟",
+    category: "progress",
+    difficulty: "platinum",
     points: 250,
     unlocked: false,
     progress: 0,
     maxProgress: 30,
     secret: false,
     requirements: [
-      { type: 'streak', stat: 'currentStreak', value: 30, comparison: 'gte' }
-    ]
+      { type: "streak", stat: "currentStreak", value: 30, comparison: "gte" },
+    ],
   },
   ACTION_HERO: {
-    id: 'ACTION_HERO',
-    name: 'Héroe de Acción',
-    description: 'Completa 50 acciones sugeridas por Mind Mirror',
-    icon: '⚡',
-    category: 'progress',
-    difficulty: 'gold',
+    id: "ACTION_HERO",
+    name: "Héroe de Acción",
+    description: "Completa 50 acciones sugeridas por Mind Mirror",
+    icon: "⚡",
+    category: "progress",
+    difficulty: "gold",
     points: 125,
     unlocked: false,
     progress: 0,
     maxProgress: 50,
     secret: false,
     requirements: [
-      { type: 'count', stat: 'actionsCompleted', value: 50, comparison: 'gte' }
-    ]
+      { type: "count", stat: "actionsCompleted", value: 50, comparison: "gte" },
+    ],
   },
   QUESTION_SEEKER: {
-    id: 'QUESTION_SEEKER',
-    name: 'Buscador de Preguntas',
-    description: 'Genera 200 preguntas introspectivas',
-    icon: '❓',
-    category: 'discovery',
-    difficulty: 'gold',
+    id: "QUESTION_SEEKER",
+    name: "Buscador de Preguntas",
+    description: "Genera 200 preguntas introspectivas",
+    icon: "❓",
+    category: "discovery",
+    difficulty: "gold",
     points: 100,
     unlocked: false,
     progress: 0,
     maxProgress: 200,
     secret: false,
     requirements: [
-      { type: 'count', stat: 'questionsAnswered', value: 200, comparison: 'gte' }
-    ]
+      {
+        type: "count",
+        stat: "questionsAnswered",
+        value: 200,
+        comparison: "gte",
+      },
+    ],
   },
   GAME_PERFECTIONIST: {
-    id: 'GAME_PERFECTIONIST',
-    name: 'Perfeccionista',
-    description: 'Completa 10 juegos con precisión perfecta (100%)',
-    icon: '🎯',
-    category: 'mastery',
-    difficulty: 'platinum',
+    id: "GAME_PERFECTIONIST",
+    name: "Perfeccionista",
+    description: "Completa 10 juegos con precisión perfecta (100%)",
+    icon: "🎯",
+    category: "mastery",
+    difficulty: "platinum",
     points: 200,
     unlocked: false,
     progress: 0,
     maxProgress: 10,
     secret: false,
     requirements: [
-      { type: 'count', stat: 'perfectGames', value: 10, comparison: 'gte' }
-    ]
+      { type: "count", stat: "perfectGames", value: 10, comparison: "gte" },
+    ],
   },
   SPECIAL_HUNTER: {
-    id: 'SPECIAL_HUNTER',
-    name: 'Cazador de Especiales',
-    description: 'Encuentra 100 celdas especiales',
-    icon: '💎',
-    category: 'discovery',
-    difficulty: 'gold',
+    id: "SPECIAL_HUNTER",
+    name: "Cazador de Especiales",
+    description: "Encuentra 100 celdas especiales",
+    icon: "💎",
+    category: "discovery",
+    difficulty: "gold",
     points: 150,
     unlocked: false,
     progress: 0,
     maxProgress: 100,
     secret: false,
     requirements: [
-      { type: 'count', stat: 'specialCellsFound', value: 100, comparison: 'gte' }
-    ]
+      {
+        type: "count",
+        stat: "specialCellsFound",
+        value: 100,
+        comparison: "gte",
+      },
+    ],
   },
   WISDOM_SEEKER: {
-    id: 'WISDOM_SEEKER',
-    name: 'Buscador de Sabiduría',
-    description: 'Completa 365 días de reflexión diaria',
-    icon: '🦉',
-    category: 'mastery',
-    difficulty: 'diamond',
+    id: "WISDOM_SEEKER",
+    name: "Buscador de Sabiduría",
+    description: "Completa 365 días de reflexión diaria",
+    icon: "🦉",
+    category: "mastery",
+    difficulty: "diamond",
     points: 500,
     unlocked: false,
     progress: 0,
     maxProgress: 365,
     secret: false,
     requirements: [
-      { type: 'count', stat: 'totalReflections', value: 365, comparison: 'gte' }
-    ]
+      {
+        type: "count",
+        stat: "totalReflections",
+        value: 365,
+        comparison: "gte",
+      },
+    ],
   },
   SECRET_PHILOSOPHER: {
-    id: 'SECRET_PHILOSOPHER',
-    name: 'Filósofo Secreto',
-    description: 'Descubre el poder de la reflexión profunda',
-    icon: '🔮',
-    category: 'mastery',
-    difficulty: 'diamond',
+    id: "SECRET_PHILOSOPHER",
+    name: "Filósofo Secreto",
+    description: "Descubre el poder de la reflexión profunda",
+    icon: "🔮",
+    category: "mastery",
+    difficulty: "diamond",
     points: 1000,
     unlocked: false,
     progress: 0,
     maxProgress: 1,
     secret: true,
     requirements: [
-      { type: 'count', stat: 'totalReflections', value: 1000, comparison: 'gte' },
-      { type: 'count', stat: 'emotionsExplored', value: 50, comparison: 'gte' },
-      { type: 'streak', stat: 'longestStreak', value: 100, comparison: 'gte' }
-    ]
-  }
+      {
+        type: "count",
+        stat: "totalReflections",
+        value: 1000,
+        comparison: "gte",
+      },
+      { type: "count", stat: "emotionsExplored", value: 50, comparison: "gte" },
+      { type: "streak", stat: "longestStreak", value: 100, comparison: "gte" },
+    ],
+  },
 };
 
 export class AchievementSystem {
@@ -250,17 +275,21 @@ export class AchievementSystem {
       emotionsExplored: 0,
       actionsCompleted: 0,
       questionsAnswered: 0,
-      dailySummariesViewed: 0
+      dailySummariesViewed: 0,
     };
   }
 
   private initializeAchievements(): void {
-    Object.values(ACHIEVEMENTS).forEach(achievement => {
+    Object.values(ACHIEVEMENTS).forEach((achievement) => {
       this.achievements.set(achievement.id, { ...achievement });
     });
   }
 
-  updateStat(statName: keyof PlayerStats, value: number, increment: boolean = true): void {
+  updateStat(
+    statName: keyof PlayerStats,
+    value: number,
+    increment: boolean = true,
+  ): void {
     if (increment) {
       this.playerStats[statName] += value;
     } else {
@@ -279,11 +308,11 @@ export class AchievementSystem {
   }
 
   private checkAchievements(): void {
-    this.achievements.forEach(achievement => {
+    this.achievements.forEach((achievement) => {
       if (achievement.unlocked) return;
 
-      const meetsAllRequirements = achievement.requirements.every(req => 
-        this.checkRequirement(req)
+      const meetsAllRequirements = achievement.requirements.every((req) =>
+        this.checkRequirement(req),
       );
 
       if (meetsAllRequirements) {
@@ -296,14 +325,16 @@ export class AchievementSystem {
   }
 
   private checkRequirement(requirement: AchievementRequirement): boolean {
-    const statValue = requirement.stat ? this.playerStats[requirement.stat] || 0 : 0;
+    const statValue = requirement.stat
+      ? this.playerStats[requirement.stat] || 0
+      : 0;
 
     switch (requirement.comparison) {
-      case 'gte':
+      case "gte":
         return statValue >= requirement.value;
-      case 'lte':
+      case "lte":
         return statValue <= requirement.value;
-      case 'eq':
+      case "eq":
         return statValue === requirement.value;
       default:
         return false;
@@ -317,12 +348,13 @@ export class AchievementSystem {
       achievement.progress = Math.min(statValue, achievement.maxProgress);
     } else {
       // Para logros con múltiples requisitos, calcular progreso promedio
-      const progressValues = achievement.requirements.map(req => {
+      const progressValues = achievement.requirements.map((req) => {
         const statValue = req.stat ? this.playerStats[req.stat] || 0 : 0;
         return Math.min(statValue / req.value, 1);
       });
-      
-      const avgProgress = progressValues.reduce((sum, p) => sum + p, 0) / progressValues.length;
+
+      const avgProgress =
+        progressValues.reduce((sum, p) => sum + p, 0) / progressValues.length;
       achievement.progress = Math.floor(avgProgress * achievement.maxProgress);
     }
   }
@@ -352,35 +384,40 @@ export class AchievementSystem {
   }
 
   getUnlockedAchievements(): Achievement[] {
-    return this.getAllAchievements().filter(a => a.unlocked);
+    return this.getAllAchievements().filter((a) => a.unlocked);
   }
 
   getLockedAchievements(): Achievement[] {
-    return this.getAllAchievements().filter(a => !a.unlocked && !a.secret);
+    return this.getAllAchievements().filter((a) => !a.unlocked && !a.secret);
   }
 
   getSecretAchievements(): Achievement[] {
-    return this.getAllAchievements().filter(a => a.secret);
+    return this.getAllAchievements().filter((a) => a.secret);
   }
 
-  getAchievementsByCategory(category: Achievement['category']): Achievement[] {
-    return this.getAllAchievements().filter(a => a.category === category);
+  getAchievementsByCategory(category: Achievement["category"]): Achievement[] {
+    return this.getAllAchievements().filter((a) => a.category === category);
   }
 
-  getAchievementsByDifficulty(difficulty: Achievement['difficulty']): Achievement[] {
-    return this.getAllAchievements().filter(a => a.difficulty === difficulty);
+  getAchievementsByDifficulty(
+    difficulty: Achievement["difficulty"],
+  ): Achievement[] {
+    return this.getAllAchievements().filter((a) => a.difficulty === difficulty);
   }
 
   getTotalPoints(): number {
-    return this.getUnlockedAchievements().reduce((total, achievement) => 
-      total + achievement.points, 0
+    return this.getUnlockedAchievements().reduce(
+      (total, achievement) => total + achievement.points,
+      0,
     );
   }
 
   getCompletionPercentage(): number {
     const totalAchievements = this.getAllAchievements().length;
     const unlockedAchievements = this.getUnlockedAchievements().length;
-    return totalAchievements > 0 ? (unlockedAchievements / totalAchievements) * 100 : 0;
+    return totalAchievements > 0
+      ? (unlockedAchievements / totalAchievements) * 100
+      : 0;
   }
 
   getPlayerStats(): PlayerStats {
@@ -389,8 +426,8 @@ export class AchievementSystem {
 
   getRecentAchievements(limit: number = 5): Achievement[] {
     return this.getUnlockedAchievements()
-      .filter(a => a.unlockedAt)
-      .sort((a, b) => (b.unlockedAt!.getTime() - a.unlockedAt!.getTime()))
+      .filter((a) => a.unlockedAt)
+      .sort((a, b) => b.unlockedAt!.getTime() - a.unlockedAt!.getTime())
       .slice(0, limit);
   }
 
@@ -398,7 +435,7 @@ export class AchievementSystem {
     const data = {
       achievements: Array.from(this.achievements.entries()),
       stats: this.playerStats,
-      exportDate: new Date().toISOString()
+      exportDate: new Date().toISOString(),
     };
     return JSON.stringify(data);
   }
@@ -406,16 +443,19 @@ export class AchievementSystem {
   importProgress(dataJson: string): boolean {
     try {
       const data = JSON.parse(dataJson);
-      
+
       // Validar estructura básica
       if (!data.achievements || !data.stats) {
-        throw new Error('Invalid data structure');
+        throw new Error("Invalid data structure");
       }
 
       // Importar logros
       this.achievements.clear();
       data.achievements.forEach(([id, achievement]: [string, Achievement]) => {
-        if (achievement.unlockedAt && typeof achievement.unlockedAt === 'string') {
+        if (
+          achievement.unlockedAt &&
+          typeof achievement.unlockedAt === "string"
+        ) {
           achievement.unlockedAt = new Date(achievement.unlockedAt);
         }
         this.achievements.set(id, achievement);
@@ -426,7 +466,7 @@ export class AchievementSystem {
 
       return true;
     } catch (error) {
-      console.error('Failed to import achievement progress:', error);
+      console.error("Failed to import achievement progress:", error);
       return false;
     }
   }
@@ -438,49 +478,49 @@ export class AchievementSystem {
 
   // Métodos de conveniencia para eventos comunes
   onReflectionCompleted(): void {
-    this.incrementStat('totalReflections');
-    this.incrementStat('mindMirrorSessions');
+    this.incrementStat("totalReflections");
+    this.incrementStat("mindMirrorSessions");
   }
 
   onGameCompleted(score: number, perfect: boolean = false): void {
-    this.incrementStat('totalGameSessions');
-    this.incrementStat('totalScore', score);
-    this.incrementStat('levelsCompleted');
-    
+    this.incrementStat("totalGameSessions");
+    this.incrementStat("totalScore", score);
+    this.incrementStat("levelsCompleted");
+
     if (perfect) {
-      this.incrementStat('perfectGames');
+      this.incrementStat("perfectGames");
     }
   }
 
   onSpecialCellFound(): void {
-    this.incrementStat('specialCellsFound');
+    this.incrementStat("specialCellsFound");
   }
 
   onEmotionExplored(): void {
-    this.incrementStat('emotionsExplored');
+    this.incrementStat("emotionsExplored");
   }
 
   onActionCompleted(): void {
-    this.incrementStat('actionsCompleted');
+    this.incrementStat("actionsCompleted");
   }
 
   onQuestionAnswered(): void {
-    this.incrementStat('questionsAnswered');
+    this.incrementStat("questionsAnswered");
   }
 
   onDailySummaryViewed(): void {
-    this.incrementStat('dailySummariesViewed');
+    this.incrementStat("dailySummariesViewed");
   }
 
   updateStreak(currentStreak: number): void {
-    this.setStat('currentStreak', currentStreak);
+    this.setStat("currentStreak", currentStreak);
     if (currentStreak > this.playerStats.longestStreak) {
-      this.setStat('longestStreak', currentStreak);
+      this.setStat("longestStreak", currentStreak);
     }
   }
 
   addPlayTime(minutes: number): void {
-    this.incrementStat('hoursPlayed', minutes / 60);
+    this.incrementStat("hoursPlayed", minutes / 60);
   }
 }
 

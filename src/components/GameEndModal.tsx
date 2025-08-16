@@ -1,9 +1,14 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Star, Target, Clock, Brain } from 'lucide-react';
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Trophy, Star, Target, Clock, Brain } from "lucide-react";
 
 interface GameEndModalProps {
   isOpen: boolean;
@@ -25,27 +30,23 @@ export default function GameEndModal({
   onClose,
   gameStats,
   onPlayAgain,
-  onReturnToMenu
+  onReturnToMenu,
 }: GameEndModalProps) {
-  const {
-    score,
-    level,
-    accuracy,
-    timeElapsed,
-    movesUsed,
-    isWin
-  } = gameStats;
+  const { score, level, accuracy, timeElapsed, movesUsed, isWin } = gameStats;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const getPerformanceRating = () => {
-    if (accuracy >= 95) return { rating: "Excelente", icon: "🏆", color: "text-yellow-400" };
-    if (accuracy >= 80) return { rating: "Muy Bien", icon: "⭐", color: "text-blue-400" };
-    if (accuracy >= 65) return { rating: "Bien", icon: "👍", color: "text-green-400" };
+    if (accuracy >= 95)
+      return { rating: "Excelente", icon: "🏆", color: "text-yellow-400" };
+    if (accuracy >= 80)
+      return { rating: "Muy Bien", icon: "⭐", color: "text-blue-400" };
+    if (accuracy >= 65)
+      return { rating: "Bien", icon: "👍", color: "text-green-400" };
     return { rating: "Puede Mejorar", icon: "💪", color: "text-orange-400" };
   };
 
@@ -83,11 +84,17 @@ export default function GameEndModal({
             <CardContent className="p-4 space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{score.toLocaleString()}</div>
-                  <div className="text-sm text-muted-foreground">Puntuación</div>
+                  <div className="text-2xl font-bold text-primary">
+                    {score.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Puntuación
+                  </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-neon-cyan">{level}</div>
+                  <div className="text-2xl font-bold text-neon-cyan">
+                    {level}
+                  </div>
                   <div className="text-sm text-muted-foreground">Nivel</div>
                 </div>
               </div>
@@ -96,23 +103,31 @@ export default function GameEndModal({
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
                     <Target className="w-4 h-4 text-green-400" />
-                    <span className="font-semibold text-green-400">{accuracy}%</span>
+                    <span className="font-semibold text-green-400">
+                      {accuracy}%
+                    </span>
                   </div>
                   <div className="text-xs text-muted-foreground">Precisión</div>
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
                     <Clock className="w-4 h-4 text-blue-400" />
-                    <span className="font-semibold text-blue-400">{formatTime(timeElapsed)}</span>
+                    <span className="font-semibold text-blue-400">
+                      {formatTime(timeElapsed)}
+                    </span>
                   </div>
                   <div className="text-xs text-muted-foreground">Tiempo</div>
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
                     <Star className="w-4 h-4 text-purple-400" />
-                    <span className="font-semibold text-purple-400">{movesUsed}</span>
+                    <span className="font-semibold text-purple-400">
+                      {movesUsed}
+                    </span>
                   </div>
-                  <div className="text-xs text-muted-foreground">Movimientos</div>
+                  <div className="text-xs text-muted-foreground">
+                    Movimientos
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -121,20 +136,31 @@ export default function GameEndModal({
           {/* Logros obtenidos */}
           {isWin && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-muted-foreground">Logros Desbloqueados</h4>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Logros Desbloqueados
+              </h4>
               <div className="flex flex-wrap gap-2">
                 {accuracy >= 90 && (
-                  <Badge variant="outline" className="bg-yellow-500/10 text-yellow-300 border-yellow-500/30">
+                  <Badge
+                    variant="outline"
+                    className="bg-yellow-500/10 text-yellow-300 border-yellow-500/30"
+                  >
                     🎯 Tirador Experto
                   </Badge>
                 )}
                 {timeElapsed <= 120 && (
-                  <Badge variant="outline" className="bg-blue-500/10 text-blue-300 border-blue-500/30">
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-500/10 text-blue-300 border-blue-500/30"
+                  >
                     ⚡ Velocidad Luz
                   </Badge>
                 )}
                 {movesUsed <= 50 && (
-                  <Badge variant="outline" className="bg-green-500/10 text-green-300 border-green-500/30">
+                  <Badge
+                    variant="outline"
+                    className="bg-green-500/10 text-green-300 border-green-500/30"
+                  >
                     🧠 Estratega
                   </Badge>
                 )}

@@ -7,11 +7,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from './config/firebase';
-import { getUserProfile } from './services/authService';
-import { useGameStore } from './store/gameStore';
-import Header from './components/layout/Header';
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "./config/firebase";
+import { getUserProfile } from "./services/authService";
+import { useGameStore } from "./store/gameStore";
+import Header from "./components/layout/Header";
 import Index from "./pages/Index";
 import Game from "./pages/Game";
 import Analytics from "./pages/Analytics";
@@ -42,7 +42,7 @@ const AppContent = () => {
           const profile = await getUserProfile(user.uid);
           setUserProfile(profile);
         } catch (error) {
-          console.error('Error loading user profile:', error);
+          console.error("Error loading user profile:", error);
         }
       } else {
         setUserProfile(null);

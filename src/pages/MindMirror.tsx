@@ -10,7 +10,7 @@ import {
   BookOpen,
   Eye,
   Hammer,
-  Gem
+  Gem,
 } from "lucide-react";
 
 import ReflectionCard from "../components/mindmirror/ReflectionCard";
@@ -20,14 +20,15 @@ import InnerDialogue from "../components/mindmirror/InnerDialogue";
 import DailySummary from "../components/mindmirror/DailySummary";
 
 export default function MindMirror() {
-  const [selectedRoute, setSelectedRoute] = useState<"explorer" | "builder" | "visionary" | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<
+    "explorer" | "builder" | "visionary" | null
+  >(null);
   const [currentReflections, setCurrentReflections] = useState<string[]>([]);
 
   if (!selectedRoute) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-dark-purple/20 p-4">
         <div className="max-w-6xl mx-auto">
-          
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink bg-clip-text text-transparent mb-4">
@@ -40,9 +41,8 @@ export default function MindMirror() {
 
           {/* Rutas de juego */}
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            
             {/* Explorador Interior */}
-            <Card 
+            <Card
               className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:bg-card/80 border-border/50 bg-gradient-to-br from-card/50 to-neon-cyan/10"
               onClick={() => setSelectedRoute("explorer")}
             >
@@ -50,11 +50,14 @@ export default function MindMirror() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-neon-cyan to-electric-blue flex items-center justify-center">
                   <Eye className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">🌌 Explorador Interior</CardTitle>
+                <CardTitle className="text-2xl">
+                  🌌 Explorador Interior
+                </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-4">
                 <p className="text-muted-foreground">
-                  Viaje personal de autodescubrimiento a través de preguntas profundas y metáforas poéticas
+                  Viaje personal de autodescubrimiento a través de preguntas
+                  profundas y metáforas poéticas
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-center gap-2">
@@ -74,7 +77,7 @@ export default function MindMirror() {
             </Card>
 
             {/* Constructor de Realidades */}
-            <Card 
+            <Card
               className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:bg-card/80 border-border/50 bg-gradient-to-br from-card/50 to-neon-green/10"
               onClick={() => setSelectedRoute("builder")}
             >
@@ -82,11 +85,14 @@ export default function MindMirror() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-neon-green to-neon-cyan flex items-center justify-center">
                   <Hammer className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">🧩 Constructor de Realidades</CardTitle>
+                <CardTitle className="text-2xl">
+                  🧩 Constructor de Realidades
+                </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-4">
                 <p className="text-muted-foreground">
-                  Transforma reflexiones en bloques visuales para construir tu mapa de metas y hábitos
+                  Transforma reflexiones en bloques visuales para construir tu
+                  mapa de metas y hábitos
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-center gap-2">
@@ -106,7 +112,7 @@ export default function MindMirror() {
             </Card>
 
             {/* Visionario Místico */}
-            <Card 
+            <Card
               className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:bg-card/80 border-border/50 bg-gradient-to-br from-card/50 to-neon-purple/10"
               onClick={() => setSelectedRoute("visionary")}
             >
@@ -114,11 +120,14 @@ export default function MindMirror() {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-neon-purple to-neon-pink flex items-center justify-center">
                   <Gem className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">🔮 Visionario Místico</CardTitle>
+                <CardTitle className="text-2xl">
+                  🔮 Visionario Místico
+                </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-4">
                 <p className="text-muted-foreground">
-                  Conecta con arquetipos y símbolos únicos, colecciona glifos en tu grimorio personal
+                  Conecta con arquetipos y símbolos únicos, colecciona glifos en
+                  tu grimorio personal
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-center gap-2">
@@ -141,7 +150,9 @@ export default function MindMirror() {
           {/* Bloques modulares */}
           <Card className="border-border/50 bg-card/30">
             <CardHeader>
-              <CardTitle className="text-center">🔧 Bloques Modulares</CardTitle>
+              <CardTitle className="text-center">
+                🔧 Bloques Modulares
+              </CardTitle>
               <p className="text-center text-muted-foreground">
                 Herramientas de reflexión disponibles en todas las rutas
               </p>
@@ -202,19 +213,22 @@ export default function MindMirror() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-dark-purple/20 p-4">
       <div className="max-w-4xl mx-auto">
-        <Button 
+        <Button
           onClick={() => setSelectedRoute(null)}
-          variant="outline" 
+          variant="outline"
           className="mb-6"
         >
           ← Volver al menú principal
         </Button>
-        
+
         <div className="text-center">
           <h2 className="text-3xl font-bold mb-4">
-            Ruta: {selectedRoute === "explorer" ? "🌌 Explorador Interior" : 
-                   selectedRoute === "builder" ? "🧩 Constructor de Realidades" : 
-                   "🔮 Visionario Místico"}
+            Ruta:{" "}
+            {selectedRoute === "explorer"
+              ? "🌌 Explorador Interior"
+              : selectedRoute === "builder"
+                ? "🧩 Constructor de Realidades"
+                : "🔮 Visionario Místico"}
           </h2>
           <p className="text-muted-foreground mb-8">
             Esta funcionalidad estará disponible próximamente...

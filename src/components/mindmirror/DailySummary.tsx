@@ -22,14 +22,15 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
   const mockReflections = [
     "Hoy me sentí más conectado conmigo mismo",
     "Necesito encontrar más equilibrio en mi trabajo",
-    "Estoy agradecido por las pequeñas cosas"
+    "Estoy agradecido por las pequeñas cosas",
   ];
 
-  const dailyReflections = reflections.length > 0 ? reflections : mockReflections;
+  const dailyReflections =
+    reflections.length > 0 ? reflections : mockReflections;
 
   const handleGenerateSummary = async () => {
     if (dailyReflections.length === 0) return;
-    
+
     setLoading(true);
     try {
       const res = await narrative(dailyReflections);
@@ -38,9 +39,11 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
         setResult(parsed);
       } catch {
         setResult({
-          summary: "Hoy fue un día de reflexión y crecimiento personal. Cada momento te ha acercado más a tu esencia verdadera.",
+          summary:
+            "Hoy fue un día de reflexión y crecimiento personal. Cada momento te ha acercado más a tu esencia verdadera.",
           main_emotion: "calma",
-          metaphor: "Como un río que fluye hacia el océano, tus pensamientos encuentran su cauce natural"
+          metaphor:
+            "Como un río que fluye hacia el océano, tus pensamientos encuentran su cauce natural",
         });
       }
     } catch (err) {
@@ -65,13 +68,13 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
     // Mapear emociones a elementos y luego a colores
     const emotionToElement: Record<string, keyof typeof elementalColors> = {
       alegría: "luz",
-      tristeza: "agua", 
+      tristeza: "agua",
       miedo: "sombra",
       enojo: "fuego",
       calma: "aire",
-      confusión: "espíritu"
+      confusión: "espíritu",
     };
-    
+
     const element = emotionToElement[emotion] || "espíritu";
     return elementalColors[element];
   };
@@ -85,7 +88,6 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        
         {/* Reflexiones del día */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -94,7 +96,10 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
           </h3>
           <div className="grid gap-2">
             {dailyReflections.slice(0, 3).map((reflection, index) => (
-              <div key={index} className="p-3 bg-muted/30 rounded-lg text-sm text-foreground/80">
+              <div
+                key={index}
+                className="p-3 bg-muted/30 rounded-lg text-sm text-foreground/80"
+              >
                 {reflection}
               </div>
             ))}
@@ -102,8 +107,8 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
         </div>
 
         {!result && (
-          <Button 
-            onClick={handleGenerateSummary} 
+          <Button
+            onClick={handleGenerateSummary}
             disabled={loading || dailyReflections.length === 0}
             className="w-full bg-gradient-to-r from-neon-cyan to-neon-purple hover:opacity-90 transition-opacity"
           >
@@ -120,7 +125,6 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
 
         {result && (
           <div className="animate-in fade-in-0 slide-in-from-bottom-4 duration-700 space-y-4">
-            
             {/* Resumen principal */}
             <Card className="border-border/30 bg-gradient-to-br from-muted/30 to-muted/10">
               <CardContent className="p-6">
@@ -137,7 +141,6 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
 
             {/* Emoción y metáfora */}
             <div className="grid md:grid-cols-2 gap-4">
-              
               {/* Emoción principal */}
               <Card className="border-border/30">
                 <CardContent className="p-4 text-center">
@@ -148,7 +151,9 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
                     <div className="flex flex-col items-center gap-2">
                       <div
                         className="w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-white/20"
-                        style={{ backgroundColor: getEmotionColor(result.main_emotion) }}
+                        style={{
+                          backgroundColor: getEmotionColor(result.main_emotion),
+                        }}
                       >
                         {getEmotionSymbol(result.main_emotion)}
                       </div>
@@ -176,7 +181,7 @@ export default function DailySummary({ reflections = [] }: DailySummaryProps) {
             </div>
 
             {/* Botón para regenerar */}
-            <Button 
+            <Button
               onClick={handleGenerateSummary}
               variant="outline"
               className="w-full border-border/50 hover:bg-muted/50"

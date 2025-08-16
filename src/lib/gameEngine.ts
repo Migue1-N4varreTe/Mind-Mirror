@@ -7,49 +7,57 @@ export class MindMirrorAI {
       "Hay una búsqueda constante de significado en tus palabras",
       "Se percibe un deseo de crecimiento y transformación",
       "Tu mente busca conexiones entre experiencias y aprendizajes",
-      "Existe una sabiduría emergente en tu proceso reflexivo"
+      "Existe una sabiduría emergente en tu proceso reflexivo",
     ];
     return insights[Math.floor(Math.random() * insights.length)];
   }
 
-  static analyzeEmotion(text: string): { emotion: string; intensity: number; color: string } {
+  static analyzeEmotion(text: string): {
+    emotion: string;
+    intensity: number;
+    color: string;
+  } {
     const emotions = [
       { emotion: "calma", intensity: 0.7, color: "#87CEEB" },
       { emotion: "alegría", intensity: 0.8, color: "#FFD700" },
       { emotion: "reflexión", intensity: 0.6, color: "#9370DB" },
       { emotion: "esperanza", intensity: 0.75, color: "#98FB98" },
-      { emotion: "curiosidad", intensity: 0.65, color: "#FF69B4" }
+      { emotion: "curiosidad", intensity: 0.65, color: "#FF69B4" },
     ];
     return emotions[Math.floor(Math.random() * emotions.length)];
   }
 
-  static suggestAction(context: string): { action: string; difficulty: string; benefit: string } {
+  static suggestAction(context: string): {
+    action: string;
+    difficulty: string;
+    benefit: string;
+  } {
     const actions = [
       {
         action: "Practica 10 minutos de meditación consciente",
         difficulty: "baja",
-        benefit: "Reduce el estrés y aumenta la claridad mental"
+        benefit: "Reduce el estrés y aumenta la claridad mental",
       },
       {
         action: "Escribe en un diario por 15 minutos",
-        difficulty: "baja", 
-        benefit: "Mejora la autoconciencia y procesa emociones"
+        difficulty: "baja",
+        benefit: "Mejora la autoconciencia y procesa emociones",
       },
       {
         action: "Realiza ejercicio físico durante 30 minutos",
         difficulty: "media",
-        benefit: "Libera endorfinas y mejora el estado de ánimo"
+        benefit: "Libera endorfinas y mejora el estado de ánimo",
       },
       {
         action: "Conecta con un ser querido",
         difficulty: "baja",
-        benefit: "Fortalece vínculos sociales y apoyo emocional"
+        benefit: "Fortalece vínculos sociales y apoyo emocional",
       },
       {
         action: "Aprende algo nuevo durante 20 minutos",
         difficulty: "media",
-        benefit: "Estimula la neuroplasticidad y el crecimiento personal"
-      }
+        benefit: "Estimula la neuroplasticidad y el crecimiento personal",
+      },
     ];
     return actions[Math.floor(Math.random() * actions.length)];
   }
@@ -99,7 +107,7 @@ export class GameEngine {
       score: this.score,
       level: this.level,
       combos: this.combo.getCombos(),
-      multiplier: this.combo.getCurrentMultiplier()
+      multiplier: this.combo.getCurrentMultiplier(),
     };
   }
 

@@ -33,7 +33,7 @@ export class InfiniteBoardEngine {
       maxSize: 64,
       difficultyScaling: 1.1,
       rewardMultiplier: 1.05,
-      ...config
+      ...config,
     };
 
     this.generateInitialChunks();
@@ -50,7 +50,7 @@ export class InfiniteBoardEngine {
 
   private generateChunk(chunkX: number, chunkY: number): InfiniteChunk {
     const chunkId = `${chunkX},${chunkY}`;
-    
+
     if (this.chunks.has(chunkId)) {
       return this.chunks.get(chunkId)!;
     }
@@ -62,7 +62,7 @@ export class InfiniteBoardEngine {
     // Calcular tamaño del chunk
     const sizeMultiplier = Math.min(
       Math.pow(this.config.expansionRate, Math.floor(distance / 2)),
-      this.config.maxSize / this.config.initialSize
+      this.config.maxSize / this.config.initialSize,
     );
     const chunkSize = Math.floor(this.config.initialSize * sizeMultiplier);
 
@@ -74,7 +74,7 @@ export class InfiniteBoardEngine {
       difficulty,
       generated: false,
       cells: [],
-      specialCells: []
+      specialCells: [],
     };
 
     this.chunks.set(chunkId, chunk);
@@ -86,44 +86,44 @@ export class InfiniteBoardEngine {
 
     // Generar celdas normales
     chunk.cells = this.generateNormalCells(chunk);
-    
+
     // Generar celdas especiales basadas en dificultad
     chunk.specialCells = this.generateSpecialCells(chunk);
-    
+
     chunk.generated = true;
   }
 
   private generateNormalCells(chunk: InfiniteChunk): any[] {
     const cells = [];
     const totalCells = chunk.size * chunk.size;
-    
+
     for (let i = 0; i < totalCells; i++) {
       const x = i % chunk.size;
       const y = Math.floor(i / chunk.size);
-      
+
       cells.push({
         id: `${chunk.id}-${x}-${y}`,
         x: chunk.x * chunk.size + x,
         y: chunk.y * chunk.size + y,
-        type: 'normal',
+        type: "normal",
         value: Math.floor(Math.random() * 10) + 1,
         difficulty: chunk.difficulty,
         discovered: false,
-        connections: []
+        connections: [],
       });
     }
-    
+
     return cells;
   }
 
   private generateSpecialCells(chunk: InfiniteChunk): any[] {
     const specialCells = [];
     const specialCellCount = Math.floor(chunk.difficulty * 2);
-    
+
     for (let i = 0; i < specialCellCount; i++) {
       const x = Math.floor(Math.random() * chunk.size);
       const y = Math.floor(Math.random() * chunk.size);
-      
+
       specialCells.push({
         id: `${chunk.id}-special-${i}`,
         x: chunk.x * chunk.size + x,
@@ -131,50 +131,66 @@ export class InfiniteBoardEngine {
         type: this.getRandomSpecialType(chunk.difficulty),
         power: Math.floor(chunk.difficulty * Math.random() * 3) + 1,
         rarity: this.calculateRarity(chunk.difficulty),
-        discovered: false
+        discovered: false,
       });
     }
-    
+
     return specialCells;
   }
 
   private getRandomSpecialType(difficulty: number): string {
     const types = [
-      'neural_boost', 'quantum_link', 'time_warp', 
-      'mind_explosion', 'reflection_mirror', 'wisdom_crystal'
+      "neural_boost",
+      "quantum_link",
+      "time_warp",
+      "mind_explosion",
+      "reflection_mirror",
+      "wisdom_crystal",
     ];
-    
+
     // Tipos más raros aparecen en chunks de mayor dificultad
-    const availableTypes = types.filter((_, index) => index < Math.ceil(difficulty));
+    const availableTypes = types.filter(
+      (_, index) => index < Math.ceil(difficulty),
+    );
     return availableTypes[Math.floor(Math.random() * availableTypes.length)];
   }
 
-  private calculateRarity(difficulty: number): 'common' | 'rare' | 'epic' | 'legendary' {
+  private calculateRarity(
+    difficulty: number,
+  ): "common" | "rare" | "epic" | "legendary" {
     const random = Math.random() * difficulty;
-    
-    if (random < 1) return 'common';
-    if (random < 2) return 'rare';
-    if (random < 4) return 'epic';
-    return 'legendary';
+
+    if (random < 1) return "common";
+    if (random < 2) return "rare";
+    if (random < 4) return "epic";
+    return "legendary";
   }
 
   updatePlayerPosition(x: number, y: number): void {
     this.playerPosition = { x, y };
-    
+
     // Determinar en qué chunk está el jugador
     const chunkX = Math.floor(x / this.config.initialSize);
     const chunkY = Math.floor(y / this.config.initialSize);
-    
+
     // Cargar chunks circundantes si es necesario
     this.loadChunksAroundPlayer(chunkX, chunkY);
-    
+
     // Descargar chunks lejanos para optimizar memoria
     this.unloadDistantChunks(chunkX, chunkY);
   }
 
   private loadChunksAroundPlayer(centerX: number, centerY: number): void {
-    for (let x = centerX - this.loadedRadius; x <= centerX + this.loadedRadius; x++) {
-      for (let y = centerY - this.loadedRadius; y <= centerY + this.loadedRadius; y++) {
+    for (
+      let x = centerX - this.loadedRadius;
+      x <= centerX + this.loadedRadius;
+      x++
+    ) {
+      for (
+        let y = centerY - this.loadedRadius;
+        y <= centerY + this.loadedRadius;
+        y++
+      ) {
         const chunk = this.generateChunk(x, y);
         if (!chunk.generated) {
           this.generateChunkContent(chunk);
@@ -185,43 +201,62 @@ export class InfiniteBoardEngine {
 
   private unloadDistantChunks(centerX: number, centerY: number): void {
     const maxDistance = this.loadedRadius + 2;
-    
+
     this.chunks.forEach((chunk, chunkId) => {
       const distance = Math.max(
         Math.abs(chunk.x - centerX),
-        Math.abs(chunk.y - centerY)
+        Math.abs(chunk.y - centerY),
       );
-      
+
       if (distance > maxDistance) {
         this.chunks.delete(chunkId);
       }
     });
   }
 
-  getVisibleCells(viewportX: number, viewportY: number, viewportWidth: number, viewportHeight: number): any[] {
+  getVisibleCells(
+    viewportX: number,
+    viewportY: number,
+    viewportWidth: number,
+    viewportHeight: number,
+  ): any[] {
     const visibleCells: any[] = [];
-    
-    this.chunks.forEach(chunk => {
+
+    this.chunks.forEach((chunk) => {
       if (!chunk.generated) return;
-      
+
       // Verificar si el chunk está en el viewport
       const chunkWorldX = chunk.x * chunk.size;
       const chunkWorldY = chunk.y * chunk.size;
-      
-      if (this.chunkIntersectsViewport(
-        chunkWorldX, chunkWorldY, chunk.size, chunk.size,
-        viewportX, viewportY, viewportWidth, viewportHeight
-      )) {
+
+      if (
+        this.chunkIntersectsViewport(
+          chunkWorldX,
+          chunkWorldY,
+          chunk.size,
+          chunk.size,
+          viewportX,
+          viewportY,
+          viewportWidth,
+          viewportHeight,
+        )
+      ) {
         visibleCells.push(...chunk.cells, ...chunk.specialCells);
       }
     });
-    
+
     return visibleCells;
   }
 
   private chunkIntersectsViewport(
-    chunkX: number, chunkY: number, chunkW: number, chunkH: number,
-    viewX: number, viewY: number, viewW: number, viewH: number
+    chunkX: number,
+    chunkY: number,
+    chunkW: number,
+    chunkH: number,
+    viewX: number,
+    viewY: number,
+    viewW: number,
+    viewH: number,
   ): boolean {
     return !(
       chunkX > viewX + viewW ||
@@ -234,23 +269,38 @@ export class InfiniteBoardEngine {
   expandWorld(): void {
     // Incrementar el radio de carga
     this.loadedRadius += 1;
-    
+
     // Generar nuevos chunks en la periferia
-    const currentChunkX = Math.floor(this.playerPosition.x / this.config.initialSize);
-    const currentChunkY = Math.floor(this.playerPosition.y / this.config.initialSize);
-    
+    const currentChunkX = Math.floor(
+      this.playerPosition.x / this.config.initialSize,
+    );
+    const currentChunkY = Math.floor(
+      this.playerPosition.y / this.config.initialSize,
+    );
+
     this.loadChunksAroundPlayer(currentChunkX, currentChunkY);
   }
 
   getWorldStats() {
-    const loadedChunks = Array.from(this.chunks.values()).filter(chunk => chunk.generated);
-    const totalCells = loadedChunks.reduce((sum, chunk) => sum + chunk.cells.length, 0);
-    const totalSpecialCells = loadedChunks.reduce((sum, chunk) => sum + chunk.specialCells.length, 0);
-    
+    const loadedChunks = Array.from(this.chunks.values()).filter(
+      (chunk) => chunk.generated,
+    );
+    const totalCells = loadedChunks.reduce(
+      (sum, chunk) => sum + chunk.cells.length,
+      0,
+    );
+    const totalSpecialCells = loadedChunks.reduce(
+      (sum, chunk) => sum + chunk.specialCells.length,
+      0,
+    );
+
     const difficultyCounts = new Map<number, number>();
-    loadedChunks.forEach(chunk => {
+    loadedChunks.forEach((chunk) => {
       const roundedDifficulty = Math.floor(chunk.difficulty);
-      difficultyCounts.set(roundedDifficulty, (difficultyCounts.get(roundedDifficulty) || 0) + 1);
+      difficultyCounts.set(
+        roundedDifficulty,
+        (difficultyCounts.get(roundedDifficulty) || 0) + 1,
+      );
     });
 
     return {
@@ -261,9 +311,11 @@ export class InfiniteBoardEngine {
       currentLevel: this.currentLevel,
       playerPosition: { ...this.playerPosition },
       loadedRadius: this.loadedRadius,
-      avgDifficulty: loadedChunks.reduce((sum, chunk) => sum + chunk.difficulty, 0) / loadedChunks.length,
+      avgDifficulty:
+        loadedChunks.reduce((sum, chunk) => sum + chunk.difficulty, 0) /
+        loadedChunks.length,
       difficultyDistribution: Object.fromEntries(difficultyCounts),
-      worldSize: this.loadedRadius * 2 * this.config.initialSize
+      worldSize: this.loadedRadius * 2 * this.config.initialSize,
     };
   }
 
@@ -271,33 +323,33 @@ export class InfiniteBoardEngine {
     const chunkX = Math.floor(x / this.config.initialSize);
     const chunkY = Math.floor(y / this.config.initialSize);
     const chunkId = `${chunkX},${chunkY}`;
-    
+
     return this.chunks.get(chunkId) || null;
   }
 
   discoverCell(x: number, y: number): boolean {
     const chunk = this.getChunkAt(x, y);
     if (!chunk || !chunk.generated) return false;
-    
+
     // Buscar la celda en el chunk
     const cell = [...chunk.cells, ...chunk.specialCells].find(
-      cell => cell.x === x && cell.y === y
+      (cell) => cell.x === x && cell.y === y,
     );
-    
+
     if (cell && !cell.discovered) {
       cell.discovered = true;
       return true;
     }
-    
+
     return false;
   }
 
   levelUp(): void {
     this.currentLevel++;
-    
+
     // Aumentar dificultad general
     this.config.difficultyScaling *= 1.05;
-    
+
     // Expandir el mundo automáticamente cada ciertos niveles
     if (this.currentLevel % 5 === 0) {
       this.expandWorld();
@@ -318,23 +370,23 @@ export class InfiniteBoardEngine {
       currentLevel: this.currentLevel,
       playerPosition: this.playerPosition,
       loadedRadius: this.loadedRadius,
-      chunks: Array.from(this.chunks.entries())
+      chunks: Array.from(this.chunks.entries()),
     };
-    
+
     return JSON.stringify(state);
   }
 
   loadState(stateJson: string): void {
     try {
       const state = JSON.parse(stateJson);
-      
+
       this.config = state.config;
       this.currentLevel = state.currentLevel;
       this.playerPosition = state.playerPosition;
       this.loadedRadius = state.loadedRadius;
       this.chunks = new Map(state.chunks);
     } catch (error) {
-      console.error('Failed to load infinite mode state:', error);
+      console.error("Failed to load infinite mode state:", error);
       this.reset();
     }
   }

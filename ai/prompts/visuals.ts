@@ -44,15 +44,15 @@ export const emotionalSymbols = {
   esperanza: "⭐",
   nostalgia: "🍂",
   amor: "💖",
-  sabiduría: "🦉"
+  sabiduría: "🦉",
 };
 
 export const elementalColors = {
   fuego: "#FF6B35",
-  agua: "#004E89", 
+  agua: "#004E89",
   aire: "#87CEEB",
   tierra: "#8B4513",
   espíritu: "#9370DB",
   luz: "#FFD700",
-  sombra: "#2F2F2F"
+  sombra: "#2F2F2F",
 };

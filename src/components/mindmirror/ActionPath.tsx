@@ -16,7 +16,7 @@ interface ActionResult {
 const difficultyConfig = {
   baja: { color: "bg-green-500/20 text-green-300", icon: "🌱" },
   media: { color: "bg-yellow-500/20 text-yellow-300", icon: "🌿" },
-  alta: { color: "bg-red-500/20 text-red-300", icon: "🌳" }
+  alta: { color: "bg-red-500/20 text-red-300", icon: "🌳" },
 };
 
 export default function ActionPath() {
@@ -27,7 +27,7 @@ export default function ActionPath() {
 
   const handleSuggest = async () => {
     if (!input.trim()) return;
-    
+
     setLoading(true);
     setCompleted(false);
     try {
@@ -39,7 +39,7 @@ export default function ActionPath() {
         setResult({
           action: "Tómate 5 minutos para respirar conscientemente",
           difficulty: "baja",
-          benefit: "Reduce el estrés y aumenta la claridad mental"
+          benefit: "Reduce el estrés y aumenta la claridad mental",
         });
       }
     } catch (err) {
@@ -66,8 +66,8 @@ export default function ActionPath() {
           rows={4}
         />
 
-        <Button 
-          onClick={handleSuggest} 
+        <Button
+          onClick={handleSuggest}
           disabled={loading || !input.trim()}
           className="w-full bg-gradient-to-r from-neon-green to-neon-cyan hover:opacity-90 transition-opacity"
         >
@@ -85,25 +85,26 @@ export default function ActionPath() {
           <div className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
             <Card className="border-border/30 bg-gradient-to-br from-muted/30 to-muted/10">
               <CardContent className="p-6 space-y-4">
-                
                 {/* Acción sugerida */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">
                       {difficultyConfig[result.difficulty]?.icon}
                     </span>
-                    <Badge 
+                    <Badge
                       className={cn(
                         "text-xs",
-                        difficultyConfig[result.difficulty]?.color
+                        difficultyConfig[result.difficulty]?.color,
                       )}
                     >
                       Dificultad {result.difficulty}
                     </Badge>
                   </div>
-                  
+
                   <div className="p-4 bg-background/30 rounded-lg border border-border/20">
-                    <h3 className="font-medium text-foreground mb-2">Tu próximo paso:</h3>
+                    <h3 className="font-medium text-foreground mb-2">
+                      Tu próximo paso:
+                    </h3>
                     <p className="text-lg text-foreground/90 leading-relaxed">
                       {result.action}
                     </p>
@@ -115,20 +116,18 @@ export default function ActionPath() {
                   <h4 className="text-sm font-medium text-neon-green mb-2">
                     Beneficio esperado:
                   </h4>
-                  <p className="text-foreground/80">
-                    {result.benefit}
-                  </p>
+                  <p className="text-foreground/80">{result.benefit}</p>
                 </div>
 
                 {/* Botón de completado */}
-                <Button 
+                <Button
                   onClick={() => setCompleted(!completed)}
                   variant={completed ? "default" : "outline"}
                   className={cn(
                     "w-full transition-all duration-300",
-                    completed 
-                      ? "bg-neon-green hover:bg-neon-green/90 text-black" 
-                      : "border-neon-green/50 text-neon-green hover:bg-neon-green/10"
+                    completed
+                      ? "bg-neon-green hover:bg-neon-green/90 text-black"
+                      : "border-neon-green/50 text-neon-green hover:bg-neon-green/10",
                   )}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
